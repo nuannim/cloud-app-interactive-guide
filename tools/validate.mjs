@@ -11,6 +11,7 @@ const files = process.argv.length > 2
   : fs.readdirSync(dataDir).filter((f) => /^m\d+\.js$/.test(f)).sort().map((f) => path.join(dataDir, f));
 
 const errors = [];
+const warnings = [];
 const err = (file, where, msg) => errors.push(`${path.basename(file)} ${where}: ${msg}`);
 const str = (v) => typeof v === 'string' && v.trim().length > 0;
 const strs = (v) => Array.isArray(v) && v.length > 0 && v.every(str);
@@ -42,7 +43,23 @@ for (const { file, mod } of modules) {
   if (!Array.isArray(mod.notes) || !mod.notes.length) err(file, 'notes', 'ต้องมี notes อย่างน้อย 1 หัวข้อ');
   (mod.notes || []).forEach((n, i) => {
     if (!str(n.heading) || !str(n.body)) err(file, `notes[${i}]`, 'ต้องมี heading และ body');
+    const d = n.diagram;
+    if (d != null) {
+      const w = `notes[${i}].diagram`;
+      if (!str(d.title)) err(file, w, 'ต้องมี title');
+      if (!str(d.source)) err(file, w, 'ต้องมี source (เลขบรรทัดที่ยืนยันแล้ว)');
+      const f = d.flow;
+      if (!f || !Array.isArray(f.nodes) || f.nodes.length < 3 || f.nodes.length > 9) err(file, w, 'flow.nodes ต้อง 3–9 กล่อง');
+      else {
+        const nid = new Set(f.nodes.map((x) => x.id));
+        if (nid.size !== f.nodes.length) err(file, w, 'node id ซ้ำ');
+        f.nodes.forEach((x) => { if (!str(x.id) || !str(x.label)) err(file, w, 'node ต้องมี id, label'); else if (x.label.length > 24) err(file, w, `label "${x.label}" ยาวเกิน 24 ตัวอักษร`); });
+        if (!Array.isArray(f.edges) || !f.edges.length) err(file, w, 'flow.edges ว่าง');
+        (f.edges || []).forEach((e) => { if (!nid.has(e.from) || !nid.has(e.to)) err(file, w, `edge ${e.from}->${e.to} อ้าง node ที่ไม่มี`); });
+      }
+    }
   });
+  if (!(mod.notes || []).some((n) => n.diagram)) warnings.push(`${path.basename(file)}: ยังไม่มี diagram ใน notes`);
 
   (mod.limits || []).forEach((l) => {
     claim(file, l.id, `l-${mm}-`);
@@ -116,12 +133,41 @@ for (const { file, mod } of modules) {
     `${(mod.limits || []).length} limit (${(mod.limits || []).filter((l) => l.sim).length} sim)`);
 }
 
+// Knowledge Check (data/kc.js สร้างจาก tools/import-kc.mjs)
+const kcFile = path.join(dataDir, 'kc.js');
+if (fs.existsSync(kcFile)) {
+  const kcs = [];
+  try {
+    vm.runInNewContext(fs.readFileSync(kcFile, 'utf8'), { GUIDE: { registerKC: (mid, kc) => kcs.push({ mid, kc }) } }, { filename: kcFile });
+  } catch (e) { err(kcFile, 'load', e.message); }
+  const known = new Set(modules.map((x) => x.mod.module));
+  let kcCount = 0;
+  for (const { mid, kc } of kcs) {
+    if (!known.has(mid)) err(kcFile, mid, 'ไม่มีโมดูลนี้ใน data/');
+    if (!Array.isArray(kc.remember) || !kc.remember.length) err(kcFile, mid, 'ขาดสรุป "จำไว้"');
+    (kc.questions || []).forEach((q) => {
+      kcCount++;
+      claim(kcFile, q.id, `k-${mid.toLowerCase()}-`);
+      if (!str(q.prompt) || !str(q.explain) || !str(q.source)) err(kcFile, q.id, 'ต้องมี prompt, explain, source');
+      if (!Array.isArray(q.choices) || q.choices.length < 3 || !q.choices.every((c) => str(c.text) && typeof c.correct === 'boolean')) err(kcFile, q.id, 'ต้องมีตัวเลือก ≥ 3 (text, correct)');
+      else {
+        const ok = q.choices.filter((c) => c.correct).length;
+        if (!ok) err(kcFile, q.id, 'ไม่มีตัวเลือกที่ถูก');
+        if (ok > 1 && !/select\s+(two|three|2|3)/i.test(q.prompt)) err(kcFile, q.id, 'ถูกหลายข้อ แต่ prompt ไม่บอก "(Select TWO)"');
+      }
+      if (q.topic != null && !(modules.find((x) => x.mod.module === mid)?.mod.notes || [])[q.topic]) err(kcFile, q.id, 'topic ชี้หัวข้อที่ไม่มี');
+    });
+  }
+  counts.push(`KC: ${kcCount} ข้อ ใน ${kcs.length} โมดูล`);
+}
+
 // refs ต้องชี้ id ที่มีจริง
 for (const { file, mod } of modules) {
   (mod.notes || []).forEach((n, i) => (n.refs || []).forEach((r) => { if (!ids.has(r)) err(file, `notes[${i}].refs`, `ไม่พบ id ${r}`); }));
 }
 
 console.log(counts.join('\n'));
+if (warnings.length) console.log('\nคำเตือน:\n' + warnings.map((w) => '  - ' + w).join('\n'));
 if (errors.length) {
   console.error(`\n✗ พบ ${errors.length} ปัญหา:\n` + errors.map((e) => '  - ' + e).join('\n'));
   process.exit(1);

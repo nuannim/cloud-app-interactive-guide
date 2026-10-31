@@ -26,7 +26,27 @@ GUIDE.register({
       body: '<p>Producer เรียก <strong>SendMessage</strong> → SQS เก็บสำเนาหลาย server → consumer เรียก <strong>ReceiveMessage</strong> → ข้อความถูกซ่อนไว้ช่วง <strong>visibility timeout</strong> (default 30 วินาที) → ประมวลผลเสร็จต้อง <strong>DeleteMessage</strong> ถ้าไม่ลบ ข้อความจะกลับมาให้คนอื่นเห็นอีก</p>' +
         '<p>ถ้า consumer ล้มเหลวซ้ำจนถึง <strong>maxReceiveCount</strong> ข้อความจะถูกย้ายไป <strong>dead-letter queue</strong> ไว้ตรวจแยกต่างหาก</p>' +
         '<p><strong>Short polling</strong> สุ่มถามบาง server (อาจพลาดข้อความ) ส่วน <strong>long polling</strong> ถามทุก server และรอได้ตาม <code>WaitTimeSeconds</code></p>',
-      refs: ['l-m10-visibility', 'g-m10-polling', 'q-m10-visibility', 'q-m10-dlq', 'q-m10-polling', 'q-m10-design-supplier']
+      refs: ['l-m10-visibility', 'g-m10-polling', 'q-m10-visibility', 'q-m10-dlq', 'q-m10-polling', 'q-m10-design-supplier'],
+      diagram: {
+        title: 'วงจรข้อความ SQS + DLQ',
+        caption: 'ข้อความถูกซ่อนช่วง visibility timeout ถ้าลบทัน จบ ถ้าไม่ทันจะกลับมาเห็นอีก จนครบ maxReceiveCount จึงเข้า DLQ',
+        source: 'L379-468',
+        flow: {
+          nodes: [
+            { id: 'producer', label: 'Producer' },
+            { id: 'queue', label: 'SQS queue' },
+            { id: 'consumer', label: 'Consumer' },
+            { id: 'deleted', label: 'DeleteMessage (สำเร็จ)' },
+            { id: 'dlq', label: 'Dead-letter queue' }
+          ],
+          edges: [
+            { from: 'producer', to: 'queue', label: 'SendMessage' },
+            { from: 'queue', to: 'consumer', label: 'Receive (ซ่อน 30 s)' },
+            { from: 'consumer', to: 'deleted', label: 'delete' },
+            { from: 'consumer', to: 'dlq', label: 'fail ถึง maxReceiveCount' }
+          ]
+        }
+      }
     },
     {
       heading: 'SNS: topic, fanout, filter policy',
@@ -36,7 +56,27 @@ GUIDE.register({
         '<li><strong>Filter policy</strong> ที่ subscription + message attributes จากฝั่ง publisher ทำให้ subscriber ได้เฉพาะข้อความที่เกี่ยวข้อง</li>' +
         '<li>ส่งไม่สำเร็จจะ retry ตาม delivery policy แล้วทิ้งหรือส่งเข้า DLQ</li>' +
         '<li>FIFO topic ใช้คู่กับ FIFO SQS เพื่อรักษาลำดับ</li></ul>',
-      refs: ['q-m10-fanout', 'q-m10-filter', 'q-m10-notify', 'q-m10-design-fanout', 'c-m10-sns-a2p']
+      refs: ['q-m10-fanout', 'q-m10-filter', 'q-m10-notify', 'q-m10-design-fanout', 'c-m10-sns-a2p'],
+      diagram: {
+        title: 'SNS fanout เข้าหลาย SQS',
+        caption: 'Publisher ส่งเข้า topic เดียว แล้ว SNS push สำเนาไปทุก SQS queue ให้แต่ละระบบทำงานของตัวเอง',
+        source: 'L815-843',
+        flow: {
+          nodes: [
+            { id: 'order', label: 'Ordering system' },
+            { id: 'topic', label: 'SNS topic new-order' },
+            { id: 'q-ful', label: 'SQS: fulfillment' },
+            { id: 'q-dw', label: 'SQS: data warehouse' },
+            { id: 'q-dev', label: 'SQS: DEV' }
+          ],
+          edges: [
+            { from: 'order', to: 'topic', label: 'publish' },
+            { from: 'topic', to: 'q-ful' },
+            { from: 'topic', to: 'q-dw' },
+            { from: 'topic', to: 'q-dev' }
+          ]
+        }
+      }
     },
     {
       heading: 'Kinesis และ queue vs stream',
@@ -44,7 +84,29 @@ GUIDE.register({
         '<li><strong>Data Firehose</strong>: ส่งข้อมูลสตรีมไป data store โดยไม่ต้องเขียน consumer เอง</li>' +
         '<li><strong>Data Analytics</strong>: วิเคราะห์ข้อมูลในสตรีมด้วย SQL (หรือ Flink/Java/Scala/Python)</li></ul>' +
         '<p>Queue: ค่าอยู่ที่ข้อความแต่ละชิ้น อัตราไม่คงที่ ประมวลผลแล้วถูกลบ (เช่น order, ธุรกรรมการเงิน) / Stream: ค่าอยู่ที่การรวมข้อมูล อัตราต่อเนื่องสูง หลาย consumer แต่ละคนมี pointer ของตัวเอง ไม่ลบ record (เช่น clickstream, log)</p>',
-      refs: ['g-m10-kinesis', 'q-m10-clickstream', 'q-m10-queue-vs-stream', 'c-m10-kin-firehose']
+      refs: ['g-m10-kinesis', 'q-m10-clickstream', 'q-m10-queue-vs-stream', 'c-m10-kin-firehose'],
+      diagram: {
+        title: 'Kinesis Data Streams',
+        caption: 'Producer put record ลง shard ของ stream (เก็บตาม retention period) แล้ว consumer หลายแบบ poll ไปใช้',
+        source: 'L1150-1160',
+        flow: {
+          nodes: [
+            { id: 'producers', label: 'Producers' },
+            { id: 'stream', label: 'Kinesis data stream' },
+            { id: 'kcl', label: 'KCL app บน EC2' },
+            { id: 'lambda', label: 'Lambda function' },
+            { id: 'firehose', label: 'Firehose' },
+            { id: 's3', label: 'Amazon S3' }
+          ],
+          edges: [
+            { from: 'producers', to: 'stream', label: 'put' },
+            { from: 'stream', to: 'kcl', label: 'poll' },
+            { from: 'stream', to: 'lambda', label: 'poll' },
+            { from: 'stream', to: 'firehose', label: 'poll' },
+            { from: 'firehose', to: 's3' }
+          ]
+        }
+      }
     },
     {
       heading: 'โจทย์คาเฟ่: อัปเดตสต็อกจาก supplier',

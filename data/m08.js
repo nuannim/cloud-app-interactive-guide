@@ -12,14 +12,15 @@ GUIDE.register({
         '<li><strong>VM</strong>: แต่ละแอปแยกกัน มี Guest OS ของตัวเองบน virtualization platform ใช้ทรัพยากรดีขึ้น แต่ต้องดูแล OS เพิ่มและกินที่เพิ่ม</li>' +
         '<li><strong>Container</strong>: ใช้ OS kernel ร่วมกัน เบา เร็ว พกไปรันได้เหมือนกันทุก environment</li></ul>' +
         '<p>จำง่าย ๆ: VM = 1 Guest OS ต่อ 1 แอป, Container = แชร์ kernel</p>',
-      refs: ['g-m08-model', 'q-m08-parity']
+      refs: ['g-m08-model', 'q-m08-parity'],
     },
     {
       heading: 'Docker และ Microservices',
       body: '<ul><li>Dockerfile (ไฟล์คำสั่ง) → build เป็น <strong>image</strong> (template อ่านอย่างเดียว) → run เป็น <strong>container</strong> (instance ที่มี layer เขียนได้บาง ๆ) → เก็บ image ไว้ใน <strong>registry</strong></li>' +
         '<li>Microservices แตกแอปใหญ่ (monolith) เป็นบริการย่อย แต่ละตัวเลือกภาษาที่เหมาะได้ พัฒนาและอัปเดตแยกกัน ออกแบบให้ล้มได้ ทิ้งและสร้างใหม่ได้</li>' +
         '<li>Container ช่วยให้ dev/test/prod เหมือนกัน (parity)</li></ul>',
-      refs: ['q-m08-parity', 'q-m08-micro']
+      refs: ['q-m08-parity', 'q-m08-micro'],
+      diagram: {"title":"ส่ง image ขึ้น ECR","caption":"สร้าง repository, build และ tag image, login แล้ว push ขึ้น ECR","source":"L1018-L1042","flow":{"nodes":[{"id":"dockerfile","label":"Dockerfile"},{"id":"image","label":"Docker image"},{"id":"tagged","label":"Image ที่ tag แล้ว"},{"id":"login","label":"Docker login ไป ECR"},{"id":"repo","label":"ECR repository"}],"edges":[{"from":"dockerfile","to":"image","label":"docker build"},{"from":"image","to":"tagged","label":"docker tag"},{"from":"tagged","to":"repo","label":"docker push"},{"from":"login","to":"repo","label":"auth"}]}},
     },
     {
       heading: 'ECS, ECR, EKS ต่างกันอย่างไร',
@@ -27,13 +28,14 @@ GUIDE.register({
         '<li><strong>ECR</strong>: registry เก็บ image มี encryption at rest และเชื่อม IAM, ECS, Docker CLI</li>' +
         '<li><strong>EKS</strong>: Kubernetes แบบ managed worker node ใช้ EC2 หรือ Fargate ได้ เหมาะกับทีมที่ใช้ Kubernetes อยู่แล้ว</li></ul>' +
         '<p>Launch type: <strong>Fargate</strong> = AWS ดูแลชั้น VM/OS ให้ เหมาะกับ demand แกว่ง งาน batch ตามเวลา test env เล็ก ๆ ส่วน <strong>EC2</strong> = เราดูแลเอง เหมาะกับ workload คาดการณ์ได้ จะใช้ reserved instance ประหยัดต้นทุน หรือมีข้อกำหนด compliance</p>',
-      refs: ['g-m08-launch', 'g-m08-service', 'q-m08-fargate', 'q-m08-ec2']
+      refs: ['g-m08-launch', 'g-m08-service', 'q-m08-fargate', 'q-m08-ec2'],
+      diagram: {"title":"ECS รัน container","caption":"ECS ดึง image จาก registry แล้วส่ง container ไปรันบน Fargate หรือ EC2","source":"L973, L1096","flow":{"nodes":[{"id":"ecr","label":"Amazon ECR"},{"id":"other","label":"Registry อื่น"},{"id":"ecs","label":"Amazon ECS"},{"id":"fargate","label":"Fargate"},{"id":"ec2","label":"EC2 instances"}],"edges":[{"from":"ecr","to":"ecs","label":"pull image"},{"from":"other","to":"ecs","label":"pull image"},{"from":"ecs","to":"fargate","label":"launch type"},{"from":"ecs","to":"ec2","label":"launch type"}]}},
     },
     {
       heading: 'Elastic Beanstalk',
       body: '<p>บริการระดับ application: ดูแล provisioning, load balancing, auto scaling, health monitoring ให้ และจัดทุกอย่างเป็น <strong>environment</strong> เริ่มใช้ได้เร็วกว่า ECS เพราะไม่ต้องตั้งค่า task definition/cluster เอง (เขียน Dockerrun.aws.json + zip โค้ด เลือก platform แล้ว launch) เหมาะกับทีมที่ยังไม่มีประสบการณ์ container/AWS</p>' +
         '<p>IAM: service role (Beanstalk ใช้ service อื่นแทนเรา), instance profile (ติดกับ instance), user policy (ทางเลือก มี 2 แบบ: full admin / read-only)</p>',
-      refs: ['q-m08-beanstalk', 'l-m08-userpolicy', 'g-m08-service']
+      refs: ['q-m08-beanstalk', 'l-m08-userpolicy', 'g-m08-service'],
     },
     {
       heading: 'Beanstalk deployment policies',
@@ -44,12 +46,13 @@ GUIDE.register({
         '<li><strong>Traffic splitting</strong>: เหมือน immutable แต่ส่ง traffic ส่วนหนึ่งไปทดสอบ version ใหม่ (canary)</li>' +
         '<li><strong>Blue/green</strong>: clone environment ใหม่ ทดสอบ แล้วสลับ CNAME</li></ul>' +
         '<p>สไลด์วางแกน "เร็ว ← → คุมได้มากกว่า" ยิ่งคุมได้มาก ยิ่ง deploy นาน</p>',
-      refs: ['g-m08-deploy', 'q-m08-canary', 'q-m08-rollback']
+      refs: ['g-m08-deploy', 'q-m08-canary', 'q-m08-rollback'],
+      diagram: {"title":"Blue/green บน Beanstalk","caption":"clone environment แล้วทดสอบใน green ก่อนสลับ CNAME","source":"L1495-L1502","flow":{"nodes":[{"id":"blue","label":"Environment (blue)"},{"id":"green","label":"Environment (green)"},{"id":"test","label":"Deploy และ test"},{"id":"swap","label":"สลับ CNAMEs"}],"edges":[{"from":"blue","to":"green","label":"1 clone"},{"from":"green","to":"test","label":"2"},{"from":"test","to":"swap","label":"ok"}]}},
     },
     {
       heading: 'Aurora Serverless (ย้าย DB ออกจาก container)',
       body: '<p>Aurora เป็น relational DB แบบ managed ใน RDS เข้ากันได้กับ MySQL/PostgreSQL ส่วน <strong>Aurora Serverless</strong> คือรูปแบบ on-demand ที่ scale ขึ้น/ลงตาม traffic และหยุดเมื่อไม่มีใช้งาน ใน lab ใช้แทน MySQL ที่รันใน container เพื่อลดงานดูแลและ scale ได้ดีขึ้น</p>',
-      refs: ['q-m08-aurora', 'q-m08-written']
+      refs: ['q-m08-aurora', 'q-m08-written'],
     }
   ],
 

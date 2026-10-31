@@ -15,6 +15,7 @@ GUIDE.register({
       heading: 'State machine และ ASL',
       body: '<p>Workflow = <strong>state machine</strong> เขียนเป็น JSON ด้วย <strong>Amazon States Language (ASL)</strong> ประกอบด้วย state (ขั้นตอน) และ transition (เส้นเชื่อม) แต่ละรอบเริ่มจาก input แล้ว state แปลงข้อมูลส่ง output ต่อให้ state ถัดไป</p>' +
         '<ul><li><code>StartAt</code> = state แรก (จำเป็น)</li><li>ทุก state มี <code>Type</code></li><li>ต้องมี <code>Next</code> หรือ <code>End: true</code> ยกเว้น Succeed/Fail ที่ไม่ต้องมี End</li></ul>',
+      diagram: {title:"Parallel: แตก branch แล้วรวม",caption:"Parallel รันหลาย branch พร้อมกัน เสร็จแล้วค่อยไป state ถัดไป (Next)",source:"L575-599",flow:{nodes:[{id:"par",label:"LookupCustomerInfo"},{id:"b1",label:"Branch: PState1"},{id:"b2",label:"Branch: PState2"},{id:"nextstate",label:"NextState"}],edges:[{from:"par",to:"b1"},{from:"par",to:"b2"},{from:"b1",to:"nextstate"},{from:"b2",to:"nextstate"}]}},
       refs: ['g-m11-state-type', 'c-m11-st-end']
     },
     {
@@ -23,6 +24,7 @@ GUIDE.register({
         '<li><strong>Fail</strong> / <strong>Succeed</strong> จบแบบล้มเหลว / สำเร็จ</li><li><strong>Pass</strong> ส่ง input เป็น output ไม่ทำงานจริง (ใส่ Result ได้)</li>' +
         '<li><strong>Wait</strong> หน่วงเวลา</li><li><strong>Parallel</strong> หลาย branch ที่ต่างกันพร้อมกัน</li><li><strong>Map</strong> วนทำขั้นเดียวกันกับทุก item ใน array</li></ul>' +
         '<p>ข้อสอบตัวอย่างของสไลด์: "เปรียบเทียบคำขอกับวงเงินแล้วแยกทาง" = <strong>Choice</strong></p>',
+      diagram: {title:"Choice state แตกกิ่งตามเงื่อนไข",caption:"Choice ตรวจค่าใน input ($.branch) แล้วเลือกทางตามเงื่อนไข ถ้าไม่ตรงเลยไป Default",source:"L436-446",flow:{nodes:[{id:"start",label:"StartState"},{id:"choice",label:"ChoiceState (Choice)"},{id:"yes",label:"ChoiceYes"},{id:"no",label:"ChoiceNo"},{id:"def",label:"DefaultState"},{id:"final",label:"FinalState"}],edges:[{from:"start",to:"choice"},{from:"choice",to:"yes",label:"$.branch = 1"},{from:"choice",to:"no",label:"$.branch = 2"},{from:"choice",to:"def",label:"Default"},{from:"yes",to:"final"},{from:"no",to:"final"}]}},
       refs: ['g-m11-state-type', 'q-m11-credit-choice']
     },
     {
@@ -30,13 +32,14 @@ GUIDE.register({
       body: '<ul><li><strong>Standard</strong>: สูงสุด 1 ปี, exactly-once, 2,000 เริ่มรัน/วินาที, 4,000 transition/วินาที, คิดเงินต่อ state transition, รองรับ activity, รองรับ pattern ครบ</li>' +
         '<li><strong>Express</strong>: สูงสุด 5 นาที, at-least-once (async) หรือ at-most-once (sync), 100,000 เริ่มรัน/วินาที, transition เกือบไม่จำกัด, คิดเงินตามจำนวน+ระยะเวลา request และ memory, <em>ไม่</em>รองรับ activity, pattern รองรับ "ส่วนใหญ่"</li></ul>' +
         '<p>จำง่าย: ยาว/ตรวจสอบย้อนหลัง/ห้ามซ้ำ = Standard, ปริมาณมาก/สั้น = Express</p>',
-      refs: ['g-m11-workflow-type', 'l-m11-std-duration', 'l-m11-exp-duration', 'q-m11-express-iot', 'q-m11-standard-long']
+      refs: ['g-m11-workflow-type', 'l-m11-std-duration', 'l-m11-exp-duration', 'l-m11-std-invoke', 'l-m11-exp-invoke', 'l-m11-std-transition', 'l-m11-exp-transition', 'q-m11-express-iot', 'q-m11-standard-long']
     },
     {
       heading: 'Activity, taskToken และ manual approval',
       body: '<p>Activity ผูกโค้ดภายนอกกับ Task หนึ่งใน state machine worker อยู่บนแอปอะไรก็ได้ที่ยิง HTTP ได้ Step Functions สร้าง <strong>taskToken</strong> ให้งานที่ส่งออกไป</p>' +
         '<ol><li>Step Functions ตั้งงาน activity รอไว้</li><li>worker เรียก <code>GetActivityTask</code> ได้ task + token</li><li>ส่งอีเมลขออนุมัติ (ตัวอย่างในสไลด์ใช้ SES และ API Gateway)</li><li>คนตอบ แล้วเรียก <code>SendTaskSuccess</code> หรือ <code>SendTaskFailure</code></li></ol>' +
         '<p>ใน ASL ใช้ Task ที่ Resource เป็น activity ARN และกำหนด TimeoutSeconds กันรอเกินไป</p>',
+      diagram: {title:"Manual approval ด้วย activity",caption:"worker poll งานด้วย GetActivityTask ได้ taskToken แล้วรายงานผลกลับเมื่อคนตัดสินใจ",source:"L830-835, L905-916",flow:{nodes:[{id:"task",label:"Task state (activity)"},{id:"worker",label:"Activity worker"},{id:"human",label:"คนอนุมัติ/ปฏิเสธ"},{id:"ok",label:"SendTaskSuccess"},{id:"ko",label:"SendTaskFailure"},{id:"next",label:"State machine ไปต่อ"}],edges:[{from:"task",to:"worker",label:"GetActivityTask"},{from:"worker",to:"human",label:"taskToken"},{from:"human",to:"ok",label:"approve"},{from:"human",to:"ko",label:"reject"},{from:"ok",to:"next",label:"taskToken"},{from:"ko",to:"next",label:"taskToken"}]}},
       refs: ['q-m11-manual-approval', 'q-m11-design-approval', 'g-m11-task-resource']
     },
     {

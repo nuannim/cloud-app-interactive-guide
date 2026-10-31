@@ -2,7 +2,26 @@
   'use strict';
   var G = window.GUIDE;
   var NS = 'http://www.w3.org/2000/svg';
-  var NW = 132, NH = 44;
+  var NW = 116, NH = 84, TILE = 46; // กล่อง = ไอคอนสี (TILE) + ชื่อใต้ไอคอน แบบ architecture diagram ของ AWS
+
+  /* สีตามหมวดบริการ (โทนใกล้ผังของ AWS) เลือกจากคำใน label รูปทรงในไอคอนวาดเองทั้งหมด ไม่ใช้โลโก้จริง
+     ลำดับสำคัญ: ตัวที่ตรงก่อนชนะ แก้/เพิ่มหมวดได้ที่ตารางนี้ที่เดียว */
+  var CATS = [
+    ['user', '#4B5563', /^(mobile app|user|browser|client|developer|customer|caller|viewer)/i, ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4 21c0-4 3.6-6 8-6s8 2 8 6']],
+    ['compute', '#ED7100', /lambda|ec2|fargate|ecs|eks|beanstalk|container|function|worker|instance|auto scaling|\bapp\b/i, ['M8 8h8v8H8z', 'M10 4v4M14 4v4M10 16v4M14 16v4M4 10h4M4 14h4M16 10h4M16 14h4']],
+    ['security', '#DD344C', /cognito|iam|sts|role|policy|waf|kms|jwt|token|credential|certificate|acm|secret/i, ['M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z', 'M9.5 12l2 2 3.5-4']],
+    ['integration', '#E7157B', /sqs|sns|queue|topic|step functions|state machine|eventbridge|kinesis|firehose|dlq|dead-letter|publisher|subscriber|ordering|event source|state\b/i, ['M5 8h12M14 5l3 3-3 3M19 16H7M10 13l-3 3 3 3']],
+    ['database', '#C925D1', /dynamo|rds|aurora|database|\bdb\b|elasticache|redis|memcached|cache|table/i, ['M5 6c0-1.4 3.1-2.5 7-2.5S19 4.6 19 6s-3.1 2.5-7 2.5S5 7.4 5 6z', 'M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6', 'M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5']],
+    ['storage', '#7AA116', /\bs3\b|bucket|efs|ebs|ecr|repository|registry|glacier|amazon s3/i, ['M5 7c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3z', 'M5 7l1.6 11c.2 1.2 2.7 2 5.4 2s5.2-.8 5.4-2L19 7']],
+    ['network', '#8C4FFF', /api gateway|cloudfront|route ?53|elb|load balancer|edge|vpc|cname|cdn|endpoint|viewer request/i, ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M3 12h18', 'M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18']],
+    ['devtools', '#3B48CC', /codepipeline|codebuild|codedeploy|codecommit|cloudformation|\bsam\b|pipeline|template|stack|dockerfile|docker|image|sdk|cli/i, ['M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12']],
+    ['mgmt', '#E7157B', /cloudwatch|cloudtrail|x-ray|logs?\b|monitor/i, ['M5 20V10M12 20V4M19 20v-7']]
+  ];
+  var GENERIC = ['generic', '#5A6B7B', null, ['M6 6h12v12H6z']];
+  G.awsStyle = function (label) {
+    for (var i = 0; i < CATS.length; i++) if (CATS[i][2].test(label)) return { key: CATS[i][0], color: CATS[i][1], paths: CATS[i][3] };
+    return { key: GENERIC[0], color: GENERIC[1], paths: GENERIC[3] };
+  };
 
   function s(tag, attrs) {
     var e = document.createElementNS(NS, tag);
@@ -17,33 +36,64 @@
       s('path', { d: 'M0 0L10 5L0 10z', class: 'cv-arrow' })));
   }
 
-  // point on the border of node rect c in the direction of point o
-  function borderPoint(c, o) {
-    var dx = o.x - c.x, dy = o.y - c.y;
-    if (!dx && !dy) return { x: c.x, y: c.y };
-    var t = Math.min((NW / 2) / (Math.abs(dx) || 1e-9), (NH / 2) / (Math.abs(dy) || 1e-9));
-    return { x: c.x + dx * t, y: c.y + dy * t };
+  // จุดต่อเส้นบนขอบของกล่อง n ในทิศทางไปหา o: แนวนอนต่อที่ข้างไอคอน แนวตั้งต่อที่หัวไอคอน/ท้ายชื่อ
+  function anchor(n, o) {
+    var dx = o.x - n.x, dy = o.y - n.y, tileTop = n.y - NH / 2 + 4;
+    if (Math.abs(dx) > Math.abs(dy) * 1.2) return { x: n.x + (dx > 0 ? 1 : -1) * (TILE / 2 + 4), y: tileTop + TILE / 2 };
+    if (dy > 0) return { x: n.x, y: n.y + NH / 2 + 2 };
+    return { x: n.x, y: tileTop - 3 };
   }
 
   function nodeEl(n, cls) {
-    var label = n.label.length > 22 ? n.label.slice(0, 21) + '…' : n.label;
+    var st = G.awsStyle(n.label), tx = (NW - TILE) / 2;
+    var label = n.label.length > 32 ? n.label.slice(0, 31) + '…' : n.label;
+    // ชื่อยาวตัดเป็น 2 บรรทัดที่ช่องว่างใกล้กลาง และลดขนาดตัวอักษรถ้ายังยาว
+    var lines = [label], maxC = Math.floor(NW / 7.2);
+    if (label.length > maxC) {
+      var mid = label.length / 2, cut = -1;
+      for (var i = 0; i < label.length; i++) if (label[i] === ' ' && (cut < 0 || Math.abs(i - mid) < Math.abs(cut - mid))) cut = i;
+      if (cut > 0) lines = [label.slice(0, cut), label.slice(cut + 1)];
+    }
+    var longest = Math.max.apply(null, lines.map(function (l) { return l.length; }));
+    var text = s('text', { x: NW / 2, y: TILE + 18 });
+    if (longest > maxC) text.setAttribute('style', 'font-size:10.5px');
+    lines.forEach(function (ln, k) {
+      var span = s('tspan', { x: NW / 2, dy: k ? 13 : 0 });
+      span.textContent = ln;
+      text.appendChild(span);
+    });
+    var glyph = s('g', { transform: 'translate(' + (tx + (TILE - 24) / 2) + ',' + (4 + (TILE - 24) / 2) + ')', fill: 'none', stroke: '#fff', 'stroke-width': 1.9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    st.paths.forEach(function (d) { glyph.appendChild(s('path', { d: d })); });
     return s('g', { class: 'cv-node' + (cls ? ' ' + cls : ''), 'data-id': n.id, transform: 'translate(' + (n.x - NW / 2) + ',' + (n.y - NH / 2) + ')' },
-      s('rect', { width: NW, height: NH, rx: 8 }),
-      Object.assign(s('text', { x: NW / 2, y: NH / 2 }), { textContent: label }));
+      s('rect', { class: 'cv-area', width: NW, height: NH, rx: 8 }),
+      s('rect', { class: 'cv-tile', x: tx, y: 4, width: TILE, height: TILE, rx: 9, fill: st.color }),
+      glyph, text);
   }
 
   function edgeEls(a, b, label, marker, selected) {
-    var p1 = borderPoint(a, b), p2 = borderPoint(b, a);
+    var p1 = anchor(a, b), p2 = anchor(b, a);
     var d = 'M' + p1.x + ',' + p1.y + 'L' + p2.x + ',' + p2.y;
     var els = [s('path', { d: d, class: 'cv-edge' + (selected ? ' sel' : ''), 'marker-end': 'url(#' + marker + ')' })];
     if (label) {
-      els.push(Object.assign(s('text', { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 - 6, class: 'cv-label' }), { textContent: label }));
+      // ป้ายยาวตัดเป็น 2 บรรทัด (ตัดที่ช่องว่างใกล้กลางข้อความ) กันทับกล่อง
+      var lines = [label], mid = label.length / 2, cut = -1;
+      if (label.length > 12) {
+        for (var i = 0; i < label.length; i++) if (label[i] === ' ' && (cut < 0 || Math.abs(i - mid) < Math.abs(cut - mid))) cut = i;
+        if (cut > 0) lines = [label.slice(0, cut), label.slice(cut + 1)];
+      }
+      var t = s('text', { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 - 6 - (lines.length - 1) * 13, class: 'cv-label' });
+      lines.forEach(function (ln, k) {
+        var span = s('tspan', { x: (p1.x + p2.x) / 2, dy: k ? 13 : 0 });
+        span.textContent = ln;
+        t.appendChild(span);
+      });
+      els.push(t);
     }
     return { els: els, d: d };
   }
 
   /* Static, auto-laid-out rendering of a reference flow ({nodes, edges}). */
-  G.renderFlow = function (flow) {
+  G.renderFlow = function (flow, opts) {
     var nodes = flow.nodes, edges = flow.edges || [];
     var layer = {};
     nodes.forEach(function (n) { layer[n.id] = 0; });
@@ -58,24 +108,47 @@
     nodes.forEach(function (n) { (cols[layer[n.id]] = cols[layer[n.id]] || []).push(n); });
     var colKeys = Object.keys(cols).map(Number).sort(function (a, b) { return a - b; });
     var maxRows = Math.max.apply(null, colKeys.map(function (k) { return cols[k].length; }));
-    var gapX = NW + 70, gapY = NH + 40;
-    var W = Math.max(600, colKeys.length * gapX + 20), H = maxRows * gapY + 20;
-    var pos = {};
-    colKeys.forEach(function (k, ci) {
-      var list = cols[k];
-      list.forEach(function (n, ri) {
-        pos[n.id] = { id: n.id, label: n.label, x: 10 + NW / 2 + ci * gapX, y: (H - list.length * gapY) / 2 + gapY / 2 + ri * gapY };
+    // จอแคบ: วางแนวตั้ง (ขั้นตอนไหลจากบนลงล่าง) เพื่อให้ตัวอักษรอ่านออกโดยไม่ต้องเลื่อนข้าง
+    // และเมื่อแนวนอนใส่กรอบไม่พอดี (ย่อแล้วเล็กกว่า 80%) ก็วางแนวตั้งเช่นกัน
+    var hostEl = document.getElementById('app') || document.body;
+    // พื้นที่ใช้ได้จริง = ความกว้างหน้า ลบ padding ของหน้า การ์ด กรอบแผนภาพ และกล่องเฉลย (~120px)
+    var avail = (hostEl.clientWidth || window.innerWidth) - 120;
+    var wideW = colKeys.length * (NW + 80) + 20;
+    var vertical = opts && opts.vertical != null ? opts.vertical : (window.innerWidth < 600 || wideW * 0.8 > avail);
+    var W, H, pos = {}, prevNW = NW;
+    if (vertical && maxRows >= 3) NW = 104; // ชั้นละ 3 กล่อง: ใช้กล่องแคบลงให้ย่อน้อยกว่า
+    if (vertical) {
+      var gx = NW + (NW < 116 ? 12 : 22), gy = NH + 40;
+      W = Math.max(maxRows * gx + 20, 300); H = colKeys.length * gy + 20;
+      colKeys.forEach(function (k, li) {
+        var list = cols[k];
+        list.forEach(function (n, ri) {
+          pos[n.id] = { id: n.id, label: n.label, x: (W - list.length * gx) / 2 + gx / 2 + ri * gx, y: 10 + NH / 2 + li * gy };
+        });
       });
-    });
+    } else {
+      var gapX = NW + 80, gapY = NH + 24;
+      W = Math.max(600, colKeys.length * gapX + 20); H = maxRows * gapY + 20;
+      colKeys.forEach(function (k, ci) {
+        var list = cols[k];
+        list.forEach(function (n, ri) {
+          pos[n.id] = { id: n.id, label: n.label, x: 10 + NW / 2 + ci * gapX, y: (H - list.length * gapY) / 2 + gapY / 2 + ri * gapY };
+        });
+      });
+    }
     var marker = 'ar' + (++uid);
     var svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'แผนภาพเฉลย' }, arrowDefs(marker));
-    svg.style.minWidth = W + 'px'; // จอแคบ: เลื่อนแนวนอนแทนการย่อจนอ่านไม่ออก
+    svg.style.minWidth = Math.round(Math.min(W, vertical ? 240 : W * 0.8)) + 'px'; // กันย่อจนอ่านไม่ออก
+    svg.style.maxWidth = Math.round(W * 1.3) + 'px'; // กันแผนภาพเล็กขยายใหญ่เกิน
+    svg.style.marginInline = 'auto';
     edges.forEach(function (e) {
       if (!pos[e.from] || !pos[e.to]) return;
       edgeEls(pos[e.from], pos[e.to], e.label, marker).els.forEach(function (el) { svg.appendChild(el); });
     });
     nodes.forEach(function (n) { svg.appendChild(nodeEl(pos[n.id])); });
-    return G.h('div', { class: 'canvas-wrap flow-wrap' }, svg);
+    var wrap = G.h('div', { class: 'canvas-wrap flow-wrap' }, svg);
+    NW = prevNW;
+    return wrap;
   };
 
   G.flowToText = function (flow) {
@@ -191,8 +264,8 @@
       label = String(label || '').trim();
       if (!label) return;
       var i = st.nodes.length;
-      var cols = narrow ? 2 : 5, stepX = narrow ? 200 : 155, x0 = narrow ? 100 : 90, stepY = narrow ? 80 : 90;
-      st.nodes.push({ id: st.nid++, label: label, x: x0 + (i % cols) * stepX, y: 50 + Math.floor(i / cols) * stepY });
+      var cols = narrow ? 2 : 5, stepX = narrow ? 190 : 150, x0 = narrow ? 105 : 90, stepY = 100;
+      st.nodes.push({ id: st.nid++, label: label, x: x0 + (i % cols) * stepX, y: NH / 2 + 8 + Math.floor(i / cols) * stepY });
       render();
     }
 
@@ -224,7 +297,8 @@
 
     var palette = h('div', { class: 'palette' });
     (opts.palette || []).forEach(function (label) {
-      palette.appendChild(h('button', { class: 'chip', type: 'button', onclick: function () { addNode(label); } }, '+ ' + label));
+      palette.appendChild(h('button', { class: 'chip', type: 'button', onclick: function () { addNode(label); } },
+        h('span', { class: 'dot', style: 'background:' + G.awsStyle(label).color }), '+ ' + label));
     });
     var custom = h('input', { type: 'text', placeholder: 'เพิ่ม service เอง', 'aria-label': 'ชื่อ service ที่จะเพิ่มเอง' });
     custom.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { addNode(custom.value); custom.value = ''; } });

@@ -30,21 +30,30 @@ GUIDE.register({
     {
       heading: 'CloudTrail ไล่รอยผู้ใช้ federated',
       body: '<p>CloudTrail บันทึก action ของผู้ใช้ที่ authenticate แล้วลง S3 และตั้งให้ตอบสนอง/แจ้งเตือนได้ วิธีไล่ว่าใครสั่ง terminate instance: ค้น <code>TerminateInstances</code> → ดู ARN ของ role ที่ผู้ใช้ assume → ค้น event <code>AssumeRoleWithSAML</code> ที่มี ARN นั้น → อ่านตัวตนผู้ใช้จาก attribute <code>userName</code> (รวม 4 ขั้น)</p>',
-      refs: ['q-m12-cloudtrail']
+      refs: ['q-m12-cloudtrail'],
+      diagram: { title: 'CloudTrail ไล่ผู้ใช้ federated', caption: 'ไล่จาก event TerminateInstances ย้อนไปหา AssumeRoleWithSAML จนเจอ userName', source: 'L471-488', flow: {
+        nodes: [{ id: 's1', label: 'ค้น TerminateInstances' }, { id: 's2', label: 'หา ARN ของ IAM role' }, { id: 's3', label: 'ค้น AssumeRoleWithSAML' }, { id: 's4', label: 'อ่าน userName' }],
+        edges: [{ from: 's1', to: 's2', label: '1→2' }, { from: 's2', to: 's3', label: 'ARN' }, { from: 's3', to: 's4', label: '3→4' }] } }
     },
     {
       heading: 'Cognito: user pool vs identity pool',
       body: '<ul><li><strong>User pool</strong> = ไดเรกทอรีผู้ใช้ มี sign-up/sign-in, หน้า login สำเร็จรูปปรับแต่งได้, ควบคุมการเข้าถึง API, ตรวจ credential ที่รั่ว, ยืนยันเบอร์/อีเมล, adaptive authentication และออก token</li>' +
         '<li><strong>Identity pool</strong> (federated identities) = รับ identity จาก Amazon/Google/Facebook/SAML/OIDC แล้วแลกเป็น <strong>credential ชั่วคราวของ AWS</strong> ผ่าน STS role</li></ul>' +
         '<p>จำง่าย ๆ: ต้องการ "ล็อกอิน" = user pool, ต้องการ "สิทธิ์ AWS ตรง ๆ" = identity pool สองตัวใช้ร่วมกันได้</p>',
-      refs: ['g-m12-pools', 'q-m12-employee-login', 'q-m12-identity-pool']
+      refs: ['g-m12-pools', 'q-m12-employee-login', 'q-m12-identity-pool'],
+      diagram: { title: 'Identity pool: ขอ credential ชั่วคราว', caption: 'แอปตัวเดิมวาดซ้ำเป็นขั้น ๆ: login ได้ JWT, เอา JWT ไปขอ credential แล้วใช้ credential เรียก DynamoDB (ขั้น 4 ในสไลด์อ่านไม่ออก จึงไม่วาด และขั้น 8 คือ DynamoDB คืนข้อมูลให้แอป)', source: 'L676, L690', flow: {
+        nodes: [{ id: 'app1', label: 'Mobile app' }, { id: 'up', label: 'Cognito user pool' }, { id: 'app2', label: 'Mobile app + JWT' }, { id: 'ip', label: 'Cognito identity pool' }, { id: 'app3', label: 'Mobile app + credential' }, { id: 'ddb', label: 'DynamoDB + IAM policy' }],
+        edges: [{ from: 'app1', to: 'up', label: '1 login' }, { from: 'up', to: 'app2', label: '2 ได้ JWT' }, { from: 'app2', to: 'ip', label: '3 ขอ credential' }, { from: 'ip', to: 'app3', label: '5 credential ชั่วคราว' }, { from: 'app3', to: 'ddb', label: '6-7 sign, เช็ก policy' }] } }
     },
     {
       heading: 'Token 3 ชนิด และ flow กับ API Gateway',
       body: '<ul><li><strong>ID token</strong>: claim เกี่ยวกับตัวผู้ใช้ (ชื่อ, อีเมล)</li><li><strong>Access token</strong>: อนุญาตการเรียก API ตาม custom scope ของ resource ที่ป้องกันไว้</li><li><strong>Refresh token</strong>: ใช้ขอ ID/access token ใหม่</li></ul>' +
         '<p>flow ตัวอย่าง (6 ขั้น): แอปมือถือ login กับ user pool → ได้ JWT → เรียก API Gateway → API Gateway ตรวจ ID token → เรียก Lambda → Lambda เข้าถึง DynamoDB ส่วน flow identity pool (8 ขั้น) เพิ่มการขอ credential ชั่วคราวแล้ว sign request ให้ IAM policy ตรวจ</p>' +
         '<p>ข้อสอบตัวอย่าง: sign-up/sign-in = Cognito (ไม่ใช่ IAM) และ log sign-in event = Lambda ที่ถูกเรียกหลัง post-authentication</p>',
-      refs: ['g-m12-token', 'q-m12-sample-exam', 'q-m12-design-api', 'q-m12-design-identity']
+      refs: ['g-m12-token', 'q-m12-sample-exam', 'q-m12-design-api', 'q-m12-design-identity'],
+      diagram: { title: 'User pool + API Gateway', caption: 'แอปได้ JWT จาก user pool แล้วเรียก API ที่ API Gateway ตรวจ ID token ก่อนส่งต่อ', source: 'L660', flow: {
+        nodes: [{ id: 'app', label: 'Mobile app' }, { id: 'up', label: 'Cognito user pool' }, { id: 'apigw', label: 'API Gateway' }, { id: 'lambda', label: 'Lambda' }, { id: 'ddb', label: 'DynamoDB' }],
+        edges: [{ from: 'app', to: 'up', label: '1-2 login, JWT' }, { from: 'app', to: 'apigw', label: '3 call API' }, { from: 'apigw', to: 'lambda', label: '4-5 validate, invoke' }, { from: 'lambda', to: 'ddb', label: '6 access' }] } }
     }
   ],
 

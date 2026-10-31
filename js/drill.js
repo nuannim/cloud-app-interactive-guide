@@ -2,11 +2,11 @@
   'use strict';
   var G = window.GUIDE, h = G.h;
   var LETTERS = 'ABCDEFGHIJ';
-  var TYPE_NAME = { scenario: 'Scenario', design: 'Design' };
+  var TYPE_NAME = { scenario: 'Scenario', design: 'Design · วาด diagram', kc: 'Knowledge Check' };
 
   /* ---------- setup screen ---------- */
   function setup(root) {
-    var selMods = {}, selTypes = { scenario: true, design: true };
+    var selMods = {}, selTypes = { scenario: true, design: true, kc: true };
     G.order.forEach(function (m) { selMods[m] = true; });
     var count = '10';
 
@@ -19,7 +19,7 @@
     root.appendChild(h('h3', { style: 'margin-top:16px' }, 'ประเภท'));
     var typeRow = h('div', { class: 'row' });
     Object.keys(TYPE_NAME).forEach(function (t) {
-      var chip = h('button', { class: 'chip on', type: 'button' }, TYPE_NAME[t] + (t === 'design' ? ' (ยาว + วาด diagram)' : ''));
+      var chip = h('button', { class: 'chip on', type: 'button' }, TYPE_NAME[t]);
       chip.addEventListener('click', function () { selTypes[t] = !selTypes[t]; chip.classList.toggle('on', selTypes[t]); });
       typeRow.appendChild(chip);
     });
@@ -46,6 +46,10 @@
   function buildQueue(q) {
     var all = G.all('question');
     if (q.id) return all.filter(function (e) { return e.item.id === q.id; });
+    if (q.ids) { // ชุดข้อที่ระบุ (ด่านใน Roadmap)
+      var want = q.ids.split(',');
+      return G.shuffle(all.filter(function (e) { return want.indexOf(e.item.id) >= 0; }));
+    }
     if (q.mistakes) {
       var wrong = G.store.wrongIds();
       return G.shuffle(all.filter(function (e) { return wrong.indexOf(e.item.id) >= 0; }));
@@ -67,6 +71,11 @@
       return;
     }
     var box = h('div');
+    root.appendChild(h('p', { class: 'small' }, h('a', {
+      href: '#/', onclick: function (ev) {
+        if (history.length > 1) { ev.preventDefault(); history.back(); }
+      }
+    }, '← ออกจากชุดนี้')));
     root.appendChild(box);
 
     function next() { i++; show(); }
@@ -87,10 +96,11 @@
       box.innerHTML = '';
       var head = h('div', { class: 'row spread small muted', style: 'margin-bottom:8px' },
         h('span', {}, 'ข้อ ' + (i + 1) + '/' + queue.length + ' · ' + e.module + ' · ' + TYPE_NAME[q.type]),
-        h('span', { class: 'row' }, G.supplementBadge(q), q.source ? h('span', { class: 'badge' }, 'notes ' + q.source) : null));
+        h('span', { class: 'row' }, G.supplementBadge(q), q.source ? h('span', { class: 'badge' }, (q.type === 'kc' ? '' : 'notes ') + q.source) : null));
       var prompt = h('div', { class: 'prompt', html: G.esc(q.prompt) });
       var body = h('div', { style: 'margin-top:14px' });
-      var card = h('div', { class: 'card' }, head, prompt, body);
+      var progress = h('div', { class: 'bar', style: 'margin:0 0 12px' }, h('i', { style: 'width:' + Math.round((i / queue.length) * 100) + '%' }));
+      var card = h('div', { class: 'card' }, head, progress, prompt, body);
       box.appendChild(card);
 
       function done(ok) {
@@ -142,13 +152,18 @@
         if (c.correct) b.classList.add('right');
         else if (chosen) b.classList.add('wrong');
         if (c.correct !== chosen) ok = false;
-        b.querySelector('.txt').appendChild(h('span', { class: 'why' },
-          (c.correct ? (chosen ? '✓ ถูก — ' : '→ ข้อนี้ถูก แต่คุณไม่ได้เลือก — ') : (chosen ? '✗ ผิด — ' : '')) + (c.why || '')));
+        var tag = c.correct ? (chosen ? '✓ ถูก' : '→ ข้อนี้ถูก แต่คุณไม่ได้เลือก') : (chosen ? '✗ ผิด' : '');
+        var note = tag + (tag && c.why ? ' — ' : '') + (c.why || '');
+        if (note) b.querySelector('.txt').appendChild(h('span', { class: 'why' }, note));
       });
       if (checkBtn) checkBtn.remove();
-      body.appendChild(h('div', { class: 'result ' + (ok ? 'ok' : 'bad') }, ok ? 'ถูกต้อง' : 'ยังไม่ถูก ดูเหตุผลแต่ละข้อด้านบน'));
+      var res = h('div', { class: 'result ' + (ok ? 'ok' : 'bad'), role: 'status' }, ok ? 'ถูกต้อง' : 'ยังไม่ถูก ดูเหตุผลแต่ละข้อด้านบน');
+      body.appendChild(res);
       done(ok);
+      if (q.explain) body.appendChild(h('div', { class: 'answer-box' }, h('h3', {}, 'เหตุผล'), h('p', {}, q.explain)));
+      body.appendChild(G.topicLink(q.id, !ok));
       body.appendChild(nextBtn());
+      G.reveal(res);
     }
   }
 
@@ -207,12 +222,15 @@
     function reveal() {
       clearInterval(tick);
       revealBtn.remove();
-      var out = h('div');
+      var out = h('div', { class: 'reveal' });
+      setTimeout(function () { G.reveal(out, 'start'); }, 0);
       if (isDesign) {
         out.appendChild(h('div', { class: 'answer-box' }, h('h3', {}, 'แผนภาพเฉลย'), G.renderFlow(q.flow),
           h('p', { class: 'small muted', style: 'margin-top:8px;white-space:pre-wrap' }, G.flowToText(q.flow))));
       }
       out.appendChild(h('div', { class: 'answer-box' }, h('h3', {}, 'ตัวอย่างคำตอบ'), h('div', { class: 'prompt', html: G.esc(q.modelAnswer) })));
+      var topicEl = G.topicLink(q.id, false);
+      out.appendChild(topicEl);
 
       var ticked = 0, saved = false;
       var scoreEl = h('p', { class: 'small muted' }, 'ติ๊กข้อที่คำตอบของคุณมี: 0/' + q.rubric.length);
@@ -234,6 +252,8 @@
           saved = true; saveBtn.remove();
           var ok = ticked / q.rubric.length >= 0.7;
           done(ok);
+          var lead = topicEl.querySelector('.lead');
+          if (!ok && lead) { topicEl.classList.add('wrong'); lead.textContent = 'ยังตอบไม่ได้? ลองกลับไปอ่านเรื่อง '; }
           out.appendChild(h('div', { class: 'result ' + (ok ? 'ok' : 'bad') },
             ok ? 'ผ่าน (ตอบได้ ' + ticked + '/' + q.rubric.length + ')' : 'ยังไม่ผ่าน (ตอบได้ ' + ticked + '/' + q.rubric.length + ') ข้อนี้จะถูกเก็บไว้ในข้อที่ผิด'));
           out.appendChild(nextBtn());

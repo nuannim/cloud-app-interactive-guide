@@ -68,7 +68,7 @@
         h('div', { style: 'width:150px' }, input), h('span', {}, s.unit)),
       range, status,
       h('details', { style: 'margin-top:10px' }, h('summary', { class: 'small muted', style: 'cursor:pointer' }, 'เฉลยลิมิต'),
-        h('p', {}, l.display), h('p', { class: 'small muted' }, 'อ้างอิง notes ' + l.source)));
+        h('p', {}, l.display), h('p', { class: 'small muted' }, 'อ้างอิง notes ' + l.source), G.topicLink(l.id, false)));
     if (focus) { card.style.borderColor = 'var(--accent)'; setTimeout(function () { card.scrollIntoView({ block: 'center' }); }, 0); }
     return card;
   }
@@ -78,7 +78,7 @@
     var groups = [];
     G.order.forEach(function (m) { (G.modules[m].optionGroups || []).forEach(function (g) { groups.push({ module: m, group: g }); }); });
 
-    if (!query.g) {
+    if (!query.g && !query.ids && !query.m) {
       root.appendChild(h('p', { class: 'muted' }, 'ได้โจทย์ความต้องการสั้น ๆ แล้วเลือกว่าต้องใช้ตัวเลือก (option / โหมด / class) ไหน'));
       var grid = h('div', { class: 'grid' });
       groups.forEach(function (e) {
@@ -91,24 +91,36 @@
       return;
     }
 
-    var entry = groups.filter(function (e) { return e.group.id === query.g; })[0];
-    if (!entry) { root.appendChild(h('div', { class: 'card' }, 'ไม่พบกลุ่มนี้ ', h('a', { href: '#/lab/options' }, 'กลับ'))); return; }
-    var g = entry.group;
-    var queue = G.shuffle(g.challenges || []);
-    if (query.id) queue = queue.filter(function (c) { return c.id === query.id; });
+    // ทำทีละกลุ่ม (?g=) หรือรวมหลายกลุ่มต่อกัน: ทั้งโมดูล (?m=M07) หรือชุดข้อที่ระบุ (?ids=a,b,c) ใช้กับด่านใน Roadmap
+    var queue, title;
+    if (query.g) {
+      var entry = groups.filter(function (e) { return e.group.id === query.g; })[0];
+      if (!entry) { root.appendChild(h('div', { class: 'card' }, 'ไม่พบกลุ่มนี้ ', h('a', { href: '#/lab/options' }, 'กลับ'))); return; }
+      queue = (entry.group.challenges || []).map(function (c) { return { c: c, g: entry.group }; });
+      if (query.id) queue = queue.filter(function (x) { return x.c.id === query.id; });
+      title = entry.group.service + ' · ' + entry.group.title;
+    } else {
+      var want = query.ids ? query.ids.split(',') : null;
+      queue = G.all('challenge').filter(function (e) { return want ? want.indexOf(e.item.id) >= 0 : e.module === query.m; })
+        .map(function (e) { return { c: e.item, g: e.group }; });
+      title = 'Detail · เลือก Option' + (query.m ? ' ' + query.m : '');
+    }
+    queue = G.shuffle(queue);
     var i = 0, box = h('div');
-    root.appendChild(h('p', {}, h('a', { href: '#/lab/options' }, '← กลุ่มอื่น')));
-    root.appendChild(h('h2', {}, g.service + ' · ' + g.title));
+    root.appendChild(h('p', { class: 'small' }, h('a', { href: query.g ? '#/lab/options' : '#/' }, query.g ? '← กลุ่มอื่น' : '← กลับ')));
+    root.appendChild(h('h2', {}, title));
     root.appendChild(box);
 
     function show() {
       box.innerHTML = '';
       if (i >= queue.length) {
-        box.appendChild(h('div', { class: 'card' }, h('p', {}, 'จบกลุ่มนี้แล้ว'),
-          h('div', { class: 'row' }, h('a', { class: 'btn primary', href: '#/lab/options?g=' + g.id }, 'ทำซ้ำ'), h('a', { class: 'btn', href: '#/lab/options' }, 'เลือกกลุ่มอื่น'))));
+        box.appendChild(h('div', { class: 'card' }, h('p', {}, 'จบชุดนี้แล้ว'),
+          h('div', { class: 'row' },
+            h('button', { class: 'btn primary', type: 'button', onclick: function () { i = 0; queue = G.shuffle(queue); show(); } }, 'ทำซ้ำ'),
+            h('a', { class: 'btn', href: query.g ? '#/lab/options' : '#/roadmap' }, query.g ? 'เลือกกลุ่มอื่น' : 'กลับไปแผนสอบ'))));
         return;
       }
-      var c = queue[i], locked = false;
+      var c = queue[i].c, g = queue[i].g, locked = false;
       var card = h('div', { class: 'card' },
         h('div', { class: 'row spread small muted' }, h('span', {}, 'ข้อ ' + (i + 1) + '/' + queue.length), G.supplementBadge(c)),
         h('div', { class: 'prompt', style: 'margin:8px 0 14px' }, c.requirement));
@@ -127,6 +139,7 @@
           });
           card.appendChild(h('div', { class: 'result ' + (ok ? 'ok' : 'bad') }, ok ? 'ถูกต้อง' : 'คำตอบที่ถูกคือ ' + c.answer));
           card.appendChild(h('div', { class: 'answer-box' }, h('h3', {}, 'ทำไม'), h('p', {}, c.why), c.source ? h('p', { class: 'small muted' }, 'อ้างอิง notes ' + c.source) : null));
+          card.appendChild(G.topicLink(c.id, !ok));
           card.appendChild(compareTable(g));
           card.appendChild(h('p', {}, h('button', { class: 'btn primary', type: 'button', onclick: function () { i++; show(); } }, i + 1 < queue.length ? 'ข้อต่อไป' : 'จบ')));
         });
@@ -190,6 +203,7 @@
         G.store.record(l.id, ok);
         out.appendChild(h('div', { class: 'result ' + (ok ? 'ok' : 'bad') }, ok ? 'ถูกต้อง' : 'ยังไม่ถูก'));
         out.appendChild(h('div', { class: 'answer-box' }, h('p', {}, 'เฉลย: ' + l.display), h('p', { class: 'small muted' }, 'อ้างอิง notes ' + l.source)));
+        out.appendChild(G.topicLink(l.id, !ok));
         out.appendChild(h('p', {}, h('button', { class: 'btn primary', type: 'button', onclick: function () { i++; show(); } }, 'ข้อต่อไป')));
         checkBtn.remove();
       }

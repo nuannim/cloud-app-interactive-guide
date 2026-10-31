@@ -10,7 +10,27 @@ GUIDE.register({
       heading: 'Lambda คืออะไร',
       body: '<p>Lambda คือ compute แบบ serverless เราส่งโค้ดขึ้นไป ไม่ต้องสร้างหรือดูแล server โค้ดจะรันเมื่อมี <strong>event</strong> เข้ามา ระบบ scale ให้เอง จ่ายเฉพาะช่วงที่รันจริง ไม่จ่ายตอนว่าง และมี log/metric ส่งเข้า CloudWatch ให้ในตัว</p>' +
         '<p>สองรูปแบบที่สไลด์ยกเป็นตัวอย่าง: (1) เว็บบน S3 → API Gateway → Lambda → DynamoDB (2) stream แบบ real-time: Kinesis → Lambda → DynamoDB</p>',
-      refs: ['q-m07-design', 'q-m07-design-stream', 'q-m07-written']
+      refs: ['q-m07-design', 'q-m07-design-stream', 'q-m07-written'],
+      diagram: {
+        title: 'เว็บ cafe แบบ dynamic',
+        caption: 'S3 เสิร์ฟหน้าเว็บ ส่วนข้อมูลมาจาก API Gateway → Lambda → DynamoDB',
+        source: 'L101, L1742',
+        flow: {
+          nodes: [
+            { id: 'user', label: 'User / Browser' },
+            { id: 's3', label: 'S3 (website)' },
+            { id: 'apigw', label: 'API Gateway' },
+            { id: 'lambda', label: 'Lambda' },
+            { id: 'ddb', label: 'DynamoDB' }
+          ],
+          edges: [
+            { from: 'user', to: 's3', label: '1 load page' },
+            { from: 'user', to: 'apigw', label: '2 call API' },
+            { from: 'apigw', to: 'lambda', label: '3 invoke' },
+            { from: 'lambda', to: 'ddb', label: 'query' }
+          ]
+        }
+      }
     },
     {
       heading: 'Invocation 3 แบบ (ออกสอบบ่อย)',
@@ -19,7 +39,25 @@ GUIDE.register({
         '<li><strong>Asynchronous (push)</strong>: Lambda รับ event เข้าคิวแล้วตอบ ack 202 ทันที เช่น S3 retry 0–2 ครั้ง เก็บ event ที่ล้มเหลวด้วย DLQ หรือ destination ได้</li>' +
         '<li><strong>Polling / event source mapping (pull)</strong>: Lambda เป็นฝ่ายไปดึงจาก SQS, Kinesis, DynamoDB Streams แล้วส่งเป็น batch ถ้า error ฝั่ง stream shard จะติดค้าง ฝั่ง SQS batch ถูกคืนเข้าคิว</li></ul>' +
         '<p>คีย์เวิร์ด: "ต้องรอผล" = sync, "ไม่ต้องรอ / fire-and-forget" = async, "ดึงจากคิว/stream เป็นชุด" = polling</p>',
-      refs: ['g-m07-invocation', 'q-m07-async-fail', 'l-m07-async-retry', 'l-m07-async-wait']
+      refs: ['g-m07-invocation', 'q-m07-async-fail', 'l-m07-async-retry', 'l-m07-async-wait'],
+      diagram: {
+        title: 'Async invocation: คิว, retry, DLQ',
+        caption: 'ตอบ 202 ทันทีโดยยังไม่รันเสร็จ และ event ที่ล้มเหลวส่งไป DLQ/destination ได้',
+        source: 'L479-512, L578-591, L1001, L1211-1220',
+        flow: {
+          nodes: [
+            { id: 'caller', label: 'Client / S3' },
+            { id: 'queue', label: 'Lambda event queue' },
+            { id: 'fn', label: 'Lambda function' },
+            { id: 'dlq', label: 'DLQ / destination' }
+          ],
+          edges: [
+            { from: 'caller', to: 'queue', label: 'Event (202 ack)' },
+            { from: 'queue', to: 'fn', label: 'run' },
+            { from: 'fn', to: 'dlq', label: 'fail หลัง retry 0-2' }
+          ]
+        }
+      }
     },
     {
       heading: 'ลิมิตและ config ด้านประสิทธิภาพ',
@@ -42,7 +80,25 @@ GUIDE.register({
         '<li>Alias (เช่น PROD) เป็นตัวชี้ไปยัง version ให้ event source ชี้ที่ alias จะไม่ต้องแก้ trigger ทุกครั้งที่ออก version ใหม่</li>' +
         '<li>Layer ไว้แชร์ไลบรารี/โค้ดข้าม function ช่วยลดขนาด package และ deploy เร็วขึ้น</li>' +
         '<li>แพ็กเกจได้สองแบบ: .zip หรือ container image (เก็บใน Amazon ECR) ภาษาที่ไม่รองรับใช้ custom runtime (มีไฟล์ bootstrap)</li></ul>',
-      refs: ['g-m07-version', 'q-m07-layer', 'q-m07-written-release', 'c-m07-cfg-layer']
+      refs: ['g-m07-version', 'q-m07-layer', 'q-m07-written-release', 'c-m07-cfg-layer'],
+      diagram: {
+        title: 'Version และ Alias',
+        caption: 'event source ชี้ที่ alias ย้าย alias ไป version ใหม่ได้โดยไม่ต้องแก้ trigger',
+        source: 'L1204-1245, L1279-1280',
+        flow: {
+          nodes: [
+            { id: 'latest', label: '$LATEST (แก้ได้)' },
+            { id: 'v1', label: 'Version 1 (snapshot)' },
+            { id: 'prod', label: 'Alias PROD' },
+            { id: 'src', label: 'Event source' }
+          ],
+          edges: [
+            { from: 'latest', to: 'v1', label: 'Publish' },
+            { from: 'prod', to: 'v1', label: 'points to' },
+            { from: 'src', to: 'prod', label: 'alias ARN' }
+          ]
+        }
+      }
     },
     {
       heading: 'Monitoring: CloudWatch vs X-Ray',

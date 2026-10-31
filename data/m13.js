@@ -30,7 +30,29 @@ GUIDE.register({
         '<li><strong>CodeDeploy</strong>: ขั้น deploy</li>' +
         '<li>CodeConnections อยู่ในกลุ่มเครื่องมือ CI/CD เหมือนกัน แต่สไลด์ไม่ได้อธิบายหน้าที่ จึงไม่ต้องกังวลว่าจะถูกถามรายละเอียด</li></ul>' +
         '<p>ขั้น Test ในภาพสไลด์เขียนว่า "your favorite tools" คือจะใช้เครื่องมือที่ชอบก็ได้ ส่วนในแล็บ คาเฟ่เก็บโค้ดไว้ใน code repository แล้วให้ CodePipeline อัปเดตเว็บอัตโนมัติ</p>',
-      refs: ['g-m13-codesvc', 'q-m13-pipeline', 'q-m13-design']
+      refs: ['g-m13-codesvc', 'q-m13-pipeline', 'q-m13-design', 'q-m13-written'],
+      diagram: {
+        title: 'ขั้นตอนของ CI/CD pipeline',
+        caption: 'CodePipeline ร้อยทุกขั้นเข้าด้วยกัน โดย CodeBuild ทำขั้น Build และ CodeDeploy ทำขั้น Deploy',
+        source: 'L297-321, L764-766',
+        flow: {
+          nodes: [
+            { id: 'repo', label: 'Code repository' },
+            { id: 'pipeline', label: 'CodePipeline' },
+            { id: 'build', label: 'Build (CodeBuild)' },
+            { id: 'test', label: 'Test (your tools)' },
+            { id: 'manual', label: 'Manual intervention' },
+            { id: 'deploy', label: 'Deploy (CodeDeploy)' }
+          ],
+          edges: [
+            { from: 'repo', to: 'pipeline', label: '1' },
+            { from: 'pipeline', to: 'build', label: '2' },
+            { from: 'build', to: 'test', label: '3' },
+            { from: 'test', to: 'manual', label: 'optional' },
+            { from: 'manual', to: 'deploy', label: '4' }
+          ]
+        }
+      }
     },
     {
       heading: 'CloudFormation: template และ stack',
@@ -38,7 +60,25 @@ GUIDE.register({
         '<ul><li><strong>Template</strong> = ไฟล์ข้อความ JSON หรือ YAML ระบุ resource ที่จะสร้าง</li>' +
         '<li><strong>Stack</strong> = หน่วยของการ deploy ที่เกิดจาก template สร้างและอัปเดตได้ <strong>ลบ stack = resource ใน stack ถูกลบทั้งหมด</strong></li>' +
         '<li>จำนวน stack อาจติด quota ถ้าชน ให้ขอเพิ่มผ่าน <strong>Support Center</strong> (เฉลยข้อสอบตัวอย่างในสไลด์)</li></ul>',
-      refs: ['q-m13-stack-quota', 'l-m13-stack-quota']
+      refs: ['q-m13-stack-quota', 'l-m13-stack-quota'],
+      diagram: {
+        title: 'Template, stack และ resource',
+        caption: 'Template สร้าง stack และ resource ทั้งหมดถูกสร้างพร้อมกัน ลบ stack แล้ว resource ถูกลบตามไปด้วย',
+        source: 'L440-448, L648-656',
+        flow: {
+          nodes: [
+            { id: 'template', label: 'Template (JSON/YAML)' },
+            { id: 'stack', label: 'Stack' },
+            { id: 'resources', label: 'Resources ใน stack' },
+            { id: 'deleted', label: 'Resources ถูกลบ' }
+          ],
+          edges: [
+            { from: 'template', to: 'stack', label: 'create/update' },
+            { from: 'stack', to: 'resources', label: 'provision' },
+            { from: 'stack', to: 'deleted', label: 'ลบ stack' }
+          ]
+        }
+      }
     },
     {
       heading: 'โครงสร้าง template',
@@ -55,7 +95,25 @@ GUIDE.register({
         '<li>ใส่บรรทัด <code>Transform: AWS::Serverless-2016-10-31</code> เพื่อบอก CloudFormation ว่าต้องแปลง SAM template</li>' +
         '<li>ประเภท resource ในตัวอย่าง: <code>AWS::Serverless::Function</code> (Lambda + API event) และ <code>AWS::Serverless::SimpleTable</code> (DynamoDB)</li>' +
         '<li>เชื่อมกับ CodeBuild/CodeDeploy/CodePipeline ได้ และจำลองการเรียกใช้แบบ local ได้</li></ul>',
-      refs: ['g-m13-iac', 'q-m13-sam', 'l-m13-sam-transform']
+      refs: ['g-m13-iac', 'q-m13-sam', 'l-m13-sam-transform'],
+      diagram: {
+        title: 'SAM template ผ่าน CloudFormation',
+        caption: 'บรรทัด Transform บอก CloudFormation ให้แปลง SAM template ก่อนสร้าง resource',
+        source: 'L700-710',
+        flow: {
+          nodes: [
+            { id: 'sam', label: 'SAM template' },
+            { id: 'cfn', label: 'CloudFormation' },
+            { id: 'func', label: 'Serverless::Function' },
+            { id: 'table', label: 'Serverless::SimpleTable' }
+          ],
+          edges: [
+            { from: 'sam', to: 'cfn', label: 'Transform' },
+            { from: 'cfn', to: 'func', label: 'Lambda' },
+            { from: 'cfn', to: 'table', label: 'DynamoDB' }
+          ]
+        }
+      }
     }
   ],
 

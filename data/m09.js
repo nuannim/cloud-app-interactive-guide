@@ -24,7 +24,48 @@ GUIDE.register({
       heading: 'Lazy loading vs Write-through',
       body: '<ul><li><strong>Lazy loading</strong>: เติม cache เฉพาะตอน miss (อ่าน DB แล้วค่อยเขียนลง cache) ข้อดี: ไม่มีข้อมูลที่ไม่มีใครใช้ค้างใน cache, node ล่มไม่ร้ายแรง ข้อเสีย: miss ช้า และข้อมูลอาจเก่า (stale) เหมาะกับข้อมูลที่อ่านบ่อยแต่แก้นาน ๆ ที เช่น user profile</li>' +
         '<li><strong>Write-through</strong>: ทุกครั้งที่เขียน DB ให้อัปเดต cache ด้วย ข้อดี: cache ไม่เก่า ข้อเสีย: เขียนช้าลง, ข้อมูลหายเมื่อ node ล่ม, มีข้อมูลที่ไม่มีใครอ่านค้าง, cache churn เหมาะกับข้อมูลที่ต้อง real-time เช่น leaderboard, ข่าวยอดนิยม</li></ul>',
-      refs: ['g-m09-strategy', 'q-m09-strategy', 'q-m09-leaderboard']
+      refs: ['g-m09-strategy', 'q-m09-strategy', 'q-m09-leaderboard'],
+      diagram: {
+        title: 'Lazy loading: อ่านผ่าน cache',
+        caption: 'ถ้า cache miss แอปอ่านจาก database แล้วเติมข้อมูลลง cache',
+        source: 'L1020',
+        flow: {
+          nodes: [
+            { id: 'app', label: 'Application รับ request' },
+            { id: 'cache', label: 'ElastiCache' },
+            { id: 'hit', label: 'คืนข้อมูลจาก cache' },
+            { id: 'db', label: 'Database' },
+            { id: 'update', label: 'Update cache' }
+          ],
+          edges: [
+            { from: 'app', to: 'cache', label: '1' },
+            { from: 'cache', to: 'hit', label: 'hit' },
+            { from: 'cache', to: 'db', label: 'miss' },
+            { from: 'db', to: 'update', label: '2' }
+          ]
+        }
+      }
+    },
+    {
+      heading: 'Write-through: เขียน DB แล้วอัปเดต cache',
+      body: '<p>ลำดับของ write-through: แอปรับข้อมูลที่ต้องเขียน อัปเดต database ก่อน (ขั้น 1) แล้วอัปเดต cache ตาม (ขั้น 2) จึงไม่มีข้อมูลเก่าใน cache</p>',
+      refs: ['g-m09-strategy'],
+      diagram: {
+        title: 'Write-through: ลำดับการเขียน',
+        caption: 'ทุกครั้งที่เขียน database จะอัปเดต cache ต่อทันที',
+        source: 'L1079',
+        flow: {
+          nodes: [
+            { id: 'app', label: 'Application' },
+            { id: 'db', label: 'Database' },
+            { id: 'cache', label: 'ElastiCache' }
+          ],
+          edges: [
+            { from: 'app', to: 'db', label: '1 update DB' },
+            { from: 'db', to: 'cache', label: '2 update cache' }
+          ]
+        }
+      }
     },
     {
       heading: 'CloudFront: distribution, cache key, TTL',
@@ -32,7 +73,29 @@ GUIDE.register({
         '<ul><li>ชนิด distribution: Web content (origin = HTTP server หรือ S3), Video on demand, Live event (origin = MediaStore/MediaPackage)</li>' +
         '<li><strong>Cache key</strong> ค่าเริ่มต้น = domain ของ distribution + URL path เท่านั้น query string/cookie/header ที่ต่างกันยังได้ cache entry เดิม ถ้าอยากแยก ต้องเพิ่มเข้า cache key ใน cache policy</li>' +
         '<li>TTL: Minimum / Maximum / Default TTL ใน cache policy ทำงานร่วมกับ header Cache-Control และ Expires จาก origin ค่าเริ่มต้นเก็บนาน 24 ชั่วโมง ถ้าหมดอายุ CloudFront ถาม origin ถ้าไฟล์ไม่เปลี่ยนจะได้ 304 Not Modified</li></ul>',
-      refs: ['g-m09-distribution', 'l-m09-default-ttl', 'q-m09-cachekey', 'q-m09-design']
+      refs: ['g-m09-distribution', 'l-m09-default-ttl', 'q-m09-cachekey', 'q-m09-design'],
+      diagram: {
+        title: 'CloudFront: cache หมดอายุ',
+        caption: 'ถ้ายังไม่หมดเวลา cache ส่งจาก cache ถ้าหมดจะถาม origin ว่าเวอร์ชันล่าสุดเปลี่ยนไหม',
+        source: 'L750-754',
+        flow: {
+          nodes: [
+            { id: 'viewer', label: 'Viewer request' },
+            { id: 'edge', label: 'CloudFront edge location' },
+            { id: 'cached', label: 'คืนไฟล์จาก cache' },
+            { id: 'origin', label: 'Origin' },
+            { id: 'nm', label: '304 Not Modified' },
+            { id: 'latest', label: 'คืนเวอร์ชันล่าสุด' }
+          ],
+          edges: [
+            { from: 'viewer', to: 'edge' },
+            { from: 'edge', to: 'cached', label: 'ยังไม่หมดอายุ' },
+            { from: 'edge', to: 'origin', label: 'หมดอายุ' },
+            { from: 'origin', to: 'nm', label: 'ตรงกับ origin' },
+            { from: 'origin', to: 'latest', label: 'ไม่ตรง' }
+          ]
+        }
+      }
     },
     {
       heading: 'Lambda@Edge vs CloudFront Functions',

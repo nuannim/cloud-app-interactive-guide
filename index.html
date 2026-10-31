@@ -11,10 +11,11 @@
 <header class="topbar">
   <a class="brand" href="#/">AWS Exam Trainer</a>
   <nav id="nav" aria-label="เมนูหลัก">
-    <a href="#/drill" data-route="drill">โจทย์</a>
-    <a href="#/lab" data-route="lab">Details Lab</a>
+    <a href="#/" data-route="home">ฝึก</a>
+    <a href="#/roadmap" data-route="roadmap">แผนสอบ</a>
+    <a href="#/lab" data-route="lab">Detail</a>
     <a href="#/notes" data-route="notes">สรุป</a>
-    <a href="#/mistakes" data-route="mistakes">ข้อที่ผิด</a>
+    <a href="#/mistakes" data-route="mistakes">ข้อผิด <span class="count" id="wrong-count" hidden></span></a>
   </nav>
 </header>
 <main id="app" tabindex="-1"></main>
@@ -28,10 +29,12 @@
 <script src="data/m11.js"></script>
 <script src="data/m12.js"></script>
 <script src="data/m13.js"></script>
+<script src="data/kc.js"></script>
 <script src="js/canvas.js"></script>
 <script src="js/drill.js"></script>
 <script src="js/lab.js"></script>
 <script src="js/notes.js"></script>
+<script src="js/roadmap.js"></script>
 <script>GUIDE.start();</script>
 </body>
 </html>
