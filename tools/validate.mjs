@@ -1,0 +1,129 @@
+// ตรวจไฟล์ data/mXX.js ตาม docs/data-schema.md   ใช้: node tools/validate.mjs [data/m07.js ...]
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const dataDir = path.join(root, 'data');
+const files = process.argv.length > 2
+  ? process.argv.slice(2).map((f) => path.resolve(f))
+  : fs.readdirSync(dataDir).filter((f) => /^m\d+\.js$/.test(f)).sort().map((f) => path.join(dataDir, f));
+
+const errors = [];
+const err = (file, where, msg) => errors.push(`${path.basename(file)} ${where}: ${msg}`);
+const str = (v) => typeof v === 'string' && v.trim().length > 0;
+const strs = (v) => Array.isArray(v) && v.length > 0 && v.every(str);
+
+const modules = [];
+for (const file of files) {
+  let mod = null;
+  try {
+    vm.runInNewContext(fs.readFileSync(file, 'utf8'), { GUIDE: { register: (m) => { mod = m; } } }, { filename: file });
+  } catch (e) { err(file, 'load', e.message); continue; }
+  if (!mod) { err(file, 'load', 'ไม่ได้เรียก GUIDE.register'); continue; }
+  modules.push({ file, mod });
+}
+
+const ids = new Map();
+function claim(file, id, prefix) {
+  if (!str(id)) return err(file, 'id', 'ขาด id');
+  if (!id.startsWith(prefix)) err(file, id, `id ต้องขึ้นต้นด้วย ${prefix}`);
+  if (ids.has(id)) err(file, id, `id ซ้ำกับ ${ids.get(id)}`);
+  ids.set(id, path.basename(file));
+}
+
+const counts = [];
+for (const { file, mod } of modules) {
+  const mm = (mod.module || '').toLowerCase();
+  if (!/^M\d+$/.test(mod.module || '')) err(file, 'module', 'ต้องเป็นรูป M07');
+  if (!str(mod.title)) err(file, 'title', 'ขาด title');
+  if (!str(mod.summary)) err(file, 'summary', 'ขาด summary');
+  if (!Array.isArray(mod.notes) || !mod.notes.length) err(file, 'notes', 'ต้องมี notes อย่างน้อย 1 หัวข้อ');
+  (mod.notes || []).forEach((n, i) => {
+    if (!str(n.heading) || !str(n.body)) err(file, `notes[${i}]`, 'ต้องมี heading และ body');
+  });
+
+  (mod.limits || []).forEach((l) => {
+    claim(file, l.id, `l-${mm}-`);
+    ['service', 'name', 'display', 'source'].forEach((k) => { if (!str(l[k])) err(file, l.id, `ขาด ${k}`); });
+    if (!strs(l.accept)) err(file, l.id, 'accept ต้องเป็น array ของ string อย่างน้อย 1 ค่า');
+    if (l.sim) {
+      const s = l.sim;
+      if (!str(s.unit)) err(file, l.id, 'sim.unit ขาด');
+      if (typeof s.limitAt !== 'number') err(file, l.id, 'sim.limitAt ต้องเป็นตัวเลข');
+      if (!str(s.overMsg) || !str(s.fix)) err(file, l.id, 'sim ต้องมี overMsg และ fix');
+      if (s.lowAt != null && typeof s.lowAt !== 'number') err(file, l.id, 'sim.lowAt ต้องเป็นตัวเลข');
+      if (s.lowAt != null && !str(s.underMsg)) err(file, l.id, 'มี lowAt ต้องมี underMsg');
+      if (typeof s.start === 'number' && (s.start > s.limitAt || (s.lowAt != null && s.start < s.lowAt))) err(file, l.id, 'sim.start ต้องอยู่ในช่วงที่ใช้ได้');
+    }
+  });
+
+  (mod.optionGroups || []).forEach((g) => {
+    claim(file, g.id, `g-${mm}-`);
+    ['service', 'title'].forEach((k) => { if (!str(g[k])) err(file, g.id, `ขาด ${k}`); });
+    if (!Array.isArray(g.options) || g.options.length < 2) err(file, g.id, 'ต้องมี options อย่างน้อย 2');
+    const names = (g.options || []).map((o) => o.name);
+    (g.options || []).forEach((o) => {
+      ['name', 'traits', 'when'].forEach((k) => { if (!str(o[k])) err(file, g.id, `option ขาด ${k}`); });
+    });
+    if (new Set(names).size !== names.length) err(file, g.id, 'ชื่อ option ซ้ำ');
+    if (!Array.isArray(g.challenges) || !g.challenges.length) err(file, g.id, 'ต้องมี challenges อย่างน้อย 1');
+    (g.challenges || []).forEach((c) => {
+      claim(file, c.id, `c-${mm}-`);
+      ['requirement', 'answer', 'why', 'source'].forEach((k) => { if (!str(c[k])) err(file, c.id, `ขาด ${k}`); });
+      if (!names.includes(c.answer)) err(file, c.id, `answer "${c.answer}" ไม่ตรงกับชื่อ option ใด`);
+    });
+  });
+
+  (mod.questions || []).forEach((q) => {
+    claim(file, q.id, `q-${mm}-`);
+    if (!['scenario', 'design'].includes(q.type)) err(file, q.id, 'type ต้องเป็น scenario หรือ design');
+    if (!['choice', 'written'].includes(q.format)) err(file, q.id, 'format ต้องเป็น choice หรือ written');
+    if (!str(q.prompt)) err(file, q.id, 'ขาด prompt');
+    if (!str(q.source)) err(file, q.id, 'ขาด source');
+    if (q.keywords != null && !strs(q.keywords)) err(file, q.id, 'keywords ต้องเป็น array ของ string');
+    (q.keywords || []).forEach((k) => { if (!q.prompt.toLowerCase().includes(k.toLowerCase())) err(file, q.id, `keyword "${k}" ไม่อยู่ใน prompt`); });
+    if (q.type === 'design' && q.format !== 'written') err(file, q.id, 'design ต้องเป็น format written');
+    if (q.format === 'choice') {
+      if (!Array.isArray(q.choices) || q.choices.length < 3) err(file, q.id, 'choice ต้องมี choices ≥ 3');
+      else {
+        if (!q.choices.some((c) => c.correct)) err(file, q.id, 'ไม่มีตัวเลือกที่ถูก');
+        q.choices.forEach((c, i) => { if (!str(c.text) || !str(c.why) || typeof c.correct !== 'boolean') err(file, q.id, `choices[${i}] ต้องมี text, why, correct`); });
+        if (q.choices.filter((c) => c.correct).length > 1 && !/เลือก\s*\d+\s*ข้อ/.test(q.prompt)) err(file, q.id, 'ถูกหลายข้อ ต้องระบุ "(เลือก N ข้อ)" ใน prompt');
+      }
+    } else {
+      if (!Array.isArray(q.rubric) || q.rubric.length < 3 || !q.rubric.every(str)) err(file, q.id, 'written ต้องมี rubric ≥ 3 ข้อ');
+      if (!str(q.modelAnswer)) err(file, q.id, 'written ต้องมี modelAnswer');
+    }
+    if (q.type === 'design') {
+      const f = q.flow;
+      if (!f || !Array.isArray(f.nodes) || f.nodes.length < 3) err(file, q.id, 'design ต้องมี flow.nodes ≥ 3');
+      else {
+        const nid = new Set(f.nodes.map((n) => n.id));
+        if (nid.size !== f.nodes.length) err(file, q.id, 'flow node id ซ้ำ');
+        f.nodes.forEach((n) => { if (!str(n.id) || !str(n.label)) err(file, q.id, 'flow node ต้องมี id, label'); });
+        if (!Array.isArray(f.edges) || !f.edges.length) err(file, q.id, 'flow.edges ว่าง');
+        (f.edges || []).forEach((e) => { if (!nid.has(e.from) || !nid.has(e.to)) err(file, q.id, `edge ${e.from}->${e.to} อ้าง node ที่ไม่มี`); });
+        if (f.distractors != null && !strs(f.distractors)) err(file, q.id, 'distractors ต้องเป็น array ของ string');
+      }
+    }
+  });
+
+  counts.push(`${mod.module}: ${(mod.questions || []).filter((q) => q.type === 'scenario').length} scenario, ` +
+    `${(mod.questions || []).filter((q) => q.type === 'design').length} design, ` +
+    `${(mod.optionGroups || []).reduce((n, g) => n + (g.challenges || []).length, 0)} detail(option), ` +
+    `${(mod.limits || []).length} limit (${(mod.limits || []).filter((l) => l.sim).length} sim)`);
+}
+
+// refs ต้องชี้ id ที่มีจริง
+for (const { file, mod } of modules) {
+  (mod.notes || []).forEach((n, i) => (n.refs || []).forEach((r) => { if (!ids.has(r)) err(file, `notes[${i}].refs`, `ไม่พบ id ${r}`); }));
+}
+
+console.log(counts.join('\n'));
+if (errors.length) {
+  console.error(`\n✗ พบ ${errors.length} ปัญหา:\n` + errors.map((e) => '  - ' + e).join('\n'));
+  process.exit(1);
+}
+console.log(`\n✓ ผ่าน (${modules.length} โมดูล, ${ids.size} รายการ)`);
