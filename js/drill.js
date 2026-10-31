@@ -102,35 +102,55 @@
       var prompt = h('div', { class: 'prompt', html: G.esc(q.prompt) });
       var body = h('div', { style: 'margin-top:14px' });
       var progress = h('div', { class: 'bar', style: 'margin:0 0 12px' }, h('i', { style: 'width:' + Math.round((i / queue.length) * 100) + '%' }));
-      var card = h('div', { class: 'card' }, head, progress, prompt, body);
+      var code = q.code ? h('pre', { class: 'q-code' }, q.code) : null;
+      var card = h('div', { class: 'card' }, head, progress, prompt, code, body);
       box.appendChild(card);
 
       function done(ok) {
         G.store.record(q.id, ok);
         if (ok) right++;
-        prompt.innerHTML = G.highlight(q.prompt, q.keywords);
+        if (!q.en) prompt.innerHTML = G.highlight(q.prompt, q.keywords);
       }
       var nextBtn = function () {
         return h('p', { style: 'margin-top:14px' }, h('button', { class: 'btn primary', type: 'button', onclick: next },
           i + 1 < queue.length ? 'ข้อต่อไป' : 'ดูสรุป'));
       };
 
-      if (q.format === 'choice') choiceUI(q, body, done, nextBtn);
+      if (q.format === 'choice') choiceUI(q, body, done, nextBtn, q.en ? function (apply) { langSwitch(q, prompt, head, apply); } : null);
       else writtenUI(q, body, done, nextBtn);
     }
     show();
   }
 
+  // ปุ่ม ไทย | EN ที่หัวการ์ด: เริ่มที่ไทยทุกข้อ สลับได้ทั้งก่อนและหลังตอบ
+  function langSwitch(q, prompt, head, apply) {
+    var btns = {};
+    function set(l) {
+      prompt.textContent = l === 'en' ? q.en.prompt : q.prompt;
+      if (l === 'en') prompt.setAttribute('lang', 'en'); else prompt.removeAttribute('lang');
+      Object.keys(btns).forEach(function (k) { btns[k].classList.toggle('on', k === l); btns[k].setAttribute('aria-pressed', k === l ? 'true' : 'false'); });
+      apply(l);
+    }
+    var box = h('span', { class: 'lang-switch', role: 'group', 'aria-label': 'ภาษาของโจทย์' });
+    [['th', 'ไทย'], ['en', 'EN']].forEach(function (p) {
+      btns[p[0]] = h('button', { class: 'chip', type: 'button', onclick: function () { set(p[0]); } }, p[1]);
+      box.appendChild(btns[p[0]]);
+    });
+    head.parentNode.insertBefore(box, head.nextSibling);
+    set('th');
+  }
+
   /* ---------- choice ---------- */
-  function choiceUI(q, body, done, nextBtn) {
-    var choices = G.shuffle(q.choices);
+  function choiceUI(q, body, done, nextBtn, onLang) {
+    // โจทย์ KC คงลำดับ A–D ตามต้นฉบับ เพราะเหตุผลอ้างตัวอักษรของตัวเลือก
+    var choices = q.type === 'kc' ? q.choices.slice() : G.shuffle(q.choices);
     var need = choices.filter(function (c) { return c.correct; }).length;
     var multi = need > 1, picked = {}, locked = false, btns = [];
 
     if (multi) body.appendChild(h('p', { class: 'small muted' }, 'เลือก ' + need + ' ข้อ'));
     choices.forEach(function (c, idx) {
       var b = h('button', { class: 'choice', type: 'button' },
-        h('span', { class: 'letter' }, LETTERS[idx]), h('span', { class: 'txt' }, c.text));
+        h('span', { class: 'letter' }, LETTERS[idx]), h('span', { class: 'txt' }, h('span', { class: 'ctext' }, c.text)));
       b.addEventListener('click', function () {
         if (locked) return;
         if (multi) { picked[idx] = !picked[idx]; b.classList.toggle('sel', !!picked[idx]); }
@@ -138,6 +158,15 @@
       });
       btns.push(b);
       body.appendChild(b);
+    });
+
+    // สลับภาษาโจทย์/ตัวเลือก (เฉพาะข้อที่มีต้นฉบับอังกฤษ) ไม่แตะข้อความ ✓/✗ ที่แนบหลังตอบ
+    if (onLang) onLang(function (l) {
+      choices.forEach(function (c, idx) {
+        var t = btns[idx].querySelector('.ctext');
+        t.textContent = l === 'en' ? q.en.choices[q.choices.indexOf(c)] : c.text;
+        if (l === 'en') t.setAttribute('lang', 'en'); else t.removeAttribute('lang');
+      });
     });
 
     var checkBtn = multi ? h('button', { class: 'btn primary', type: 'button', onclick: finish }, 'ตรวจคำตอบ') : null;

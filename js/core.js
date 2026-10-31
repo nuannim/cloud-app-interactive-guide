@@ -32,6 +32,19 @@
     m.kc = { summary: kc.summary, remember: kc.remember };
   };
 
+  // คำแปลไทยของโจทย์ KC (data/kc-th.js หลัง data/kc.js): ไทยเป็นค่าเริ่มต้น เก็บอังกฤษไว้ใน q.en ให้สลับได้
+  G.registerKCth = function (map) {
+    G.order.forEach(function (mid) {
+      (G.modules[mid].questions || []).forEach(function (q) {
+        var t = map[q.id];
+        if (!t || q.type !== 'kc' || q.en) return;
+        q.en = { prompt: q.prompt, choices: q.choices.map(function (c) { return c.text; }) };
+        q.prompt = t.prompt;
+        q.choices.forEach(function (c, i) { c.text = t.choices[i]; });
+      });
+    });
+  };
+
   G.all = function (kind) {
     var out = [];
     Object.keys(G.index).forEach(function (id) { if (G.index[id].kind === kind) out.push(G.index[id]); });
@@ -270,7 +283,10 @@
   function plain(html) { return String(html).replace(/<[^>]+>/g, ' '); }
   function itemText(e) {
     var i = e.item;
-    if (e.kind === 'question') return i.prompt + ' ' + (i.choices || []).filter(function (c) { return c.correct; }).map(function (c) { return c.text; }).join(' ') + ' ' + (i.explain || '');
+    if (e.kind === 'question') { // โจทย์ KC ที่แปลแล้วใช้ข้อความอังกฤษเดิมจับคู่หัวข้อ (ผลเหมือนก่อนแปล)
+      var en = i.en;
+      return (en ? en.prompt : i.prompt) + ' ' + (i.choices || []).filter(function (c) { return c.correct; }).map(function (c) { return en ? en.choices[i.choices.indexOf(c)] : c.text; }).join(' ') + ' ' + (i.explain || '');
+    }
     if (e.kind === 'challenge') return i.requirement + ' ' + i.answer + ' ' + i.why;
     return i.service + ' ' + i.name + ' ' + i.display;
   }

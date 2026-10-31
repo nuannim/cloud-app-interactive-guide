@@ -172,6 +172,25 @@ if (fs.existsSync(kcFile)) {
     });
   }
   counts.push(`KC: ${kcCount} ข้อ ใน ${kcs.length} โมดูล`);
+
+  // คำแปลไทย (data/kc-th.js): ทุกข้อ KC ต้องมี และจำนวนตัวเลือกต้องเท่าต้นฉบับ
+  const thFile = path.join(dataDir, 'kc-th.js');
+  if (!fs.existsSync(thFile)) err(thFile, 'file', 'ไม่พบไฟล์คำแปล');
+  else {
+    let th = {};
+    try {
+      vm.runInNewContext(fs.readFileSync(thFile, 'utf8'), { GUIDE: { registerKCth: (m) => { th = m; } } }, { filename: thFile });
+    } catch (e) { err(thFile, 'load', e.message); }
+    const all = new Map(kcs.flatMap(({ kc }) => kc.questions.map((q) => [q.id, q])));
+    for (const [id, q] of all) {
+      const t = th[id];
+      if (!t) { err(thFile, id, 'ไม่มีคำแปล'); continue; }
+      if (!str(t.prompt)) err(thFile, id, 'prompt ว่าง');
+      if (!Array.isArray(t.choices) || t.choices.length !== q.choices.length || !t.choices.every(str)) err(thFile, id, `ตัวเลือกต้องมี ${q.choices.length} ข้อ และไม่ว่าง`);
+    }
+    for (const id of Object.keys(th)) if (!all.has(id)) err(thFile, id, 'id ไม่มีใน data/kc.js');
+    counts.push(`KC แปลไทย: ${Object.keys(th).length}/${all.size} ข้อ`);
+  }
 }
 
 // refs ต้องชี้ id ที่มีจริง

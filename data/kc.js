@@ -2094,7 +2094,8 @@ GUIDE.registerKC("M13", {
     }
    ],
    "explain": "`SimpleTable` สร้างตาราง DynamoDB ที่มี primary key ตัวเดียว · ถ้าเป็น function จะใช้ `AWS::Serverless::Function` · ถ้าเป็น API จะใช้ `AWS::Serverless::Api`",
-   "source": "KC M13 ข้อ 10"
+   "source": "KC M13 ข้อ 10",
+   "code": "Resources:\n  Orders:\n    Type: AWS::Serverless::SimpleTable"
   }
  ]
 });

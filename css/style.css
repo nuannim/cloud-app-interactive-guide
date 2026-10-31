@@ -93,6 +93,9 @@ a.btn, a.chip { display: inline-flex; align-items: center; }
   font: inherit; font-size: .9rem; cursor: pointer; border-radius: 999px; padding: 5px 13px; min-height: 36px;
   border: 1px solid var(--border); background: var(--surface); color: var(--text);
 }
+.q-code { margin: 12px 0 0; padding: 10px 14px; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; font-size: .9rem; line-height: 1.5; }
+.lang-switch { display: inline-flex; gap: 6px; margin: 0 0 10px; }
+.lang-switch .chip { min-height: 32px; padding: 3px 12px; font-size: .85rem; }
 .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 .badge { display: inline-block; font-size: .78rem; padding: 1px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
 .badge.warn { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }

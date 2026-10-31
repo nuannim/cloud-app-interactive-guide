@@ -76,7 +76,12 @@ for (const mod of mods.filter((x) => x.n >= FIRST)) {
     while (i < L.length && L[i].trim() && !/^- [A-F]\./.test(L[i])) { q.prompt += ' ' + L[i].trim(); i++; }
     while (i < L.length && !/^\*\*\d+\.\*\*/.test(L[i]) && !L[i].startsWith('📌')) {
       let m;
-      if ((m = L[i].match(/^- ([A-F])\.\s*(.*)$/))) q.opts.push({ letter: m[1], text: m[2].trim() });
+      if (L[i].startsWith('```')) { // โค้ดประกอบโจทย์ (เช่น YAML ของ SAM) เก็บไว้ใน code
+        const code = [];
+        i++;
+        while (i < L.length && !L[i].startsWith('```')) { code.push(L[i]); i++; }
+        q.code = code.join('\n');
+      } else if ((m = L[i].match(/^- ([A-F])\.\s*(.*)$/))) q.opts.push({ letter: m[1], text: m[2].trim() });
       else if ((m = L[i].match(/^>\s*✅\s*\*\*([A-F](?:\s*\+\s*[A-F])*)\*\*/))) q.ans = m[1].split('+').map((s) => s.trim());
       else if ((m = L[i].match(/^>\s*💡\s*(.*)$/))) {
         q.explain = m[1].trim();
@@ -96,6 +101,7 @@ for (const mod of mods.filter((x) => x.n >= FIRST)) {
       explain: q.explain,
       source: `KC ${mid} ข้อ ${q.n}`
     };
+    if (q.code) item.code = q.code;
     if (topicOverrides[id] != null) item.topic = topicOverrides[id];
     questions.push(item);
   }
