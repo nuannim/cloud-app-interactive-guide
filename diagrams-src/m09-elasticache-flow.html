@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-elasticache-flow · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-elasticache-flow-title m09-elasticache-flow-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-elasticache-flow-title">ElastiCache ทำงานในแอปอย่างไร</title>
+      <desc id="m09-elasticache-flow-desc">Clients ส่ง request ไปที่ application บน EC2 ขั้น 1 ขอข้อมูลจาก cache ขั้น 2 ถ้ามีและยังไม่หมดอายุ คืนข้อมูล ถ้าไม่มี ขั้น 3 ขอจาก database ขั้น 4 database คืนค่าปัจจุบัน ขั้น 5 application เติมค่าลง cache</desc>
+      <defs>
+        <marker id="m09-elasticache-flow-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-elasticache-flow-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-elasticache-flow-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-elasticache-flow-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-elasticache-flow-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="150" width="88" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="150" width="88" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="60" y="182" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Clients</text>
+<rect x="168" y="150" width="128" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="168" y="150" width="128" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="232" y="173" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Application</text>
+<text x="232" y="191" fill="#5f5d57" font-size="12" text-anchor="middle">บน EC2 instances</text>
+<rect x="440" y="56" width="136" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="440" y="56" width="136" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="508" y="88" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ElastiCache</text>
+<rect x="440" y="240" width="136" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="440" y="240" width="136" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="508" y="272" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Database</text>
+<path d="M104,178 L168,178" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-elasticache-flow-arrow-blue)"/>
+<path d="M232,150 L232,92 Q232,84 240,84 L440,84" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-elasticache-flow-arrow-blue)"/>
+<rect x="282" y="60" width="108" height="16" fill="#f6f5f1"/>
+<text x="336" y="72" fill="#5f5d57" font-size="12" text-anchor="middle">1 · ขอจาก cache</text>
+<path d="M440,100 L272,100 Q264,100 264,108 L264,150" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-elasticache-flow-arrow-green)"/>
+<rect x="297" y="106" width="110" height="16" fill="#f6f5f1"/>
+<text x="352" y="118" fill="#5f5d57" font-size="12" text-anchor="middle">2 · hit: คืนข้อมูล</text>
+<path d="M232,206 L232,260 Q232,268 240,268 L440,268" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-elasticache-flow-arrow-red)"/>
+<rect x="284" y="244" width="104" height="16" fill="#f6f5f1"/>
+<text x="336" y="256" fill="#5f5d57" font-size="12" text-anchor="middle">3 · miss: ถาม DB</text>
+<path d="M440,284 L272,284 Q264,284 264,276 L264,206" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m09-elasticache-flow-arrow)"/>
+<rect x="298" y="290" width="108" height="16" fill="#f6f5f1"/>
+<text x="352" y="302" fill="#5f5d57" font-size="12" text-anchor="middle">4 · คืนค่าปัจจุบัน</text>
+<path d="M296,178 L600,178 Q608,178 608,170 L608,92 Q608,84 600,84 L576,84" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-elasticache-flow-arrow-acc)"/>
+<rect x="394" y="154" width="116" height="16" fill="#f6f5f1"/>
+<text x="452" y="166" fill="#5f5d57" font-size="12" text-anchor="middle">5 · เติมค่าลง cache</text>
+<line x1="16" y1="336" x2="704" y2="336" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="356" fill="#5f5d57" font-size="12">เลข 1–5 ตามสไลด์ · เขียว = hit · แดง = miss (หรือ TTL หมดอายุ) · ส้ม = เติมค่าลง cache · น้ำเงิน = request ของผู้ใช้</text>
+
+    </svg>
+  </div>
+</body>
+</html>

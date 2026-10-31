@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-namespace · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-namespace-title m08-namespace-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-namespace-title">Namespace ของ Elastic Beanstalk คือหมวดของค่าตั้ง</title>
+      <desc id="m08-namespace-desc">ในไฟล์ option_settings แต่ละบรรทัดที่ขึ้นต้นด้วย aws:elasticbeanstalk เป็นชื่อ namespace หรือหมวด ค่าที่เยื้องเข้ามาข้างใต้เป็นค่าตั้งในหมวดนั้น command เก็บค่าเลือก deployment policy ส่วน trafficsplitting เก็บค่าเปอร์เซ็นต์ traffic และเวลารอ</desc>
+      <defs>
+        <marker id="m08-namespace-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-namespace-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="48" width="320" height="232" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="52" width="150" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="64" fill="#5f5d57" font-size="12" font-weight="600">ไฟล์ตั้งค่า (YAML)</text>
+<rect x="360" y="48" width="344" height="296" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="368" y="52" width="231" height="16" rx="2" fill="#f6f5f1"/>
+<text x="376" y="64" fill="#5f5d57" font-size="12" font-weight="600">ลิ้นชักของค่าตั้ง (namespace)</text>
+<text x="32" y="100" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">option_settings:</text>
+<text x="32" y="130" fill="#b45309" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">  aws:elasticbeanstalk:command:</text>
+<text x="32" y="152" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">    DeploymentPolicy: TrafficSplitting</text>
+<text x="32" y="190" fill="#b45309" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">  aws:elasticbeanstalk:trafficsplitting:</text>
+<text x="32" y="212" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">    NewVersionPercent: "15"</text>
+<text x="32" y="234" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">    EvaluationTime: "10"</text>
+<rect x="372" y="84" width="320" height="112" rx="6" fill="#f6f5f1"/>
+<rect x="372" y="84" width="320" height="112" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="386" y="106" fill="#b45309" font-size="12" font-weight="600" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">aws:elasticbeanstalk:command</text>
+<text x="386" y="130" font-size="12"><tspan fill="#1d1d1b">เลือก deployment policy</tspan></text>
+<text x="386" y="148" font-size="12"><tspan fill="#1d1d1b">ตั้ง timeout</tspan></text>
+<text x="386" y="166" font-size="12"><tspan fill="#1d1d1b">ขนาดและชนิดของ batch</tspan></text>
+<text x="386" y="184" font-size="12"><tspan fill="#1d1d1b">ยกเลิกถ้า health check ล้มเหลว</tspan></text>
+<rect x="372" y="216" width="320" height="112" rx="6" fill="#f6f5f1"/>
+<rect x="372" y="216" width="320" height="112" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="386" y="238" fill="#b45309" font-size="12" font-weight="600" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">aws:elasticbeanstalk:trafficsplitting</text>
+<text x="386" y="262" font-size="12"><tspan fill="#1d1d1b">% ของ traffic ที่ไปเครื่องใหม่</tspan></text>
+<text x="386" y="280" font-size="12"><tspan fill="#1d1d1b">รอนานเท่าไรก่อนเลื่อน traffic เพิ่ม</tspan></text>
+<path d="M262,126 L372,126" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m08-namespace-arrow-acc)"/>
+<path d="M328,186 L342,186 Q350,186 350,194 L350,242 Q350,250 358,250 L372,250" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m08-namespace-arrow-acc)"/>
+<line x1="16" y1="364" x2="704" y2="364" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="384" fill="#5f5d57" font-size="12">namespace = ชื่อหมวดของค่าตั้ง (บรรทัดสีส้มที่ลงท้ายด้วย :) บรรทัดที่เยื้องเข้าไปข้างใต้คือค่าในหมวดนั้น</text>
+<text x="16" y="402" fill="#5f5d57" font-size="12">เปรียบเทียบ: หมวดคือโฟลเดอร์ ค่าตั้งคือไฟล์ในโฟลเดอร์ (คำเปรียบเทียบของผู้สรุป)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-edge-events · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-edge-events-title m09-edge-events-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-edge-events-title">จุดที่ edge function เกาะได้ 4 จุด</title>
+      <desc id="m09-edge-events-desc">request ผ่านสี่จุด viewer request, origin request, origin response, viewer response CloudFront Functions และ Lambda@Edge จับ viewer request และ response ได้ ส่วน origin request และ response จับได้เฉพาะ Lambda@Edge</desc>
+      <defs>
+        <marker id="m09-edge-events-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-edge-events-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-edge-events-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-edge-events-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-edge-events-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="150" width="100" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="150" width="100" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="66" y="182" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Viewer</text>
+<rect x="310" y="150" width="100" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="310" y="150" width="100" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="360" y="173" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">CloudFront</text>
+<text x="360" y="191" fill="#5f5d57" font-size="12" text-anchor="middle">cache</text>
+<rect x="604" y="150" width="100" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="604" y="150" width="100" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="654" y="182" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Origin</text>
+<path d="M116,164 L310,164" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-edge-events-arrow-blue)"/>
+<rect x="153" y="140" width="120" height="16" fill="#f6f5f1"/>
+<text x="213" y="152" fill="#5f5d57" font-size="12" text-anchor="middle">1 · viewer request</text>
+<path d="M310,194 L116,194" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-edge-events-arrow-blue)"/>
+<rect x="151" y="200" width="124" height="16" fill="#f6f5f1"/>
+<text x="213" y="212" fill="#5f5d57" font-size="12" text-anchor="middle">4 · viewer response</text>
+<path d="M410,164 L604,164" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-edge-events-arrow-acc)"/>
+<rect x="448" y="140" width="118" height="16" fill="#f6f5f1"/>
+<text x="507" y="152" fill="#5f5d57" font-size="12" text-anchor="middle">2 · origin request</text>
+<path d="M604,194 L410,194" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-edge-events-arrow-acc)"/>
+<rect x="446" y="200" width="122" height="16" fill="#f6f5f1"/>
+<text x="507" y="212" fill="#5f5d57" font-size="12" text-anchor="middle">3 · origin response</text>
+<rect x="16" y="250" width="330" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="250" width="330" height="56" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="181" y="273" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">CloudFront Functions และ Lambda@Edge</text>
+<text x="181" y="291" fill="#5f5d57" font-size="12" text-anchor="middle">จับ viewer request / response ได้</text>
+<rect x="384" y="250" width="320" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="384" y="250" width="320" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="544" y="273" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Lambda@Edge เท่านั้น</text>
+<text x="544" y="291" fill="#5f5d57" font-size="12" text-anchor="middle">จับ origin request / response ได้</text>
+<line x1="16" y1="330" x2="704" y2="330" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="350" fill="#5f5d57" font-size="12">น้ำเงิน = ฝั่งผู้ใช้ (viewer) · ส้ม = ฝั่ง origin · เขียว = จับได้ทั้งสองแบบ · ตารางว่า function ไหนจับ event ไหนอยู่ในสไลด์</text>
+<text x="16" y="368" fill="#5f5d57" font-size="12">ลำดับเลข 1–4 และ origin request ที่เกิดเมื่อ cache miss เป็นความรู้ทั่วไป ไม่อยู่ในสไลด์</text>
+
+    </svg>
+  </div>
+</body>
+</html>

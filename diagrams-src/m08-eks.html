@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-eks · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 292" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-eks-title m08-eks-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-eks-title">Amazon EKS: 4 ขั้นตอนใช้งาน</title>
+      <desc id="m08-eks-desc">Provision EKS cluster แล้ว deploy worker node ซึ่งเลือก AWS Fargate หรือ Amazon EC2 จากนั้นเชื่อมต่อกับ EKS cluster และรันแอป Kubernetes</desc>
+      <defs>
+        <marker id="m08-eks-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-eks-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-eks-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-eks-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-eks-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="48" width="512" height="196" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="52" width="90" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="64" fill="#5f5d57" font-size="12" font-weight="600">Amazon EKS</text>
+<rect x="40" y="124" width="128" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="124" width="128" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="104" y="151" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Provision</text>
+<text x="104" y="169" fill="#5f5d57" font-size="12" text-anchor="middle">EKS cluster</text>
+<rect x="212" y="72" width="132" height="160" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="220" y="76" width="98" height="16" rx="2" fill="#f6f5f1"/>
+<text x="228" y="88" fill="#5f5d57" font-size="12" font-weight="600">Worker node</text>
+<rect x="228" y="100" width="100" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="228" y="100" width="100" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="278" y="124" fill="#1d1d1b" font-size="12" text-anchor="middle">AWS Fargate</text>
+<text x="278" y="162" fill="#5f5d57" font-size="12" text-anchor="middle">หรือ</text>
+<rect x="228" y="176" width="100" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="228" y="176" width="100" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="278" y="200" fill="#1d1d1b" font-size="12" text-anchor="middle">Amazon EC2</text>
+<rect x="384" y="128" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="384" y="128" width="120" height="56" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="444" y="151" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Connect to</text>
+<text x="444" y="169" fill="#5f5d57" font-size="12" text-anchor="middle">EKS cluster</text>
+<rect x="568" y="128" width="136" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="568" y="128" width="136" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="636" y="151" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Run Kubernetes</text>
+<text x="636" y="169" fill="#5f5d57" font-size="12" text-anchor="middle">applications</text>
+<path d="M168,156 L212,156" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eks-arrow)"/>
+<path d="M344,156 L384,156" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eks-arrow)"/>
+<path d="M504,156 L568,156" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eks-arrow)"/>
+<line x1="16" y1="264" x2="704" y2="264" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="284" fill="#5f5d57" font-size="12">Fargate ใช้เป็น worker node ของ EKS ได้ (ตามภาพสไลด์) เลือก Fargate หรือ EC2 อย่างใดอย่างหนึ่ง</text>
+
+    </svg>
+  </div>
+</body>
+</html>

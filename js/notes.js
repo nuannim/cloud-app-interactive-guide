@@ -70,9 +70,15 @@
     }
 
     sections.forEach(function (n, i) {
-      var card = h('section', { class: 'card notes-body', id: 'sec-' + i },
-        h('h2', {}, n.heading), h('div', { html: n.body }));
-      diagramsOf(n).forEach(function (d) { card.appendChild(diagramFigure(d)); });
+      var bodyEl = h('div', { html: n.body });
+      var card = h('section', { class: 'card notes-body', id: 'sec-' + i }, h('h2', {}, n.heading), bodyEl);
+      // ภาพที่มีช่องวางใน body (<div class="fig-slot" data-i="N">) ไปอยู่ตรงนั้น (ท้ายหัวข้อย่อยของมัน) ที่เหลือเรียงท้ายหัวข้อเหมือนเดิม
+      var figs = diagramsOf(n), placed = {};
+      Array.prototype.forEach.call(bodyEl.querySelectorAll('.fig-slot'), function (slot) {
+        var k = Number(slot.getAttribute('data-i'));
+        if (figs[k] && !placed[k]) { placed[k] = true; slot.replaceWith(diagramFigure(figs[k])); } else slot.remove();
+      });
+      figs.forEach(function (d, k) { if (!placed[k]) card.appendChild(diagramFigure(d)); });
       if (n.refs && n.refs.length) {
         var chips = h('div', { class: 'row', style: 'margin-top:8px' });
         n.refs.forEach(function (id) {

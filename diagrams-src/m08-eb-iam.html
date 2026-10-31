@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-eb-iam · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 364" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-eb-iam-title m08-eb-iam-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-eb-iam-title">สิทธิ์ใน Elastic Beanstalk: 3 แบบ</title>
+      <desc id="m08-eb-iam-desc">Service role ให้ Elastic Beanstalk assume เพื่อใช้ service อื่นแทนผู้ใช้, Instance profile ใช้กับ EC2 instance ที่ launch ใน environment, User policies แนบกับ user หรือ group ที่สร้างและจัดการ application และ environment</desc>
+      <defs>
+        <marker id="m08-eb-iam-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-eb-iam-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<text x="16" y="52" fill="#1d1d1b" font-size="12" font-weight="600">ใคร</text>
+<text x="248" y="52" fill="#1d1d1b" font-size="12" font-weight="600">role / policy</text>
+<text x="512" y="52" fill="#1d1d1b" font-size="12" font-weight="600">ใช้ทำอะไร</text>
+<rect x="16" y="72" width="160" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="72" width="160" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="96" y="108" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Elastic Beanstalk</text>
+<path d="M176,104 L248,104" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-iam-arrow)"/>
+<rect x="184" y="80" width="56" height="16" fill="#f6f5f1"/>
+<text x="212" y="92" fill="#5f5d57" font-size="12" text-anchor="middle">assume</text>
+<rect x="248" y="72" width="248" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="248" y="72" width="248" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="372" y="99" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Service role</text>
+<text x="372" y="117" fill="#5f5d57" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">awselasticbeanstalkservice-role</text>
+<text x="512" y="98" fill="#1d1d1b" font-size="12">Beanstalk assume role นี้</text>
+<text x="512" y="116" fill="#1d1d1b" font-size="12">เพื่อใช้ service อื่นแทนคุณ</text>
+<rect x="16" y="160" width="160" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="160" width="160" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="96" y="187" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">EC2 instance</text>
+<text x="96" y="205" fill="#5f5d57" font-size="12" text-anchor="middle">ใน environment</text>
+<path d="M176,192 L248,192" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-iam-arrow)"/>
+<rect x="184" y="168" width="56" height="16" fill="#f6f5f1"/>
+<text x="212" y="180" fill="#5f5d57" font-size="12" text-anchor="middle">ใช้กับ</text>
+<rect x="248" y="160" width="248" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="248" y="160" width="248" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="372" y="187" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Instance profile</text>
+<text x="372" y="205" fill="#5f5d57" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">awselasticbeanstalkec2-role</text>
+<text x="512" y="186" fill="#1d1d1b" font-size="12">ใช้กับ instance ที่ถูก</text>
+<text x="512" y="204" fill="#1d1d1b" font-size="12">launch ใน environment</text>
+<rect x="16" y="248" width="160" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="248" width="160" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="96" y="284" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">User / Group</text>
+<path d="M176,280 L248,280" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-iam-arrow)"/>
+<rect x="184" y="256" width="56" height="16" fill="#f6f5f1"/>
+<text x="212" y="268" fill="#5f5d57" font-size="12" text-anchor="middle">แนบกับ</text>
+<rect x="248" y="248" width="248" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="248" y="248" width="248" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="372" y="275" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">User policies</text>
+<text x="372" y="293" fill="#5f5d57" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">managed policy 2 แบบ (optional)</text>
+<text x="512" y="268" fill="#1d1d1b" font-size="12">แนบกับ user/group ที่สร้าง</text>
+<text x="512" y="286" fill="#1d1d1b" font-size="12">และจัดการ application/environment</text>
+<text x="512" y="304" fill="#1d1d1b" font-size="12">admin เต็ม หรือ read-only</text>
+<line x1="16" y1="340" x2="704" y2="340" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="360" fill="#5f5d57" font-size="12">IAM role/policy ที่เกี่ยวกับ environment ของ Elastic Beanstalk 3 แบบ (ชื่อ role ตามที่เขียนในสไลด์)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

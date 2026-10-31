@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-s3-accel · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 356" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-s3-accel-title m09-s3-accel-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-s3-accel-title">เร่งการโอนไฟล์ S3 ด้วย CloudFront</title>
+      <desc id="m09-s3-accel-desc">bucket S3 เปิด transfer acceleration ผู้ใช้ที่อยู่ไกล bucket ส่งผ่าน edge location และ optimized network path มีโอกาสเร็วขึ้น ผู้ใช้ที่อยู่ใกล้ bucket อยู่แล้ว เร็วขึ้นเล็กน้อยหรืออาจช้าลง</desc>
+      <defs>
+        <marker id="m09-s3-accel-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-s3-accel-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-s3-accel-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-s3-accel-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-s3-accel-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="64" width="112" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="64" width="112" height="56" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="72" y="96" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ผู้ใช้ไกล bucket</text>
+<rect x="270" y="64" width="150" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="270" y="64" width="150" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="345" y="87" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Edge location</text>
+<text x="345" y="105" fill="#5f5d57" font-size="12" text-anchor="middle">ใกล้ผู้ใช้</text>
+<rect x="560" y="140" width="144" height="120" rx="6" fill="#f6f5f1"/>
+<rect x="560" y="140" width="144" height="120" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="632" y="186" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">S3 bucket</text>
+<text x="632" y="204" fill="#5f5d57" font-size="12" text-anchor="middle">เปิด transfer</text>
+<text x="632" y="222" fill="#5f5d57" font-size="12" text-anchor="middle">acceleration</text>
+<path d="M128,92 L270,92" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-s3-accel-arrow-green)"/>
+<rect x="179" y="68" width="40" height="16" fill="#f6f5f1"/>
+<text x="199" y="80" fill="#5f5d57" font-size="12" text-anchor="middle">ใกล้</text>
+<path d="M420,92 L624,92 Q632,92 632,100 L632,140" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-s3-accel-arrow-green)"/>
+<rect x="451" y="68" width="150" height="16" fill="#f6f5f1"/>
+<text x="526" y="80" fill="#5f5d57" font-size="12" text-anchor="middle">optimized network path</text>
+<text x="16" y="144" fill="#15803d" font-size="12" font-weight="600">มีโอกาสเร็วขึ้นมาก</text>
+<rect x="16" y="200" width="112" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="200" width="112" height="56" rx="6" fill="rgba(29,29,27,0.03)" stroke="rgba(29,29,27,0.30)" stroke-width="1"/>
+<text x="72" y="232" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ผู้ใช้ใกล้ bucket</text>
+<path d="M128,228 L560,228" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m09-s3-accel-arrow)"/>
+<rect x="259" y="204" width="170" height="16" fill="#f6f5f1"/>
+<text x="344" y="216" fill="#5f5d57" font-size="12" text-anchor="middle">เข้า S3 ตรง ๆ ก็ใกล้อยู่แล้ว</text>
+<text x="16" y="280" fill="#5f5d57" font-size="12" font-weight="600">เร็วขึ้นเล็กน้อย หรืออาจช้าลง</text>
+<line x1="16" y1="304" x2="704" y2="304" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="324" fill="#5f5d57" font-size="12">ตามสไลด์ Using CloudFront to accelerate Amazon S3 file transfer · เขียว = มักเร็วขึ้น · เทา = แทบไม่ต่างหรืออาจช้าลง</text>
+<text x="16" y="342" fill="#5f5d57" font-size="12">เส้นทางที่ปรับให้เหมาะ (optimized network path) มีประโยชน์เมื่อผู้ใช้อยู่ไกล bucket</text>
+
+    </svg>
+  </div>
+</body>
+</html>

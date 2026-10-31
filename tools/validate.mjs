@@ -52,6 +52,12 @@ for (const { file, mod } of modules) {
   (mod.notes || []).forEach((n, i) => {
     if (!str(n.heading) || !str(n.body)) err(file, `notes[${i}]`, 'ต้องมี heading และ body');
     const ds = n.diagrams || (n.diagram ? [n.diagram] : []);
+    // ช่องวางภาพใน body (<div class="fig-slot" data-i="N">) ต้องอ้างภาพที่มีจริงและไม่ซ้ำ
+    const slots = [...String(n.body || '').matchAll(/class="fig-slot" data-i="(\d+)"/g)].map((m) => Number(m[1]));
+    slots.forEach((k, si) => {
+      if (k >= ds.length) err(file, `notes[${i}]`, `fig-slot data-i="${k}" ไม่มีภาพ (มีภาพ ${ds.length} ภาพ)`);
+      if (slots.indexOf(k) !== si) err(file, `notes[${i}]`, `fig-slot data-i="${k}" ซ้ำ`);
+    });
     ds.forEach((d, di) => {
       const w = `notes[${i}].diagram[${di}]`;
       if (!str(d.title)) err(file, w, 'ต้องมี title');

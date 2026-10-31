@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-cache-key · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-cache-key-title m09-cache-key-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-cache-key-title">Cache key เริ่มต้นของ CloudFront</title>
+      <desc id="m09-cache-key-desc">คำขอสองครั้งมี query string, cookie และ user-agent ต่างกัน แต่ domain และ URL path เหมือนกัน จึงได้ cache key เดียวกัน คำขอแรกเป็น cache miss คำขอที่สองเป็น cache hit</desc>
+      <defs>
+        <marker id="m09-cache-key-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-cache-key-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-cache-key-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-cache-key-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-cache-key-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="56" width="340" height="112" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="56" width="340" height="112" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1"/>
+<text x="30" y="78" fill="#b91c1c" font-size="12" font-weight="600">Request 1 · cache miss</text>
+<text x="30" y="100" fill="#b45309" font-size="12" font-weight="600">path: /content/stories/example-story.html</text>
+<text x="30" y="120" fill="#5f5d57" font-size="12">query: ?ref=0123abc&amp;split-pages=false  (ไม่นับ)</text>
+<text x="30" y="140" fill="#5f5d57" font-size="12">cookie: session_id=01234abcd  (ไม่นับ)</text>
+<text x="30" y="160" fill="#5f5d57" font-size="12">user-agent: Firefox  (ไม่นับ)</text>
+<rect x="16" y="184" width="340" height="112" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="184" width="340" height="112" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="30" y="206" fill="#15803d" font-size="12" font-weight="600">Request 2 · cache hit</text>
+<text x="30" y="228" fill="#b45309" font-size="12" font-weight="600">path: /content/stories/example-story.html</text>
+<text x="30" y="248" fill="#5f5d57" font-size="12">query: ?ref=xyz987&amp;split-pages=true  (ไม่นับ)</text>
+<text x="30" y="268" fill="#5f5d57" font-size="12">cookie: session_id=wxyz9876  (ไม่นับ)</text>
+<text x="30" y="288" fill="#5f5d57" font-size="12">user-agent: Chrome  (ไม่นับ)</text>
+<rect x="424" y="130" width="280" height="92" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="130" width="280" height="92" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="564" y="153" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Cache key (ค่าเริ่มต้น)</text>
+<text x="564" y="171" fill="#5f5d57" font-size="12" text-anchor="middle">domain + URL path</text>
+<text x="564" y="189" fill="#1d1d1b" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">d111111abcdef8.cloudfront.net</text>
+<text x="564" y="207" fill="#1d1d1b" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">/content/stories/example-story.html</text>
+<path d="M356,112 L382,112 Q390,112 390,120 L390,152 Q390,160 398,160 L424,160" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-cache-key-arrow-red)"/>
+<path d="M356,240 L382,240 Q390,240 390,232 L390,200 Q390,192 398,192 L424,192" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-cache-key-arrow-green)"/>
+<line x1="16" y1="316" x2="704" y2="316" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="336" fill="#5f5d57" font-size="12">ส้ม = ส่วนที่นับใน cache key · ค่าอื่นในคำขอ (query string, header, cookie) ไม่ถูกนับโดยค่าเริ่มต้น</text>
+<text x="16" y="354" fill="#5f5d57" font-size="12">จึงได้ cache entry เดิม (hit) · ถ้าอยากแยก ต้องเพิ่มค่าเหล่านั้นเข้า cache key ใน cache policy</text>
+
+    </svg>
+  </div>
+</body>
+</html>

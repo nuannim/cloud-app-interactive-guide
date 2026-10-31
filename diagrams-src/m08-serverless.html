@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-serverless · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-serverless-title m08-serverless-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-serverless-title">Lambda, Fargate และ Aurora Serverless ต่างกันที่ชนิดของ serverless</title>
+      <desc id="m08-serverless-desc">Lambda คือ serverless compute service รันเป็น function ตาม event, Fargate คือ serverless compute engine for containers รันเป็น container, Aurora Serverless คือ serverless database ที่ scale ตาม traffic และหยุดเมื่อไม่ใช้</desc>
+      <defs>
+        <marker id="m08-serverless-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-serverless-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<text x="16" y="40" fill="#1d1d1b" font-size="12" font-weight="600">serverless = คุณไม่ต้องจัดการ server เอง (ไม่ได้แปลว่าไม่มีเครื่อง)</text>
+<rect x="12" y="64" width="224" height="128" rx="6" fill="#f6f5f1"/>
+<rect x="12" y="64" width="224" height="128" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="124" y="96" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">AWS Lambda</text>
+<text x="124" y="114" fill="#5f5d57" font-size="12" text-anchor="middle">serverless compute service</text>
+<text x="124" y="132" fill="#1d1d1b" font-size="12" text-anchor="middle">รันเป็น function</text>
+<text x="124" y="150" fill="#1d1d1b" font-size="12" text-anchor="middle">ตาม event</text>
+<text x="124" y="168" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่ต้องจัดการ server</text>
+<rect x="248" y="64" width="224" height="128" rx="6" fill="#f6f5f1"/>
+<rect x="248" y="64" width="224" height="128" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="360" y="96" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">AWS Fargate</text>
+<text x="360" y="114" fill="#5f5d57" font-size="12" text-anchor="middle">serverless compute engine</text>
+<text x="360" y="132" fill="#5f5d57" font-size="12" text-anchor="middle">for containers</text>
+<text x="360" y="150" fill="#1d1d1b" font-size="12" text-anchor="middle">รันเป็น container</text>
+<text x="360" y="168" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่ต้องจัดการ EC2</text>
+<rect x="484" y="64" width="224" height="128" rx="6" fill="#f6f5f1"/>
+<rect x="484" y="64" width="224" height="128" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="596" y="96" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Aurora Serverless</text>
+<text x="596" y="114" fill="#5f5d57" font-size="12" text-anchor="middle">serverless database</text>
+<text x="596" y="132" fill="#1d1d1b" font-size="12" text-anchor="middle">scale ขึ้น/ลงตาม traffic</text>
+<text x="596" y="150" fill="#1d1d1b" font-size="12" text-anchor="middle">หยุดเมื่อไม่ใช้งาน</text>
+<text x="596" y="168" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่ต้องจัดการ server</text>
+<line x1="16" y1="212" x2="704" y2="212" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="232" fill="#5f5d57" font-size="12">เส้นประ = ความรู้ทั่วไป ไม่อยู่ในสไลด์ M08 · Aurora Serverless อยู่ในสไลด์ (Lab 8.2)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

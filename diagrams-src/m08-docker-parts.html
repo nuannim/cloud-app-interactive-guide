@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-docker-parts · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 332" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-docker-parts-title m08-docker-parts-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-docker-parts-title">ส่วนประกอบ 5 อย่างของ Docker</title>
+      <desc id="m08-docker-parts-desc">Dockerfile ถูก build เป็น container image ซึ่งเป็น template แบบ read-only แล้ว docker run สร้าง container ที่มี container layer แบบ read/write ด้านบน image push ไปเก็บใน container registry และ image ใน registry ใช้เป็นฐานสร้าง image อื่นได้</desc>
+      <defs>
+        <marker id="m08-docker-parts-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<path d="M335,136 V212" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-docker-parts-arrow)"/>
+<path d="M385,212 V136" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-docker-parts-arrow)"/>
+<path d="M174,104 H285" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-docker-parts-arrow)"/>
+<path d="M435,104 H546" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-docker-parts-arrow)"/>
+<path d="M621,136 V212" fill="none" stroke="#5f5d57" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m08-docker-parts-arrow)"/>
+<rect x="187.5" y="80" width="84" height="16" fill="#f6f5f1"/>
+<text x="229.5" y="92" fill="#5f5d57" font-size="12" text-anchor="middle">docker build</text>
+<rect x="452.5" y="80" width="76" height="16" fill="#f6f5f1"/>
+<text x="490.5" y="92" fill="#5f5d57" font-size="12" text-anchor="middle">docker run</text>
+<rect x="294" y="166" width="34" height="16" fill="#f6f5f1"/>
+<text x="311" y="178" fill="#5f5d57" font-size="12" text-anchor="middle">push</text>
+<text x="393" y="178" fill="#5f5d57" font-size="12">ใช้เป็นฐานสร้าง image อื่น</text>
+<rect x="24" y="72" width="150" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="24" y="72" width="150" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="99" y="99" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Dockerfile</text>
+<text x="99" y="117" fill="#5f5d57" font-size="12" text-anchor="middle">คำสั่งสร้าง image</text>
+<rect x="285" y="72" width="150" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="285" y="72" width="150" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="99" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Container image</text>
+<text x="360" y="117" fill="#5f5d57" font-size="12" text-anchor="middle">template แบบ read-only</text>
+<rect x="546" y="72" width="150" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="546" y="72" width="150" height="64" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="621" y="99" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Container</text>
+<text x="621" y="117" fill="#5f5d57" font-size="12" text-anchor="middle">instance ที่รันได้</text>
+<rect x="285" y="212" width="150" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="285" y="212" width="150" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="360" y="239" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Container registry</text>
+<text x="360" y="257" fill="#5f5d57" font-size="12" text-anchor="middle">private หรือ public</text>
+<rect x="546" y="212" width="150" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="546" y="212" width="150" height="64" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="621" y="239" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Container layer</text>
+<text x="621" y="257" fill="#5f5d57" font-size="12" text-anchor="middle">ชั้น read/write</text>
+<line x1="16" y1="300" x2="704" y2="300" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="320" fill="#5f5d57" font-size="12">ส้ม = ชั้นเดียวที่เขียนได้ (อยู่บนสุดของ container ที่รัน) ส่วนของ image เป็น read-only ทั้งหมด</text>
+
+    </svg>
+  </div>
+</body>
+</html>

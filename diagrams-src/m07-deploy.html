@@ -6,14 +6,14 @@
   <title>m07-deploy · Diagram Design</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Noto Sans Thai', 'Sarabun', 'Segoe UI', system-ui, sans-serif; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans', 'Noto Sans Thai Looped', 'Sarabun', 'Segoe UI', system-ui, sans-serif; }
     .frame { max-width: 760px; margin: 0 auto; }
     svg { width: 100%; min-width: 600px; display: block; }
   </style>
 </head>
 <body>
   <div class="frame">
-    <svg viewBox="0 0 672 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m07-deploy-title m07-deploy-desc" font-family="'Noto Sans Thai','Sarabun','Segoe UI',system-ui,sans-serif">
+    <svg viewBox="0 0 672 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m07-deploy-title m07-deploy-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
       <title id="m07-deploy-title">วิธี deploy Lambda: .zip หรือ container image</title>
       <desc id="m07-deploy-desc">Developer ส่งโค้ดขึ้น Lambda ได้สองทาง: บีบอัดเป็น .zip แล้วอัปโหลดตรงหรือพักที่ S3 ก่อน หรือ build เป็น Docker image แล้ว push ไป ECR ให้ Lambda ดึงไปรัน</desc>
       <defs>

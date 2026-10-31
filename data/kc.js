@@ -674,7 +674,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "ข้อ A กลับด้าน เพราะ query ที่ช้าและแพงคือข้อมูลที่ควร cache ที่สุด · ข้อ B ก็กลับด้าน เพราะข้อมูลที่ควร cache คือข้อมูลที่เปลี่ยนช้าแต่ถูกอ่านบ่อย · ข้อ D ใส่ cache เยอะโดยไม่ได้ดูข้อมูลก่อนจะเพิ่มความซับซ้อนและเสี่ยงได้ข้อมูลเก่า",
-   "source": "KC M09 ข้อ 1"
+   "source": "KC M09 ข้อ 1",
+   "topic": 3
   },
   {
    "id": "k-m09-02",
@@ -698,7 +699,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "ทั้งสองตัวเป็น in-memory key-value store แต่มี read replica เฉพาะ Redis · CloudFront Functions กับ Lambda@Edge เป็น code ที่รันที่ edge ไม่ใช่ที่เก็บข้อมูล",
-   "source": "KC M09 ข้อ 2"
+   "source": "KC M09 ข้อ 2",
+   "topic": 4
   },
   {
    "id": "k-m09-03",
@@ -722,7 +724,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "ElastiCache เป็น managed service AWS จึงทำ patch และตรวจสุขภาพ cluster ให้ (A, B) · ข้อ D ผิด เพราะ cache ไม่ได้ต่อกับ RDS เอง แอปเป็นตัวกลางที่คุยกับทั้งสองฝั่ง",
-   "source": "KC M09 ข้อ 3"
+   "source": "KC M09 ข้อ 3",
+   "topic": 7
   },
   {
    "id": "k-m09-04",
@@ -746,7 +749,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "ข้อ A ผิดตรง \"variable-size\" เพราะ node มีขนาดคงที่ · ข้อ C ผิด เพราะ shard เป็นคำของ Redis ส่วน Memcached กระจายข้อมูลไปตาม node · ข้อ D ผิด เพราะทุก node ใน cluster ต้องเป็น instance type เดียวกันด้วย",
-   "source": "KC M09 ข้อ 4"
+   "source": "KC M09 ข้อ 4",
+   "topic": 5
   },
   {
    "id": "k-m09-05",
@@ -770,7 +774,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "CloudFront เป็น CDN ไม่ได้ copy code ไปลง EC2 (A) · edge location กับ regional edge cache เป็นของ AWS เราสร้างหรือเลือกตั้งเองไม่ได้ (C, D) · เราสร้างแค่ distribution แล้ว CloudFront จะส่ง request ไปที่ edge ที่ใกล้ที่สุดเอง",
-   "source": "KC M09 ข้อ 5"
+   "source": "KC M09 ข้อ 5",
+   "topic": 10
   },
   {
    "id": "k-m09-06",
@@ -818,7 +823,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "24 ชั่วโมงเป็นแค่ค่า default ที่แก้ได้ (A) · ถ้าไฟล์ที่ origin ไม่เปลี่ยน origin ตอบ 304 Not Modified ไม่ต้องส่งไฟล์ซ้ำ (C) · cache policy กับ Cache-Control header ใช้ร่วมกันได้ โดย min/max TTL ใน policy เป็นกรอบ (D)",
-   "source": "KC M09 ข้อ 7"
+   "source": "KC M09 ข้อ 7",
+   "topic": 12
   },
   {
    "id": "k-m09-08",
@@ -890,7 +896,8 @@ GUIDE.registerKC("M09", {
     }
    ],
    "explain": "ข้อ B ผิด เพราะช่วงระหว่าง client กับ web server ใช้ CDN (CloudFront) ช่วยได้ · ข้อ D กลับด้าน เพราะแอปที่อ่านเยอะคือแอปที่ cache ช่วยได้มากที่สุด",
-   "source": "KC M09 ข้อ 10"
+   "source": "KC M09 ข้อ 10",
+   "topic": 2
   }
  ]
 });

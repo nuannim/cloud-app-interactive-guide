@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-traffic-split · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 556" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-traffic-split-title m08-traffic-split-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-traffic-split-title">Traffic splitting (canary testing)</title>
+      <desc id="m08-traffic-split-desc">ELB ส่ง traffic ส่วนใหญ่ไป Auto Scaling group เดิมที่รัน v1 และส่ง 15 เปอร์เซ็นต์ไป Temporary Auto Scaling group ที่รัน v2 พร้อมตรวจ health 10 นาที ตั้งค่าด้วย option_settings ของ namespace command และ trafficsplitting</desc>
+      <defs>
+        <marker id="m08-traffic-split-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-traffic-split-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-traffic-split-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-traffic-split-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-traffic-split-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="40" width="688" height="304" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="44" width="231" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="56" fill="#5f5d57" font-size="12" font-weight="600">Elastic Beanstalk environment</text>
+<rect x="36" y="168" width="80" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="36" y="168" width="80" height="56" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="76" y="200" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ELB</text>
+<rect x="232" y="64" width="300" height="112" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="240" y="68" width="150" height="16" rx="2" fill="#f6f5f1"/>
+<text x="248" y="80" fill="#5f5d57" font-size="12" font-weight="600">Auto Scaling group</text>
+<rect x="248" y="100" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="248" y="100" width="120" height="56" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="308" y="123" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">v1</text>
+<text x="308" y="141" fill="#5f5d57" font-size="12" text-anchor="middle">EC2</text>
+<rect x="392" y="100" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="392" y="100" width="120" height="56" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="452" y="123" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">v1</text>
+<text x="452" y="141" fill="#5f5d57" font-size="12" text-anchor="middle">EC2</text>
+<rect x="232" y="208" width="300" height="112" rx="8" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="0.8" stroke-dasharray="4,3"/>
+<rect x="240" y="212" width="224" height="16" rx="2" fill="#f6f5f1"/>
+<text x="248" y="224" fill="#5f5d57" font-size="12" font-weight="600">Temporary Auto Scaling group</text>
+<rect x="248" y="244" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="248" y="244" width="120" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="308" y="267" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">v2</text>
+<text x="308" y="285" fill="#5f5d57" font-size="12" text-anchor="middle">EC2</text>
+<rect x="392" y="244" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="392" y="244" width="120" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="452" y="267" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">v2</text>
+<text x="452" y="285" fill="#5f5d57" font-size="12" text-anchor="middle">EC2</text>
+<path d="M116,180 L152,180 Q160,180 160,172 L160,136 Q160,128 168,128 L248,128" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-traffic-split-arrow)"/>
+<rect x="176" y="106" width="56" height="16" fill="#f6f5f1"/>
+<text x="204" y="118" fill="#5f5d57" font-size="12" text-anchor="middle">ที่เหลือ</text>
+<path d="M116,212 L152,212 Q160,212 160,220 L160,264 Q160,272 168,272 L248,272" fill="none" stroke="#b45309" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m08-traffic-split-arrow-acc)"/>
+<rect x="182" y="250" width="44" height="16" fill="#f6f5f1"/>
+<text x="204" y="262" fill="#5f5d57" font-size="12" text-anchor="middle">15%</text>
+<rect x="560" y="236" width="128" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="560" y="236" width="128" height="64" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="624" y="263" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">Health checks</text>
+<text x="624" y="281" fill="#5f5d57" font-size="12" text-anchor="middle">10 นาที</text>
+<path d="M512,272 L560,272" fill="none" stroke="#15803d" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m08-traffic-split-arrow-green)"/>
+<rect x="16" y="368" width="688" height="140" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="32" y="392" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">option_settings:</text>
+<text x="32" y="412" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">  aws:elasticbeanstalk:command:</text>
+<text x="32" y="432" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">    DeploymentPolicy: TrafficSplitting</text>
+<text x="380" y="432" fill="#5f5d57" font-size="12">เลือกวิธี deploy แบบ traffic splitting</text>
+<text x="32" y="452" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">  aws:elasticbeanstalk:trafficsplitting:</text>
+<text x="32" y="472" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">    NewVersionPercent: "15"</text>
+<text x="380" y="472" fill="#5f5d57" font-size="12">ส่ง 15% ของ traffic ไปเวอร์ชันใหม่</text>
+<text x="32" y="492" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">    EvaluationTime: "10"</text>
+<text x="380" y="492" fill="#5f5d57" font-size="12">ตรวจ health 10 นาทีก่อนเลื่อนต่อ</text>
+<line x1="16" y1="524" x2="704" y2="524" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="544" fill="#5f5d57" font-size="12">ส้ม = เวอร์ชันใหม่ที่รับ traffic 15% · เขียว = ตรวจ health ก่อนเลื่อนต่อ · ตามสไลด์ Example of traffic splitting</text>
+
+    </svg>
+  </div>
+</body>
+</html>

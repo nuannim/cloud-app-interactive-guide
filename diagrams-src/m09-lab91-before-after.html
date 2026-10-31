@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-lab91-before-after · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 412" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-lab91-before-after-title m09-lab91-before-after-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-lab91-before-after-title">Lab 9.1: ก่อนและหลังใส่ ElastiCache</title>
+      <desc id="m09-lab91-before-after-desc">ก่อน แอป coffee supplier บน Elastic Beanstalk query Aurora Serverless ทุกครั้งทำให้หน้าแสดงช้า หลัง ใส่ ElastiCache for Memcached ไว้หน้า database แอปส่ง query ไป cache ถ้า hit ได้ response ถ้า miss จึงไปถึง database</desc>
+      <defs>
+        <marker id="m09-lab91-before-after-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-lab91-before-after-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-lab91-before-after-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-lab91-before-after-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-lab91-before-after-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="48" width="688" height="120" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="52" width="231" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="64" fill="#5f5d57" font-size="12" font-weight="600">ก่อน: query ฐานข้อมูลทุกครั้ง</text>
+<rect x="40" y="84" width="150" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="84" width="150" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="115" y="107" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Coffee supplier app</text>
+<text x="115" y="125" fill="#5f5d57" font-size="12" text-anchor="middle">บน Elastic Beanstalk</text>
+<rect x="500" y="84" width="170" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="500" y="84" width="170" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="585" y="107" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Aurora Serverless</text>
+<text x="585" y="125" fill="#5f5d57" font-size="12" text-anchor="middle">database</text>
+<path d="M190,112 L500,112" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-lab91-before-after-arrow-red)"/>
+<rect x="250" y="88" width="190" height="16" fill="#f6f5f1"/>
+<text x="345" y="100" fill="#5f5d57" font-size="12" text-anchor="middle">query ทุกครั้ง → หน้าแสดงช้า</text>
+<rect x="16" y="190" width="688" height="150" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="194" width="298" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="206" fill="#5f5d57" font-size="12" font-weight="600">หลัง: ใส่ ElastiCache ไว้หน้า database</text>
+<rect x="40" y="236" width="150" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="236" width="150" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="115" y="259" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Coffee supplier app</text>
+<text x="115" y="277" fill="#5f5d57" font-size="12" text-anchor="middle">บน Elastic Beanstalk</text>
+<rect x="310" y="236" width="150" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="310" y="236" width="150" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="385" y="259" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ElastiCache</text>
+<text x="385" y="277" fill="#5f5d57" font-size="12" text-anchor="middle">for Memcached</text>
+<rect x="540" y="236" width="150" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="540" y="236" width="150" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="615" y="259" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Aurora Serverless</text>
+<text x="615" y="277" fill="#5f5d57" font-size="12" text-anchor="middle">database</text>
+<path d="M190,254 L310,254" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-lab91-before-after-arrow-blue)"/>
+<rect x="220" y="230" width="60" height="16" fill="#f6f5f1"/>
+<text x="250" y="242" fill="#5f5d57" font-size="12" text-anchor="middle">queries</text>
+<path d="M310,274 L190,274" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-lab91-before-after-arrow-green)"/>
+<rect x="198" y="280" width="104" height="16" fill="#f6f5f1"/>
+<text x="250" y="292" fill="#5f5d57" font-size="12" text-anchor="middle">responses (hit)</text>
+<path d="M460,254 L540,254" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-lab91-before-after-arrow-red)"/>
+<rect x="480" y="230" width="40" height="16" fill="#f6f5f1"/>
+<text x="500" y="242" fill="#5f5d57" font-size="12" text-anchor="middle">miss</text>
+<line x1="16" y1="360" x2="704" y2="360" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="380" fill="#5f5d57" font-size="12">ตามสไลด์ Lab: Final product (app ↔ ElastiCache for Memcached ↔ Aurora Serverless)</text>
+<text x="16" y="398" fill="#5f5d57" font-size="12">เขียว = hit · แดง = ต้องไปถึง database · ส้ม = ElastiCache · ภาพ "ก่อน" เรียบเรียงจากสถานการณ์ใน Lab scenario</text>
+
+    </svg>
+  </div>
+</body>
+</html>

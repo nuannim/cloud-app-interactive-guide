@@ -2,112 +2,249 @@
 GUIDE.register({
   module: 'M09',
   title: 'Caching',
-  summary: 'ElastiCache (Memcached vs Redis), lazy loading vs write-through, CloudFront (cache key, TTL), Lambda@Edge vs CloudFront Functions, WAF',
+  summary: 'ทำไมต้อง cache, ElastiCache (Memcached vs Redis), lazy loading vs write-through, CDN และ CloudFront (cache key, TTL), Lambda@Edge vs CloudFront Functions, 2 แล็บ',
 
   notes: [
     {
-      heading: 'Caching คืออะไร และใช้ตรงไหนได้บ้าง',
-      body: '<p>เก็บ <strong>สำเนา</strong> ของข้อมูลไว้ใกล้ผู้ขอ ถ้าเจอใน cache (hit) ตอบทันที ถ้าไม่เจอ (miss) ค่อยไปถามต้นทาง (origin) แล้วเก็บสำเนาไว้พร้อม <strong>TTL</strong> ผลคือ latency ต่ำลงและ origin รับงานน้อยลง</p>' +
-        '<ul><li>cache ได้หลายชั้น: browser (Cache-Control header), API Gateway cache, ElastiCache (query ฐานข้อมูล / session), CloudFront (เนื้อหาเว็บ)</li>' +
-        '<li>คุ้มเมื่อ: อ่านบ่อย, query ช้า/แพง, ข้อมูลค่อนข้างนิ่ง, ยอมให้ข้อมูลเก่าได้บ้าง และคุ้มกับความซับซ้อนที่เพิ่ม</li></ul>',
-      refs: ['q-m09-elasticache-choice', 'q-m09-strategy']
+      heading: 'โจทย์คาเฟ่ และ cache อยู่ตรงไหนในแอป',
+      body: '<p class="analogy">เหมือนลูกค้าที่ต้องรอนาน เพราะพนักงานต้องเดินไปเปิดสมุดสต็อกหลังร้านทุกครั้งที่ถูกถาม</p>' +
+        '<p><strong>โจทย์ของคาเฟ่ในโมดูลนี้</strong></p>' +
+        '<ul><li>พนักงานคาเฟ่ได้ยินลูกค้าบ่นเป็นระยะว่า หน้าเว็บแสดงข้อมูลสต็อกเมล็ดกาแฟ (coffee bean inventory) ช้า</li><li>Sofía อยากลด latency</li><li>และอยากให้เว็บรองรับ HTTPS ด้วย</li></ul>' +
+        '<p><strong>cache เป็นส่วนหนึ่งของการพัฒนา cloud application</strong></p>' +
+        '<p>สไลด์ใช้ภาพสถาปัตยกรรมทั้งคาเฟ่ที่สะสมมาตั้งแต่โมดูลก่อน ๆ แล้วเพิ่มชั้น cache เข้าไป ส่วนที่อ่านออกจากภาพ</p>' +
+        '<ul><li>เว็บคาเฟ่เก็บใน S3 bucket แล้วส่งผ่าน CloudFront distribution ซึ่งมี AWS WAF ช่วยปกป้อง</li><li>ฝั่ง supplier: image อยู่ใน ECR, รันใน Docker container บน EC2 instance ที่ Elastic Beanstalk ดูแล</li><li>REST API อยู่บน API Gateway และมี Lambda function ค้นข้อมูลจาก database</li><li>ข้อมูล supplier อยู่ใน Aurora Serverless ข้อมูลสินค้าอยู่ใน DynamoDB และมี ElastiCache เพิ่มเข้ามา</li></ul>' +
+        '<p class="small muted">ภาพสไลด์นี้เป็นภาพล้วน ข้อความอ่านได้ไม่ครบ รายการข้างบนเรียบเรียงจากส่วนที่อ่านออก</p>',
+      refs: []
     },
     {
-      heading: 'ElastiCache: Memcached vs Redis',
-      body: '<p>ElastiCache คือ in-memory key-value store แบบ managed ตอบในระดับ submillisecond คั่นระหว่างแอปกับฐานข้อมูล</p>' +
-        '<ul><li><strong>Memcached</strong>: multithreading, ดูแลง่าย, scale แนวนอนง่ายด้วย Auto Discovery เหมาะเมื่อต้องการโมเดลที่ <em>ง่ายที่สุด</em></li>' +
-        '<li><strong>Redis</strong>: data type ซับซ้อน, persistence, replication (HA), automatic failover, pub/sub</li>' +
-        '<li>Redis shard (node group) มี node ได้ 1-6 ตัว (primary + replica) และ Redis cluster (replication group) คือกลุ่มของ shard ตั้งแต่ 1 ตัวขึ้นไป</li></ul>',
-      refs: ['g-m09-engine', 'l-m09-shard-nodes', 'q-m09-elasticache-choice', 'q-m09-redis-written']
+      heading: 'ทำไมต้อง cache: ปัญหาข้อมูลยุคใหม่ และ caching คืออะไร',
+      body: '<p class="analogy">เหมือนจดเบอร์ที่โทรบ่อยไว้หน้าแรกของสมุด ไม่ต้องเปิดหาทั้งเล่มทุกครั้ง</p>' +
+        '<h3>ความท้าทายของข้อมูลในแอปยุคใหม่</h3>' +
+        '<ul><li>ผู้ใช้หลายล้านคน</li><li>กระจายอยู่ทั่วโลก</li><li>request หลายล้านต่อวินาที</li><li>ต้องตอบเร็วระดับ microsecond</li><li>เข้ามาจากหลายช่องทาง: mobile, อุปกรณ์ IoT ฯลฯ</li><li>ตัวอย่างงานที่เจอแรงกดดันนี้: e-commerce, media streaming, social media, online gaming, shared economy</li></ul>' +
+        '<p>ผลคือแหล่งข้อมูลของแอป (data source) ต้องรับงานหนักมาก</p>' +
+        '<h3>Caching คืออะไร</h3>' +
+        '<ul><li>cache คือ <strong>สำเนา</strong> ของข้อมูลบางส่วนหรือทั้งหมดของต้นทาง (origin)</li><li>ถ้าข้อมูลที่ขอมีใน cache (hit) ตอบทันที</li><li>ถ้าไม่มี (miss) ถามต้นทาง แล้วเก็บสำเนาไว้</li><li>สำเนามีอายุ เรียกว่า <strong>TTL</strong> (time to live)</li><li>ผลที่ได้: latency ต่ำลง และ origin รับงานน้อยลง</li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<p><strong>ใจความหลักของส่วนนี้</strong> (ตามสไลด์ Key takeaways, L248-250)</p><ul><li>แอปยุคใหม่เรียกร้องประสิทธิภาพสูงจาก data source</li><li>caching เพิ่มประสิทธิภาพโดยตอบจาก <strong>สำเนาของข้อมูล</strong> (cache) แทนที่จะไปถามต้นทาง</li><li>cache ทำได้ <strong>ทุกชั้น</strong> ของแอป (หัวข้อถัดไป)</li></ul>',
+      refs: ['q-m09-elasticache-choice'],
+      diagrams: [
+        { title: 'Cache ทำงานอย่างไร', caption: 'ตามสไลด์ What is caching?: hit ตอบทันที, miss ไปถาม origin แล้วเก็บสำเนา พร้อม TTL', source: 'L133-140', svgId: 'm09-what-is-cache' }
+      ]
     },
     {
-      heading: 'Lazy loading vs Write-through',
-      body: '<ul><li><strong>Lazy loading</strong>: เติม cache เฉพาะตอน miss (อ่าน DB แล้วค่อยเขียนลง cache) ข้อดี: ไม่มีข้อมูลที่ไม่มีใครใช้ค้างใน cache, node ล่มไม่ร้ายแรง ข้อเสีย: miss ช้า และข้อมูลอาจเก่า (stale) เหมาะกับข้อมูลที่อ่านบ่อยแต่แก้นาน ๆ ที เช่น user profile</li>' +
-        '<li><strong>Write-through</strong>: ทุกครั้งที่เขียน DB ให้อัปเดต cache ด้วย ข้อดี: cache ไม่เก่า ข้อเสีย: เขียนช้าลง, ข้อมูลหายเมื่อ node ล่ม, มีข้อมูลที่ไม่มีใครอ่านค้าง, cache churn เหมาะกับข้อมูลที่ต้อง real-time เช่น leaderboard, ข่าวยอดนิยม</li></ul>',
+      heading: 'Cache ได้ทุกชั้นของแอป',
+      body: '<p class="analogy">เหมือนของที่ใช้บ่อยวางใกล้มือหลายจุด ในกระเป๋า บนโต๊ะ ในตู้ ไม่ต้องไปคลังกลางทุกครั้ง</p>' +
+        '<p>ข้อมูลเดินทางจากผู้ใช้ ผ่านอินเทอร์เน็ต ไปที่แอป แล้วไปถึง database ทุกจุดตามทางใส่ cache ได้</p>' +
+        '<ul><li><strong>ฝั่งผู้ใช้</strong> (single-page web application, เบราว์เซอร์)<ul><li>browser caching ด้วย HTTP cache-control header</li></ul></li><li><strong>เนื้อหาเว็บ</strong> (web content)<ul><li>web content caching</li><li>proxy และ resolver</li><li>Amazon CloudFront</li></ul></li><li><strong>ประสิทธิภาพของแอป</strong><ul><li>Amazon API Gateway cache</li><li>Amazon ElastiCache</li><li>Amazon CloudFront</li></ul></li><li><strong>ฐานข้อมูล</strong><ul><li>database query caching</li><li>web session management</li><li>Amazon ElastiCache</li></ul></li></ul>' +
+        '<p class="small muted">ตัวอักษรในภาพสไลด์นี้เพี้ยน การจับคู่ชั้นกับ service เรียบเรียงตามตำแหน่งในภาพ ถ้าต้องการให้ตรงต้นฉบับ แปะภาพสไลด์ "You can cache at all layers" มาได้</p>',
+      refs: []
+    },
+    {
+      heading: 'ควร cache ไหม: workload ที่ได้ประโยชน์ และ 4 คำถามก่อนตัดสินใจ',
+      body: '<p class="analogy">เหมือนคิดว่าจะซื้อตู้เย็นเล็กไว้ข้างเตียงดีไหม คุ้มเมื่อเปิดบ่อยและของไม่เสียเร็ว</p>' +
+        '<h3>Workload ที่ได้ประโยชน์จาก cache</h3>' +
+        '<div class="table-wrap"><table><thead><tr><th>ชนิด</th><th>ประโยชน์</th><th>ตัวอย่าง</th></tr></thead><tbody><tr><td><strong>Read-heavy</strong><br>(อ่านมากกว่าเขียน)</td><td>ลด latency<br>ปรับปรุง IOPS (input/output operations per second)</td><td>social networking<br>gaming<br>media sharing<br>question and answer (Q&A) portals</td></tr><tr><td><strong>Compute-intensive</strong><br>(ใช้การคำนวณหนัก)</td><td>จัดการ dataset ขนาดใหญ่แบบ real time</td><td>recommendation engine<br>high performance computing (HPC) simulation</td></tr></tbody></table></div>' +
+        '<p class="small muted">ข้อความในภาพสไลด์สลับตำแหน่งกัน (รายการ IOPS และ Q&A portals) การจัดกลุ่มข้างบนตามที่ AWS ใช้ในเอกสาร ElastiCache <span class="badge warn">นอก notes</span></p>' +
+        '<h3>4 คำถามก่อนตัดสินใจ cache</h3>' +
+        '<ol><li>query ที่ช้า/แพงต้องใช้สร้างข้อมูลนี้หรือเปล่า</li><li>ข้อมูลค่อนข้างนิ่ง และถูกเรียกใช้บ่อยหรือเปล่า</li><li>ข้อมูลยอมให้เก่า (stale) ได้หรือเปล่า</li><li>คุ้มกับความซับซ้อนในการพัฒนาและค่าใช้จ่ายที่เพิ่มขึ้นหรือเปล่า</li></ol>' +
+        '<div class="fig-slot" data-i="0"></div>',
+      refs: [],
+      diagrams: [
+        { title: '4 คำถามก่อนตัดสินใจ cache', caption: 'ตามสไลด์ Factors for considering whether to cache', source: 'L213-240', svgId: 'm09-should-cache' }
+      ]
+    },
+    {
+      heading: 'Amazon ElastiCache: Memcached กับ Redis',
+      body: '<p class="analogy">เหมือนจดคำตอบที่ถูกถามบ่อยไว้บนกระดานหน้าร้าน (RAM) แทนการเดินเข้าไปเปิดแฟ้มในห้องหลังร้านทุกครั้ง</p>' +
+        '<p>ElastiCache คือ <strong>in-memory</strong> data store แบบ fully managed ที่ตอบได้ระดับ <strong>submillisecond</strong></p>' +
+        '<ul><li>เป็น key-value store ที่อยู่ระหว่างแอปกับ data store ต้นทาง</li><li>ลด latency ในการเข้าถึง</li><li>เพิ่ม throughput</li><li>ลดภาระของ database และแอป</li><li>scale ได้ทั้งออก เข้า ขึ้น ลง (scale out, in, up, down) ตามความต้องการ</li><li>เข้ากันได้เต็มที่กับ open-source <strong>Redis</strong> และ <strong>Memcached</strong></li></ul>' +
+        '<h3>เลือก engine: Memcached หรือ Redis</h3>' +
+        '<div class="table-wrap"><table><thead><tr><th></th><th>ElastiCache for Memcached</th><th>ElastiCache for Redis</th></tr></thead><tbody><tr><td>จุดเด่น</td><td>multithreading<br>ดูแลง่าย (low maintenance)<br>scale แนวนอนง่ายด้วย Auto Discovery</td><td>data type ซับซ้อน<br>persistence<br>high availability (replication)<br>automatic failover<br>publish/subscribe</td></tr><tr><td>เหมาะเมื่อ</td><td>ต้องการโมเดลที่ <strong>ง่ายที่สุด</strong></td><td>ต้องการข้อมูลคงอยู่ (persistence)<br>ต้องการ data type ขั้นสูง<br>หรือต้องการฟีเจอร์อื่นในรายการข้างบน</td></tr></tbody></table></div>' +
+        '<div class="callout"><span class="callout-title">จำง่าย ๆ</span><p>ต้องการแบบง่ายที่สุด → Memcached · ต้องการฟีเจอร์เพิ่ม (persistence, replication, failover, pub/sub, data type ขั้นสูง) → Redis</p></div>' +
+        '<p class="small muted">ข้อสอบตัวอย่างของโมดูลถามเรื่องนี้ตรง ๆ ดูท้ายหน้าสรุป</p>',
+      refs: ['g-m09-engine', 'q-m09-engine-detail', 'q-m09-elasticache-choice2', 'q-m09-elasticache-choice', 'q-m09-redis-written']
+    },
+    {
+      heading: 'ศัพท์ของ ElastiCache: node, cluster, shard',
+      body: '<p class="analogy">node เหมือนล็อกเกอร์หนึ่งช่อง cluster คือตู้ล็อกเกอร์ทั้งแถว shard คือชุดช่องที่ผูกกัน (ช่องหลัก + ช่องสำรอง)</p>' +
+        '<ul><li><strong>Node</strong> = RAM ขนาดคงที่ที่ปลอดภัยและต่อเข้าเครือข่าย</li><li><strong>Cluster</strong> = กลุ่มตรรกะของ node ตั้งแต่ 1 ตัวขึ้นไป</li><li>Memcached cluster ใช้การแบ่งข้อมูล (data partitioning) ไปเก็บคนละ node</li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>ศัพท์เฉพาะของ Redis</h3>' +
+        '<ul><li><strong>Redis shard</strong> (หรือ node group) = กลุ่ม node ที่เกี่ยวข้องกัน 1–6 ตัว (primary + replica)</li><li><strong>Redis cluster</strong> (หรือ replication group) = กลุ่มของ shard ตั้งแต่ 1 ตัวขึ้นไป</li><li>cluster mode ปิด: มี shard เดียว (primary + replica)</li><li>cluster mode เปิด: มีหลาย shard (แต่ละ shard มี primary + replica ของตัวเอง)</li></ul>' +
+        '<div class="fig-slot" data-i="1"></div>',
+      refs: ['l-m09-shard-nodes', 'q-m09-redis-written'],
+      diagrams: [
+        { title: 'Memcached cluster: แบ่งข้อมูลไปหลาย node', caption: 'ตามชื่อภาพสไลด์ Memcached cluster with data partitioning (key ตัวอย่างเป็นของผู้สรุป)', source: 'L346-356', svgId: 'm09-memcached-partition' },
+        { title: 'Redis: shard และ cluster', caption: 'ตามสไลด์ ElastiCache terminology: Redis (cluster mode ปิดและเปิด)', source: 'L363-379', svgId: 'm09-redis-cluster' }
+      ]
+    },
+    {
+      heading: 'ElastiCache ทำงานในแอปอย่างไร: miss penalty และ TTL',
+      body: '<p class="analogy">พนักงานเช็กกระดานก่อน ถ้าไม่มีค่อยเข้าไปเปิดแฟ้ม แล้วจดลงกระดานเผื่อคนถัดไป</p>' +
+        '<h3>5 ขั้นของตัวอย่างในสไลด์</h3>' +
+        '<ol><li>แอปขอข้อมูลจาก cache</li><li>ถ้ามี คืนข้อมูลจาก cache</li><li>ถ้าไม่มีใน cache หรือหมดอายุ ขอข้อมูลจาก database</li><li>database คืนค่าปัจจุบัน</li><li>แอปอัปเดต cache ด้วยค่าที่ได้มา</li></ol>' +
+        '<p>ภาพในสไลด์มีกล่อง external API ด้วย (เช่น login ของบุคคลที่สาม หรือ data stream) แปลว่าใช้ cache หน้า API ภายนอกได้ในแบบเดียวกัน</p>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>Cache miss penalty และ TTL</h3>' +
+        '<ul><li>ถ้าข้อมูลไม่อยู่ใน cache หรือ TTL หมดอายุ แอปต้องไปขอจาก database แล้วเขียนกลับ cache</li><li>เวลาที่เสียเพิ่มตรงนี้เรียกว่า <strong>cache miss penalty</strong></li></ul>' +
+        '<div class="fig-slot" data-i="1"></div>' +
+        '<p><strong>ใจความหลักของส่วนนี้</strong> (ตามสไลด์ Key takeaways, L420-428)</p><ul><li>ElastiCache เป็น fully managed, <strong>in-memory</strong> data store ที่มี latency ระดับ <strong>sub-millisecond</strong></li><li>รองรับ engine in-memory caching แบบ open source 2 ตัว: <strong>Memcached</strong> และ <strong>Redis</strong></li><li><strong>node</strong> คือ RAM ขนาดคงที่ที่ปลอดภัยและต่อเครือข่าย ส่วน <strong>cluster</strong> คือกลุ่มตรรกะของ node ตั้งแต่ 1 ตัวขึ้นไป</li></ul>',
+      refs: [],
+      diagrams: [
+        { title: 'ElastiCache ทำงานในแอปอย่างไร', caption: 'ตามสไลด์ Example: ElastiCache in an application (เลข 1–5 ตามสไลด์)', source: 'L388-402', svgId: 'm09-elasticache-flow' },
+        { title: 'Cache miss penalty', caption: 'ตามสไลด์ Cache miss penalty and TTL: เทียบเส้นทาง hit กับ miss', source: 'L404-418', svgId: 'm09-miss-penalty' }
+      ]
+    },
+    {
+      heading: 'กลยุทธ์ cache: Lazy loading กับ Write-through',
+      body: '<p class="analogy">lazy loading = จดลงกระดานเมื่อมีคนถามแล้วไม่เจอ · write-through = จดกระดานทุกครั้งที่แก้แฟ้ม</p>' +
+        '<p class="small muted">ในสไลด์เรื่องนี้อยู่ส่วนที่ 5 (หลัง CloudFront) ย้ายมาไว้ต่อจาก ElastiCache เพราะเป็นวิธีใช้ cache กับ database โดยตรง</p>' +
+        '<p>มี 2 กลยุทธ์หลัก ต่างกันที่ <strong>เวลาที่ cache ถูกอัปเดต</strong></p>' +
+        '<div class="table-wrap"><table><thead><tr><th></th><th>Lazy loading</th><th>Write-through</th></tr></thead><tbody><tr><td>cache ถูกอัปเดตเมื่อ</td><td>จำเป็นเท่านั้น (ตอน cache hit หรือ miss)</td><td>ทุกครั้งที่เขียนข้อมูลลง database</td></tr><tr><td>ใช้เมื่อ</td><td>ข้อมูลอ่านบ่อยแต่เขียนนาน ๆ ที</td><td>ข้อมูลต้องอัปเดตแบบ real time</td></tr><tr><td>ตัวอย่าง</td><td>user profile</td><td>leaderboard top 100 ของเกม<br>ข่าวยอดนิยม top 10</td></tr><tr><td>ข้อดี</td><td>ไม่มีข้อมูลที่ไม่ถูกใช้ค้างใน cache<br>node ล่มไม่ร้ายแรง (non-fatal)</td><td>ไม่มีข้อมูลเก่า (stale) ใน cache</td></tr><tr><td>ข้อเสีย</td><td>cache miss penalty<br>ข้อมูลอาจเก่า (stale)</td><td>write penalty (เขียนช้าลง)<br>ข้อมูลหายเมื่อ node ล่ม<br>มีข้อมูลที่ไม่มีใครอ่านค้างใน cache<br>cache churn</td></tr></tbody></table></div>' +
+        '<div class="callout"><span class="callout-title">เลือกยังไง</span><p>อ่านบ่อยแต่แก้น้อย → Lazy loading · ต้องการข้อมูลตรงกับ database เสมอ (real time) → Write-through</p></div>' +
+        '<h3>Lazy loading</h3>' +
+        '<ol><li>แอปรับ request ขอข้อมูล แล้วเช็ก cache (hit หรือ miss)</li><li>ถ้า miss: ขอข้อมูลจาก database</li><li>อัปเดต cache ด้วยข้อมูลที่ได้</li></ol>' +
+        '<pre><code># Python\ndef get_user(user_id):\n    # Check the cache\n    record = cache.get(user_id)\n    if record is None:\n        # Run a DB query\n        record = db.query("select * from users where id = ?", user_id)\n        # Populate the cache\n        cache.set(user_id, record)\n    return record</code></pre>' +
+        '<p>อ่านโค้ด: ถาม cache ก่อน ถ้าได้ <code>None</code> (miss) ค่อย query database แล้วเก็บผลลง cache ก่อนคืนค่า</p>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>Write-through</h3>' +
+        '<ol><li>แอปรับข้อมูลที่ต้องเขียน</li><li>อัปเดต database</li><li>อัปเดต cache ตาม</li></ol>' +
+        '<pre><code># Python\ndef save_user(user_id, values):\n    # Save to DB\n    record = db.query("update users ... where id = ?", user_id, values)\n    # Push into cache\n    cache.set(user_id, record)\n    return record</code></pre>' +
+        '<p>อ่านโค้ด: เขียน database ก่อน แล้ว push ค่าที่ได้เข้า cache ทันที ทุกครั้งที่บันทึก</p>' +
+        '<div class="fig-slot" data-i="1"></div>' +
+        '<p><strong>ใจความหลักของส่วนนี้</strong> (ตามสไลด์ Key takeaways, L1123-1131)</p><ul><li>caching มี 2 กลยุทธ์หลัก: <strong>lazy loading</strong> และ <strong>write-through</strong></li><li>lazy loading อัปเดต cache <strong>เมื่อจำเป็นเท่านั้น</strong> (hit หรือ miss)</li><li>write-through อัปเดต cache <strong>ทุกครั้งที่เขียน</strong> ลง database</li><li>เลือกกลยุทธ์ที่ <strong>ตรงกับ use case</strong> ของข้อมูล</li></ul>',
       refs: ['g-m09-strategy', 'q-m09-strategy', 'q-m09-leaderboard'],
-      diagram: {
-        title: 'Lazy loading: อ่านผ่าน cache',
-        caption: 'ถ้า cache miss แอปอ่านจาก database แล้วเติมข้อมูลลง cache',
-        source: 'L1020',
-        flow: {
-          nodes: [
-            { id: 'app', label: 'Application รับ request' },
-            { id: 'cache', label: 'ElastiCache' },
-            { id: 'hit', label: 'คืนข้อมูลจาก cache' },
-            { id: 'db', label: 'Database' },
-            { id: 'update', label: 'Update cache' }
-          ],
-          edges: [
-            { from: 'app', to: 'cache', label: '1' },
-            { from: 'cache', to: 'hit', label: 'hit' },
-            { from: 'cache', to: 'db', label: 'miss' },
-            { from: 'db', to: 'update', label: '2' }
-          ]
-        }
-      }
+      diagrams: [
+        { title: 'Lazy loading', caption: 'ตามสไลด์ Lazy loading: hit ตอบเลย, miss อ่าน database แล้วเติม cache', source: 'L1013-1042', svgId: 'm09-lazy-loading' },
+        { title: 'Write-through', caption: 'ตามสไลด์ Write-through: อัปเดต database แล้วอัปเดต cache', source: 'L1072-1085', svgId: 'm09-write-through' }
+      ]
     },
     {
-      heading: 'Write-through: เขียน DB แล้วอัปเดต cache',
-      body: '<p>ลำดับของ write-through: แอปรับข้อมูลที่ต้องเขียน อัปเดต database ก่อน (ขั้น 1) แล้วอัปเดต cache ตาม (ขั้น 2) จึงไม่มีข้อมูลเก่าใน cache</p>',
-      refs: ['g-m09-strategy'],
-      diagram: {
-        title: 'Write-through: ลำดับการเขียน',
-        caption: 'ทุกครั้งที่เขียน database จะอัปเดต cache ต่อทันที',
-        source: 'L1079',
-        flow: {
-          nodes: [
-            { id: 'app', label: 'Application' },
-            { id: 'db', label: 'Database' },
-            { id: 'cache', label: 'ElastiCache' }
-          ],
-          edges: [
-            { from: 'app', to: 'db', label: '1 update DB' },
-            { from: 'db', to: 'cache', label: '2 update cache' }
-          ]
-        }
-      }
+      heading: 'Lab 9.1: เพิ่ม ElastiCache ให้เว็บคาเฟ่',
+      body: '<p><strong>สถานการณ์</strong></p>' +
+        '<ul><li>ข้อมูลสต็อกเมล็ดกาแฟของ supplier ถูกรวมเข้าเว็บคาเฟ่แล้ว แต่ลูกค้าบ่นว่าหน้าแสดงช้า</li><li>Olivia ลูกค้าที่เป็น AWS consultant แนะนำให้เพิ่ม database caching</li><li>เครื่องมือที่แนะนำคือ ElastiCache ซึ่งคล้าย Aurora Serverless ตรงที่ deploy และดูแล cache cluster ง่ายขึ้น</li></ul>' +
+        '<details><summary>งาน 8 ข้อใน Lab (กดเพื่อดู)</summary><ol><li>เตรียม development environment</li><li>ตั้งค่า subnet ให้ ElastiCache ใช้</li><li>สร้าง ElastiCache cluster</li><li>โหลด record จาก database เข้า cache</li><li>อัปเดตข้อมูล</li><li>สร้าง record ใหม่</li><li>ลบ record</li><li>อัปเดต application container</li></ol></details>' +
+        '<p>ผลลัพธ์สุดท้าย: coffee supplier application บน Elastic Beanstalk ส่ง query ไปยัง ElastiCache for Memcached และรับ response กลับ โดยมี Aurora Serverless เป็น database ด้านหลัง</p>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<p class="small muted">ใช้เวลาประมาณ 90 นาที · สไลด์ Lab debrief เป็นภาพล้วน ไม่มีข้อความให้สรุป</p>',
+      refs: [],
+      diagrams: [
+        { title: 'Lab 9.1: ก่อนและหลังใส่ ElastiCache', caption: 'ภาพ "หลัง" ตามสไลด์ Lab: Final product ภาพ "ก่อน" เรียบเรียงจากสถานการณ์ใน scenario', source: 'L451-526', svgId: 'm09-lab91-before-after' }
+      ]
     },
     {
-      heading: 'CloudFront: distribution, cache key, TTL',
-      body: '<p>CloudFront คือ CDN ที่ส่งเนื้อหาจาก edge location ใกล้ผู้ใช้ ลดปัญหาระยะทางและจำนวน hop ผู้ใช้ทั่วโลกจึงโหลดเร็วขึ้น</p>' +
-        '<ul><li>ชนิด distribution: Web content (origin = HTTP server หรือ S3), Video on demand, Live event (origin = MediaStore/MediaPackage)</li>' +
-        '<li><strong>Cache key</strong> ค่าเริ่มต้น = domain ของ distribution + URL path เท่านั้น query string/cookie/header ที่ต่างกันยังได้ cache entry เดิม ถ้าอยากแยก ต้องเพิ่มเข้า cache key ใน cache policy</li>' +
-        '<li>TTL: Minimum / Maximum / Default TTL ใน cache policy ทำงานร่วมกับ header Cache-Control และ Expires จาก origin ค่าเริ่มต้นเก็บนาน 24 ชั่วโมง ถ้าหมดอายุ CloudFront ถาม origin ถ้าไฟล์ไม่เปลี่ยนจะได้ 304 Not Modified</li></ul>',
-      refs: ['g-m09-distribution', 'l-m09-default-ttl', 'q-m09-cachekey', 'q-m09-design'],
-      diagram: {
-        title: 'CloudFront: cache หมดอายุ',
-        caption: 'ถ้ายังไม่หมดเวลา cache ส่งจาก cache ถ้าหมดจะถาม origin ว่าเวอร์ชันล่าสุดเปลี่ยนไหม',
-        source: 'L750-754',
-        flow: {
-          nodes: [
-            { id: 'viewer', label: 'Viewer request' },
-            { id: 'edge', label: 'CloudFront edge location' },
-            { id: 'cached', label: 'คืนไฟล์จาก cache' },
-            { id: 'origin', label: 'Origin' },
-            { id: 'nm', label: '304 Not Modified' },
-            { id: 'latest', label: 'คืนเวอร์ชันล่าสุด' }
-          ],
-          edges: [
-            { from: 'viewer', to: 'edge' },
-            { from: 'edge', to: 'cached', label: 'ยังไม่หมดอายุ' },
-            { from: 'edge', to: 'origin', label: 'หมดอายุ' },
-            { from: 'origin', to: 'nm', label: 'ตรงกับ origin' },
-            { from: 'origin', to: 'latest', label: 'ไม่ตรง' }
-          ]
-        }
-      }
+      heading: 'ปัญหาเสิร์ฟข้อมูลทั่วโลก และ CDN',
+      body: '<p class="analogy">เหมือนร้านสาขาใกล้บ้าน แทนการสั่งของจากโรงงานที่อยู่ไกลอีกซีกโลก</p>' +
+        '<h3>ปัญหา: network latency สูงระหว่าง origin กับผู้ใช้บางกลุ่ม</h3>' +
+        '<ul><li>ระยะทางระหว่าง origin กับผู้ใช้ยิ่งไกล ประสิทธิภาพยิ่งแย่</li><li>จำนวน hop (router ที่ผ่าน) ระหว่าง origin กับผู้ใช้ยิ่งมาก ประสิทธิภาพยิ่งแย่</li></ul>' +
+        '<h3>CDN (content delivery network)</h3>' +
+        '<ul><li>เก็บสำเนาของ resource แบบ static ไว้ที่จุดใกล้ผู้ใช้ (POP)</li><li>ส่ง dynamic content ที่เหมาะกับตำแหน่งทางภูมิศาสตร์ของผู้ใช้</li><li>ผลคือ network latency ต่ำลง</li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>',
+      refs: [],
+      diagrams: [
+        { title: 'CDN ลดระยะทางและจำนวน hop', caption: 'ตามสไลด์ Challenges of serving data globally และ What is a CDN?', source: 'L545-567', svgId: 'm09-cdn' }
+      ]
     },
     {
-      heading: 'Lambda@Edge vs CloudFront Functions',
-      body: '<ul><li><strong>CloudFront Functions</strong>: เป็นฟีเจอร์ native ของ CloudFront เขียนด้วย JavaScript เท่านั้น จับได้เฉพาะ viewer request/response เบามาก (sub-millisecond, memory 2 MB, ขนาด 10 KB) พัฒนาและทดสอบในตัว CloudFront ได้ครบ เหมาะกับงานเล็ก เช่น redirect, แก้ header</li>' +
-        '<li><strong>Lambda@Edge</strong>: ต่อยอดจาก Lambda เขียนด้วย Node.js หรือ Python จับได้ทั้ง viewer และ origin request/response รันงานซับซ้อนได้ ทรัพยากรมากกว่า (สไลด์ไม่ระบุตัวเลข) แต่สร้าง/ทดสอบทั้งหมดใน CloudFront อย่างเดียวไม่ได้</li>' +
-        '<li>AWS WAF: ใส่หน้า CloudFront หรือ REST API เพื่อกรอง traffic อันตราย (ใช้ใน lab 9.2)</li></ul>',
-      refs: ['g-m09-edge', 'l-m09-cff-memory', 'l-m09-cff-size', 'q-m09-edge']
+      heading: 'Amazon CloudFront: ทำงานอย่างไร และ distribution 3 ชนิด',
+      body: '<p class="analogy">เหมือนเครือข่ายร้านสาขาที่ตุนของยอดนิยมไว้ทุกสาขา ลูกค้าไปสาขาที่ใกล้ที่สุด</p>' +
+        '<p>CloudFront คือบริการ <strong>CDN</strong> ที่ส่งข้อมูล วิดีโอ แอปพลิเคชัน และ API ให้ลูกค้าทั่วโลกอย่างปลอดภัย ด้วย <strong>low latency</strong> และ <strong>high transfer speed</strong></p>' +
+        '<ul><li>ปรับให้เหมาะกับประสิทธิภาพและ scale</li><li>มีฟีเจอร์ security ในตัว</li><li>เชื่อมลึกกับ AWS service อื่น</li><li>ปรับแต่งได้สูง</li></ul>' +
+        '<h3>CloudFront ทำงาน 5 ขั้น</h3>' +
+        '<ol><li>ผู้ใช้ขอไฟล์</li><li>DNS ส่งไปยัง edge location ของ CloudFront ที่ดีที่สุด</li><li>CloudFront ตรวจ cache ถ้ามีไฟล์ก็คืนให้ ถ้าไม่มีก็ขอจาก origin</li><li>origin (เช่น S3 bucket หรือ HTTP server) ส่งไฟล์กลับมาที่ edge location</li><li>CloudFront ส่งไฟล์ให้ผู้ใช้ และเก็บไฟล์ลง cache</li></ol>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>Distribution 3 ชนิด</h3>' +
+        '<div class="table-wrap"><table><thead><tr><th>ชนิด</th><th>ใช้กับ</th><th>origin</th><th>เงื่อนไข</th></tr></thead><tbody><tr><td><strong>Web content</strong></td><td>ส่งเนื้อหาผ่าน HTTP/HTTPS ทั้ง static และ dynamic</td><td>HTTP server หรือ S3 bucket</td><td>—</td></tr><tr><td><strong>Video on demand</strong></td><td>วิดีโอที่ผู้ใช้ดูเมื่อไรก็ได้</td><td>HTTP server หรือ S3 bucket</td><td>ต้อง encode วิดีโอให้รองรับ streaming</td></tr><tr><td><strong>Live event</strong></td><td>ถ่ายทอดสด</td><td>AWS Elemental MediaStore หรือ AWS Elemental MediaPackage</td><td>ต้อง encode และ compress ให้เหมาะกับอุปกรณ์ที่ดู</td></tr></tbody></table></div>',
+      refs: ['g-m09-distribution', 'q-m09-web-written', 'q-m09-design'],
+      diagrams: [
+        { title: 'CloudFront ทำงาน 5 ขั้นตอน', caption: 'ตามสไลด์ How CloudFront works (เลข 1–5 ตามสไลด์)', source: 'L598-624', svgId: 'm09-cloudfront-flow' }
+      ]
     },
     {
-      heading: 'ลิมิตและตัวเลขที่ต้องจำ',
-      body: '<ul><li>Redis shard: 1-6 node</li><li>CloudFront cache duration ค่าเริ่มต้น: 24 ชั่วโมง</li><li>CloudFront Functions: memory 2 MB, ขนาด 10 KB, duration ระดับ sub-millisecond</li></ul>',
-      refs: ['l-m09-shard-nodes', 'l-m09-default-ttl', 'l-m09-cff-memory', 'l-m09-cff-size', 'l-m09-cff-duration']
+      heading: 'Cache key และ cache policy',
+      body: '<p class="analogy">เหมือนเลขที่ช่องเก็บของ ถ้าเลขตรงกันก็ได้ของชิ้นเดิม ไม่ว่าใครมาเอา</p>' +
+        '<p><strong>Cache key</strong> คือตัวระบุเฉพาะของแต่ละ object ใน cache</p>' +
+        '<ul><li>ค่าเริ่มต้นคือ <strong>domain name ของ distribution + URL path</strong> ของ object ที่ขอ</li><li>ค่าอื่นใน request (query string, header, cookie) ไม่รวมใน cache key โดยค่าเริ่มต้น</li><li>ตัวอย่างในสไลด์: key คือ <code>d111111abcdef8.cloudfront.net</code> + <code>/content/stories/example-story.html</code></li><li>Request 1 ไม่เจอ key ใน cache → <strong>cache miss</strong></li><li>Request 2 มี query string, cookie, user-agent ต่างจาก Request 1 แต่ key เหมือนกัน → <strong>cache hit</strong></li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>คุม cache key ด้วย cache policy</h3>' +
+        '<div class="table-wrap"><table><thead><tr><th>หมวดการตั้งค่า</th><th>อธิบาย</th><th>ค่าที่ตั้งได้</th></tr></thead><tbody><tr><td><strong>Policy information</strong></td><td>อธิบาย policy</td><td>ชื่อ policy (ใช้ผูก policy กับ caching behavior)<br>comment</td></tr><tr><td><strong>Time to live (TTL) settings</strong></td><td>ทำงานร่วมกับ header Cache-Control และ Expires (ถ้ามีใน response ของ origin) กำหนดว่า object อยู่ใน cache ได้นานแค่ไหนก่อนที่ CloudFront จะเช็กกับ origin</td><td>Minimum TTL<br>Maximum TTL<br>Default TTL</td></tr><tr><td><strong>Cache key settings</strong></td><td>ระบุค่าใน viewer request ที่ CloudFront ใส่ใน cache key ค่าเหล่านี้ถูกส่งไปใน request ที่ CloudFront ส่งให้ origin ด้วย (เรียก origin request)</td><td>URL query string<br>HTTP header<br>cookie<br>compression support</td></tr></tbody></table></div>',
+      refs: ['q-m09-cachekey'],
+      diagrams: [
+        { title: 'Cache key เริ่มต้นของ CloudFront', caption: 'ตามสไลด์ Understanding the cache key: ค่าเริ่มต้นนับแค่ domain + URL path', source: 'L674-691', svgId: 'm09-cache-key' }
+      ]
+    },
+    {
+      heading: 'ไฟล์ใน cache หมดอายุอย่างไร',
+      body: '<p class="analogy">เหมือนวันหมดอายุบนนมกล่อง พอหมดแล้วต้องถามร้านต้นทางว่ามีของใหม่ไหม</p>' +
+        '<ul><li>ถ้ายังไม่ถึงเวลาหมดอายุของ img4.jpg → คืนไฟล์จาก cache</li><li>ถ้าหมดอายุ → ขอเวอร์ชันล่าสุดจาก origin</li><li>ถ้าไฟล์ใน cache ตรงกับเวอร์ชันล่าสุดที่ origin → origin ตอบ <strong>304 Not Modified</strong></li><li>ถ้าไม่ตรง → ส่งเวอร์ชันล่าสุดของ img4.jpg</li><li>ระยะเวลาเริ่มต้นคือ <strong>24 ชั่วโมง</strong></li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>ปรับระยะเวลาได้ 2 ที่</h3>' +
+        '<div class="table-wrap"><table><thead><tr><th>ตั้งที่</th><th>ทำอย่างไร</th><th>ผลกับอะไร</th></tr></thead><tbody><tr><td><strong>ใน CloudFront</strong></td><td>ตั้ง Minimum TTL, Maximum TTL, Default TTL ใน cache policy</td><td>ไฟล์ที่ผูกกับ policy นั้น</td></tr><tr><td><strong>ใน response header</strong></td><td>ใส่ header <code>Cache-Control</code> หรือ <code>Expires</code></td><td>เปลี่ยนอายุของไฟล์แต่ละไฟล์<br>หรือไฟล์ทั้งหมดที่ตรงกับ path pattern</td></tr></tbody></table></div>',
+      refs: ['l-m09-default-ttl'],
+      diagrams: [
+        { title: 'ไฟล์ใน CloudFront cache หมดอายุแล้วเกิดอะไรขึ้น', caption: 'ตามสไลด์ Managing cached file expiration', source: 'L750-762', svgId: 'm09-expiry' }
+      ]
+    },
+    {
+      heading: 'ใช้ CloudFront เร่งการโอนไฟล์ Amazon S3',
+      body: '<p class="analogy">เหมือนฝากพัสดุที่ศูนย์รับของใกล้บ้านให้ขนส่งทางด่วนต่อ ได้ผลมากเมื่อบ้านอยู่ไกลคลัง</p>' +
+        '<ul><li>เปิด transfer acceleration ที่ S3 bucket</li><li>ผู้ใช้ที่อยู่ไกล bucket: มีโอกาสเร็วขึ้น เพราะใช้เส้นทางเครือข่ายที่ปรับให้เหมาะ (optimized network path)</li><li>ผู้ใช้ที่อยู่ใกล้ bucket อยู่แล้ว: เร็วขึ้นเล็กน้อย หรืออาจช้าลง</li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>',
+      refs: [],
+      diagrams: [
+        { title: 'เร่งการโอนไฟล์ S3 ด้วย CloudFront', caption: 'ตามสไลด์ Using CloudFront to accelerate Amazon S3 file transfer', source: 'L771-778', svgId: 'm09-s3-accel' }
+      ]
+    },
+    {
+      heading: 'Edge function: Lambda@Edge กับ CloudFront Functions',
+      body: '<p class="analogy">เหมือนพนักงานหน้าด่านของสาขา ที่แก้คำสั่งหรือชี้ทางให้ก่อนส่งต่อไปข้างใน</p>' +
+        '<ul><li>ใช้ edge function ปรับแต่งวิธีที่ distribution ประมวลผล request และ response</li><li>โค้ดรันใกล้ผู้ชม (viewer) เพื่อลด latency</li><li>เขียนและจัดการได้ 2 แบบ: <strong>Lambda@Edge</strong> และ <strong>CloudFront Functions</strong></li></ul>' +
+        '<div class="fig-slot" data-i="0"></div>' +
+        '<h3>Lambda@Edge</h3>' +
+        '<ol><li>นักพัฒนาผูก Lambda function ให้ทำงานตาม event ของ CloudFront distribution</li><li>Lambda replicate function ไปยัง CloudFront Regional edge location</li><li>เมื่อ event ที่ตั้งไว้เกิดขึ้น function ถูกเรียกที่ Regional edge cache</li></ol>' +
+        '<p>ตัวอย่างในสไลด์: เลือก origin ตามประเทศของผู้ชม</p>' +
+        '<pre><code>def lambda_handler(event, context):\n    request = event[\'Records\'][0][\'cf\'][\'request\']\n    viewerCountry = request[\'headers\'].get(\'cloudfront-viewer-country\')\n    if viewerCountry:\n        countryCode = viewerCountry[0][\'value\']\n        if countryCode == \'GB\' or countryCode == \'DE\' or countryCode == \'IE\':\n            domainName = \'eu.example.com\'\n            request[\'origin\'][\'custom\'][\'domainName\'] = domainName\n            request[\'headers\'][\'host\'] = [{\'key\': \'host\', \'value\': domainName}]\n    return request</code></pre>' +
+        '<p>อ่านโค้ด: ถ้าผู้ชมมาจาก GB, DE หรือ IE ให้เปลี่ยน origin และ host header ไปที่ <code>eu.example.com</code> (origin ของยุโรป) นอกนั้นส่ง request ต่อตามเดิม</p>' +
+        '<h3>CloudFront Functions</h3>' +
+        '<ol><li>นักพัฒนา publish function แล้วผูกกับ event ของ CloudFront distribution</li><li>CloudFront ดัก request และ response ที่ edge location แล้วส่งให้ function</li></ol>' +
+        '<p>ตัวอย่างในสไลด์: redirect ไปหน้า CloudFront ของ AWS (ผูกกับ event ชนิด viewer request)</p>' +
+        '<pre><code>function handler(event) {\n    // NOTE: This example function is for a viewer request event type.\n    // Choose viewer request for event type when you associate this function\n    // with a distribution.\n    var response = {\n        statusCode: 302,\n        statusDescription: \'Found\',\n        headers: {\n            \'cloudfront-functions\': { value: \'generated-by-CloudFront-Functions\' },\n            \'location\': { value: \'https://aws.amazon.com/cloudfront/\' }\n        }\n    };\n    return response;\n}</code></pre>' +
+        '<p>อ่านโค้ด: ตอบ status 302 พร้อม header <code>location</code> ทำให้ผู้ที่เปิด URL ของ distribution (<code>https://d111111abcdef8.cloudfront.net/</code>) ถูกส่งต่อไป <code>https://aws.amazon.com/cloudfront/</code></p>' +
+        '<div class="fig-slot" data-i="1"></div>' +
+        '<h3>เลือกอันไหน</h3>' +
+        '<div class="table-wrap"><table><thead><tr><th></th><th>Lambda@Edge</th><th>CloudFront Functions</th></tr></thead><tbody><tr><td>เหมาะกับ</td><td>function ซับซ้อน และ logic ของแอปเต็มรูปแบบ</td><td>function เบา รันสั้น</td></tr><tr><td>สร้างและทดสอบใน CloudFront ทั้งหมดได้ไหม</td><td>ไม่ได้</td><td>ได้</td></tr><tr><td>เป็น</td><td>ส่วนต่อยอดของ Lambda</td><td>ฟีเจอร์ native ของ CloudFront</td></tr><tr><td>ภาษา</td><td>runtime Node.js หรือ Python</td><td>JavaScript</td></tr><tr><td>event ที่จับได้</td><td>viewer request/response และ origin request/response</td><td>viewer request/response</td></tr><tr><td>ขนาด</td><td>duration, memory และขนาด function ใหญ่กว่า CloudFront Functions (สไลด์ไม่ให้ตัวเลข)</td><td>duration ระดับ sub-millisecond<br>memory 2 MB<br>ขนาด function 10 KB</td></tr></tbody></table></div>' +
+        '<div class="callout"><span class="callout-title">จำง่าย ๆ</span><p>งานเล็ก เร็ว JavaScript จับแค่ฝั่ง viewer → CloudFront Functions · งานซับซ้อน หรือต้องจับฝั่ง origin → Lambda@Edge</p></div>' +
+        '<p><strong>ใจความหลักของส่วนนี้</strong> (ตามสไลด์ Key takeaways, L952-960)</p><ul><li>CloudFront เป็น <strong>CDN</strong> ที่ส่งข้อมูลทั่วโลกด้วย <strong>low latency</strong> และ <strong>high transfer speed</strong></li><li>distribution ส่งได้ทั้ง <strong>web</strong>, <strong>video</strong> และ <strong>live streaming</strong></li><li><strong>cache key</strong> คือ <strong>ตัวระบุเฉพาะ</strong> ของแต่ละ object ใน cache</li><li>ใช้ <strong>CloudFront Functions</strong> และ <strong>Lambda@Edge</strong> ปรับแต่งวิธีที่ distribution ประมวลผล request และ response</li></ul>',
+      refs: ['g-m09-edge', 'l-m09-cff-memory', 'l-m09-cff-size', 'l-m09-cff-duration', 'q-m09-edge'],
+      diagrams: [
+        { title: 'จุดที่ edge function เกาะได้ 4 จุด', caption: 'เส้นทาง request ผ่าน 4 จุด และ function ไหนจับจุดไหน (ลำดับจุดเป็นความรู้ทั่วไป)', source: 'AWS CloudFront docs', supplement: true, svgId: 'm09-edge-events' },
+        { title: 'ขั้นตอนใช้ Lambda@Edge เทียบกับ CloudFront Functions', caption: 'ตามสไลด์ Using CloudFront with Lambda@Edge และ Using CloudFront Functions', source: 'L808-823, L867-873', svgId: 'm09-edge-deploy' }
+      ]
+    },
+    {
+      heading: 'Lab 9.2: CloudFront เพื่อ cache และปกป้องเว็บ',
+      body: '<p><strong>สถานการณ์</strong></p>' +
+        '<ul><li>เว็บคาเฟ่ยังรันบน HTTP ยังไม่รองรับ HTTPS</li><li>คาเฟ่อยากให้หน้าเว็บโหลดเร็วสำหรับผู้ใช้ทั่วโลก</li><li>Sofía ตัดสินใจส่งเว็บคาเฟ่ผ่าน <strong>content delivery network (CDN)</strong></li></ul>' +
+        '<details><summary>งาน 6 ข้อใน Lab (กดเพื่อดู)</summary><ol><li>เตรียม development environment</li><li>ตั้งค่า CloudFront distribution สำหรับเนื้อหา static ของเว็บ</li><li>ป้องกัน network access ของ CloudFront distribution ด้วย AWS WAF</li><li>ป้องกัน REST API endpoint ด้วย AWS WAF</li><li>ตั้งค่า CloudFront Function บนเว็บ</li><li>ปรับระยะเวลา cache (cache duration)</li></ol></details>' +
+        '<p>ผลลัพธ์สุดท้ายที่อ่านออกจากภาพ</p>' +
+        '<ul><li>S3 bucket เป็น origin ของ CloudFront และ edge location ถูกกำหนดโดย CloudFront distribution</li><li>object ใน cache มี metadata <code>max-age</code> ควบคุมอายุ และ refresh cache ตามที่ตั้งค่า</li><li>AWS WAF ปกป้องทั้ง CloudFront และ API Gateway REST API</li><li>ฝั่ง supplier ยังเป็น Beanstalk, Lambda, Aurora Serverless, ElastiCache for Memcached และ DynamoDB ตามเดิม</li></ul>' +
+        '<p>AWS WAF คือ web application firewall ใช้กรอง traffic อันตราย (สไลด์โมดูลนี้ไม่ได้อธิบาย WAF มีแค่ชื่อ task) <span class="badge warn">นอก notes</span></p>' +
+        '<p class="small muted">ข้อความในภาพ Lab final product อ่านได้ไม่ครบ รายการข้างบนเรียบเรียงจากส่วนที่อ่านออก · ใช้เวลาประมาณ 90 นาที · Lab debrief เป็นภาพล้วน</p>',
+      refs: []
+    },
+    {
+      heading: 'สรุปโมดูล ตัวเลขที่ต้องจำ ตัวอย่างข้อสอบ และแหล่งอ่านเพิ่ม',
+      body: '<p><strong>สไลด์สรุปโมดูล</strong> บอกว่าคุณควรทำ 5 อย่างนี้ได้</p>' +
+        '<ul><li>อธิบายได้ว่าใช้ caching เมื่อไร</li><li>อธิบาย caching ด้วย ElastiCache</li><li>อธิบาย caching ด้วย CloudFront</li><li>อธิบายและเทียบ Lambda@Edge กับ CloudFront Functions</li><li>ใช้กลยุทธ์ caching ได้</li></ul>' +
+        '<p><strong>ตัวเลขที่ต้องจำ</strong></p>' +
+        '<ul><li>Redis shard: 1–6 node</li><li>ระยะ cache เริ่มต้นของ CloudFront: 24 ชั่วโมง</li><li>CloudFront Functions: memory 2 MB, ขนาด 10 KB, duration ระดับ sub-millisecond</li></ul>' +
+        '<p><strong>ตัวอย่างข้อสอบในสไลด์</strong></p>' +
+        '<ul><li>โจทย์: ข้อใดเป็นเหตุผลที่เลือก <strong>Memcached แทน Redis</strong> สำหรับ ElastiCache</li><li>สไลด์ให้ระบุ key words ก่อนตอบ: <strong>requirement</strong>, <strong>Memcached over Redis</strong>, <strong>ElastiCache</strong></li></ul>' +
+        '<div class="table-wrap"><table><thead><tr><th>ตัวเลือก</th><th>คำตอบ</th><th>ผล</th></tr></thead><tbody><tr><td>A</td><td>ต้องการ replication ของข้อมูล</td><td>ผิด (replication เป็นฟีเจอร์ของ Redis)</td></tr><tr><td>B</td><td>ต้องการโมเดลที่ง่ายที่สุด</td><td><strong>ถูก</strong></td></tr><tr><td>C</td><td>มี data type ที่ซับซ้อน</td><td>ผิด (เป็นของ Redis)</td></tr><tr><td>D</td><td>ต้องการ in-memory cache</td><td>ผิด (ทั้งสอง engine เป็น in-memory)</td></tr></tbody></table></div>' +
+        '<p class="small muted">เหตุผลของข้อ A, C, D เป็นข้อสรุปของผู้สรุป เทียบกับตารางฟีเจอร์ของ engine สไลด์ประกาศแค่ว่าคำตอบคือ B</p>' +
+        '<p><strong>แหล่งอ่านเพิ่ม</strong> (จากสไลด์)</p>' +
+        '<ul><li>วิดีโอ: Getting Started with Caching: Turbocharging Your Application Workloads</li><li>บล็อก: Introducing CloudFront Functions – Run Your Code at the Edge with Low Latency at Any Scale</li></ul>',
+      refs: ['q-m09-engine-detail']
     }
   ],
 

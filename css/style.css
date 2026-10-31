@@ -15,7 +15,7 @@
   --bad-soft: #fde2e2;
   --mark: #fde68a;
   --radius: 10px;
-  --font: "Noto Sans Thai", "Sarabun", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font: "Google Sans", "Noto Sans Thai Looped", "Sarabun", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
@@ -269,6 +269,23 @@ th { color: var(--muted); font-weight: 600; }
 .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .notes-body h3 { margin-top: 1.1em; }
 .notes-body ul, .notes-body ol { padding-left: 1.3em; margin: 0 0 .8em; }
+.notes-body li { margin-bottom: .35em; }
+.notes-body h3 { font-size: 1.02rem; margin: 1.2em 0 .45em; }
+/* กล่องเน้น (idea / highlight) ในหน้าสรุป */
+.callout { margin: 14px 0; padding: 12px 16px; background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0; }
+.callout > :last-child { margin-bottom: 0; }
+.callout .callout-title { display: block; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+/* บรรทัดเปรียบเทียบชีวิตจริงต้นหัวข้อ: ตัวเอียงเทา ไม่มีป้าย */
+.notes-body .analogy { font-style: italic; color: var(--muted); }
+/* รายการที่ซ่อนไว้กดเปิดดู (เช่น task ของแล็บ) */
+.notes-body details { margin: .4em 0 1em; border: 1px solid var(--border); border-radius: 8px; padding: 0 14px; }
+.notes-body details > summary { cursor: pointer; font-weight: 600; padding: 9px 0; }
+.notes-body details[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: .6em; }
+.notes-body a { overflow-wrap: anywhere; }
+.notes-body pre { margin: .4em 0 1em; padding: 10px 14px; overflow-x: auto; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; font-size: .88rem; line-height: 1.5; }
+.notes-body pre code { background: none; padding: 0; font-size: inherit; }
+.notes-body .table-wrap { margin: .4em 0 1em; }
+.notes-body li > ul, .notes-body li > ol { margin: .3em 0 .2em; }
 
 .sim-status { margin-top: 10px; border-radius: 8px; padding: 10px 14px; font-size: .95rem; }
 .sim-status.ok { background: var(--ok-soft); color: var(--ok); }
@@ -279,7 +296,14 @@ th { color: var(--muted); font-weight: 600; }
 /* diagram canvas */
 .canvas-wrap { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 10px; }
 .canvas-wrap svg { display: block; width: 100%; height: auto; background: var(--surface-2); border-radius: 8px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
-.flow-wrap { overflow-x: auto; }
+.flow-wrap { overflow-x: auto; padding: 6px; }
+/* ภาพ flow แบบ static: กรอบเดียว (ไม่มีพื้นเบจซ้อนข้างใน) ตัวอักษรชัด ป้ายเป็นแคปซูล */
+.flow-wrap svg { background: none; }
+.cv-big text { font-size: 13px; }
+.cv-pill { fill: var(--surface); stroke: var(--border); stroke-width: 1; }
+.cv-badge { fill: var(--accent); }
+.cv-badge-n { fill: var(--accent-text); font-family: var(--font); font-size: 11px; font-weight: 700; text-anchor: middle; pointer-events: none; }
+.cv-label.cv-label-pill { paint-order: normal; stroke: none; }
 /* แผนภาพวาดมือ (skill diagram-design): พื้นกระดาษของตัวเอง อ่านได้ทั้งโหมดสว่าง/มืด, จอแคบเลื่อนข้างแทนการย่อจนอ่านไม่ออก */
 .svg-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: #f6f5f1; padding: 4px; }
 .svg-wrap svg { display: block; width: 100%; min-width: 600px; max-width: 720px; height: auto; margin-inline: auto; }
@@ -293,7 +317,7 @@ th { color: var(--muted); font-weight: 600; }
 .cv-node text { fill: var(--text); font-family: var(--font); font-size: 11.5px; text-anchor: middle; pointer-events: none; }
 .chip .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; flex: none; }
 .chip:has(.dot) { display: inline-flex; align-items: center; }
-.cv-edge { stroke: var(--muted); stroke-width: 2; fill: none; }
+.cv-edge { stroke: var(--muted); stroke-width: 1.6; fill: none; stroke-linejoin: round; }
 .cv-edge.sel { stroke: var(--accent); stroke-width: 3; }
 .cv-hit { stroke: transparent; stroke-width: 18; fill: none; cursor: pointer; }
 .cv-arrow { fill: var(--muted); }

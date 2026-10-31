@@ -7,21 +7,26 @@ GUIDE.register({
   notes: [
     {
       heading: 'Step Functions คืออะไร',
-      body: '<p>เป็น serverless <strong>orchestration</strong> ที่เอา Lambda และ service อื่นมาต่อเป็นลำดับงานแบบ visual workflow แทนที่จะให้แต่ละ microservice เรียกกันเอง ตัว Step Functions จะสั่งงานแต่ละขั้น ติดตามผล retry เมื่อ error และบันทึกสถานะของทุกขั้นให้</p>' +
-        '<p>รูปแบบที่ทำได้: เรียงลำดับ, ทำขนาน, เลือกงานตามข้อมูล, try-catch-finally และ retry งานที่ล้ม</p>',
+      body: '<p>เป็น serverless <strong>orchestration</strong> ที่เอา Lambda และ service อื่นมาต่อเป็นลำดับงานแบบ visual workflow</p>' +
+        '<p>แทนที่จะให้แต่ละ microservice เรียกกันเอง Step Functions จะเป็นตัวสั่งงานแต่ละขั้นแทน และทำสิ่งเหล่านี้ให้</p>' +
+        '<ul><li>ติดตามผลของแต่ละขั้น</li><li>retry เมื่อ error</li><li>บันทึกสถานะของทุกขั้น</li></ul>' +
+        '<p>รูปแบบที่ทำได้</p>' +
+        '<ul><li>เรียงลำดับ</li><li>ทำขนาน</li><li>เลือกงานตามข้อมูล</li><li>try-catch-finally</li><li>retry งานที่ล้ม</li></ul>',
       refs: ['q-m11-written-why', 'q-m11-map-parallel']
     },
     {
       heading: 'State machine และ ASL',
-      body: '<p>Workflow = <strong>state machine</strong> เขียนเป็น JSON ด้วย <strong>Amazon States Language (ASL)</strong> ประกอบด้วย state (ขั้นตอน) และ transition (เส้นเชื่อม) แต่ละรอบเริ่มจาก input แล้ว state แปลงข้อมูลส่ง output ต่อให้ state ถัดไป</p>' +
-        '<ul><li><code>StartAt</code> = state แรก (จำเป็น)</li><li>ทุก state มี <code>Type</code></li><li>ต้องมี <code>Next</code> หรือ <code>End: true</code> ยกเว้น Succeed/Fail ที่ไม่ต้องมี End</li></ul>',
+      body: '<p>Workflow คือ <strong>state machine</strong> เขียนเป็น JSON ด้วย <strong>Amazon States Language (ASL)</strong></p>' +
+        '<ul><li>state = ขั้นตอน</li><li>transition = เส้นเชื่อมระหว่าง state</li></ul>' +
+        '<p>แต่ละรอบเริ่มจาก input แล้วแต่ละ state จะแปลงข้อมูล ส่ง output ต่อให้ state ถัดไป</p>' +
+        '<ul><li><code>StartAt</code> = state แรก (จำเป็น)</li><li>ทุก state มี <code>Type</code></li><li>ต้องมี <code>Next</code> หรือ <code>End: true</code></li><li>ยกเว้น Succeed/Fail ที่ไม่ต้องมี End</li></ul>',
       diagram: {title:"Parallel: แตก branch แล้วรวม",caption:"Parallel รันหลาย branch พร้อมกัน เสร็จแล้วค่อยไป state ถัดไป (Next)",source:"L575-599",flow:{nodes:[{id:"par",label:"LookupCustomerInfo"},{id:"b1",label:"Branch: PState1"},{id:"b2",label:"Branch: PState2"},{id:"nextstate",label:"NextState"}],edges:[{from:"par",to:"b1"},{from:"par",to:"b2"},{from:"b1",to:"nextstate"},{from:"b2",to:"nextstate"}]}},
       refs: ['g-m11-state-type', 'c-m11-st-end']
     },
     {
       heading: 'State 8 ชนิด',
       body: '<ul><li><strong>Task</strong> ทำงานหนึ่งหน่วย (Lambda หรือ activity)</li><li><strong>Choice</strong> แตกกิ่งตามเงื่อนไข มี Default</li>' +
-        '<li><strong>Fail</strong> / <strong>Succeed</strong> จบแบบล้มเหลว / สำเร็จ</li><li><strong>Pass</strong> ส่ง input เป็น output ไม่ทำงานจริง (ใส่ Result ได้)</li>' +
+        '<li><strong>Fail</strong> จบแบบล้มเหลว</li><li><strong>Succeed</strong> จบแบบสำเร็จ</li><li><strong>Pass</strong> ส่ง input เป็น output ไม่ทำงานจริง (ใส่ Result ได้)</li>' +
         '<li><strong>Wait</strong> หน่วงเวลา</li><li><strong>Parallel</strong> หลาย branch ที่ต่างกันพร้อมกัน</li><li><strong>Map</strong> วนทำขั้นเดียวกันกับทุก item ใน array</li></ul>' +
         '<p>ข้อสอบตัวอย่างของสไลด์: "เปรียบเทียบคำขอกับวงเงินแล้วแยกทาง" = <strong>Choice</strong></p>',
       diagram: {title:"Choice state แตกกิ่งตามเงื่อนไข",caption:"Choice ตรวจค่าใน input ($.branch) แล้วเลือกทางตามเงื่อนไข ถ้าไม่ตรงเลยไป Default",source:"L436-446",flow:{nodes:[{id:"start",label:"StartState"},{id:"choice",label:"ChoiceState (Choice)"},{id:"yes",label:"ChoiceYes"},{id:"no",label:"ChoiceNo"},{id:"def",label:"DefaultState"},{id:"final",label:"FinalState"}],edges:[{from:"start",to:"choice"},{from:"choice",to:"yes",label:"$.branch = 1"},{from:"choice",to:"no",label:"$.branch = 2"},{from:"choice",to:"def",label:"Default"},{from:"yes",to:"final"},{from:"no",to:"final"}]}},
@@ -29,25 +34,26 @@ GUIDE.register({
     },
     {
       heading: 'Standard vs Express',
-      body: '<ul><li><strong>Standard</strong>: สูงสุด 1 ปี, exactly-once, 2,000 เริ่มรัน/วินาที, 4,000 transition/วินาที, คิดเงินต่อ state transition, รองรับ activity, รองรับ pattern ครบ</li>' +
-        '<li><strong>Express</strong>: สูงสุด 5 นาที, at-least-once (async) หรือ at-most-once (sync), 100,000 เริ่มรัน/วินาที, transition เกือบไม่จำกัด, คิดเงินตามจำนวน+ระยะเวลา request และ memory, <em>ไม่</em>รองรับ activity, pattern รองรับ "ส่วนใหญ่"</li></ul>' +
-        '<p>จำง่าย: ยาว/ตรวจสอบย้อนหลัง/ห้ามซ้ำ = Standard, ปริมาณมาก/สั้น = Express</p>',
+      body: '<ul><li><strong>Standard</strong><ul><li>ระยะเวลาสูงสุด 1 ปี</li><li>exactly-once</li><li>เริ่มรันได้ 2,000 ต่อวินาที</li><li>4,000 transition ต่อวินาที</li><li>คิดเงินต่อ state transition</li><li>รองรับ activity</li><li>รองรับ pattern ครบ</li></ul></li>' +
+        '<li><strong>Express</strong><ul><li>ระยะเวลาสูงสุด 5 นาที</li><li>at-least-once (async) หรือ at-most-once (sync)</li><li>เริ่มรันได้ 100,000 ต่อวินาที</li><li>transition เกือบไม่จำกัด</li><li>คิดเงินตามจำนวน request, ระยะเวลา และ memory</li><li><em>ไม่</em>รองรับ activity</li><li>รองรับ pattern "ส่วนใหญ่"</li></ul></li></ul>' +
+        '<p>จำง่าย</p><ul><li>งานยาว / ตรวจสอบย้อนหลัง / ห้ามซ้ำ = Standard</li><li>ปริมาณมาก / งานสั้น = Express</li></ul>',
       refs: ['g-m11-workflow-type', 'l-m11-std-duration', 'l-m11-exp-duration', 'l-m11-std-invoke', 'l-m11-exp-invoke', 'l-m11-std-transition', 'l-m11-exp-transition', 'q-m11-express-iot', 'q-m11-standard-long']
     },
     {
       heading: 'Activity, taskToken และ manual approval',
-      body: '<p>Activity ผูกโค้ดภายนอกกับ Task หนึ่งใน state machine worker อยู่บนแอปอะไรก็ได้ที่ยิง HTTP ได้ Step Functions สร้าง <strong>taskToken</strong> ให้งานที่ส่งออกไป</p>' +
-        '<ol><li>Step Functions ตั้งงาน activity รอไว้</li><li>worker เรียก <code>GetActivityTask</code> ได้ task + token</li><li>ส่งอีเมลขออนุมัติ (ตัวอย่างในสไลด์ใช้ SES และ API Gateway)</li><li>คนตอบ แล้วเรียก <code>SendTaskSuccess</code> หรือ <code>SendTaskFailure</code></li></ol>' +
-        '<p>ใน ASL ใช้ Task ที่ Resource เป็น activity ARN และกำหนด TimeoutSeconds กันรอเกินไป</p>',
+      body: '<p>Activity ผูกโค้ดภายนอกกับ Task หนึ่งใน state machine</p>' +
+        '<ul><li>worker อยู่บนแอปอะไรก็ได้ที่ยิง HTTP ได้</li><li>Step Functions สร้าง <strong>taskToken</strong> ให้งานที่ส่งออกไป</li></ul>' +
+        '<ol><li>Step Functions ตั้งงาน activity รอไว้</li><li>worker เรียก <code>GetActivityTask</code> แล้วได้ task + token</li><li>ส่งอีเมลขออนุมัติ (ตัวอย่างในสไลด์ใช้ SES และ API Gateway)</li><li>คนตอบ แล้วเรียก <code>SendTaskSuccess</code> หรือ <code>SendTaskFailure</code></li></ol>' +
+        '<p>ใน ASL ใช้ Task ที่ Resource เป็น activity ARN</p><p>กำหนด TimeoutSeconds เพื่อกันรอนานเกินไป</p>',
       diagram: {title:"Manual approval ด้วย activity",caption:"worker poll งานด้วย GetActivityTask ได้ taskToken แล้วรายงานผลกลับเมื่อคนตัดสินใจ",source:"L830-835, L905-916",flow:{nodes:[{id:"task",label:"Task state (activity)"},{id:"worker",label:"Activity worker"},{id:"human",label:"คนอนุมัติ/ปฏิเสธ"},{id:"ok",label:"SendTaskSuccess"},{id:"ko",label:"SendTaskFailure"},{id:"next",label:"State machine ไปต่อ"}],edges:[{from:"task",to:"worker",label:"GetActivityTask"},{from:"worker",to:"human",label:"taskToken"},{from:"human",to:"ok",label:"approve"},{from:"human",to:"ko",label:"reject"},{from:"ok",to:"next",label:"taskToken"},{from:"ko",to:"next",label:"taskToken"}]}},
       refs: ['q-m11-manual-approval', 'q-m11-design-approval', 'g-m11-task-resource']
     },
     {
       heading: 'API, quota และ lab',
       body: '<ul><li>เข้าถึงได้ผ่าน Console, SDK หรือ API</li><li>ตัวอย่าง operation: Create, StartExecution, StopExecution, List, Describe, GetExecutionHistory</li>' +
-        '<li>Quota แยกหมวด (ชื่อ, account, run, task, throttling) และต่างกันระหว่าง Standard/Express (สไลด์ไม่ให้ตัวเลข)</li>' +
+        '<li>Quota แยกเป็นหมวด (ชื่อ, account, run, task, throttling)</li><li>Quota ต่างกันระหว่าง Standard/Express (สไลด์ไม่ให้ตัวเลข)</li>' +
         '<li>เปิดเป็น REST ได้โดยผูกกับ method ของ API Gateway</li></ul>' +
-        '<p>Lab 11.1: API Gateway เรียก state machine → Lambda ดึงข้อมูลซัพพลายเออร์ → Lambda สร้าง HTML → เก็บบน S3 → SNS ส่งลิงก์รายงานทางอีเมล</p>',
+        '<p>Lab 11.1</p><ol><li>API Gateway เรียก state machine</li><li>Lambda ดึงข้อมูลซัพพลายเออร์</li><li>Lambda สร้าง HTML</li><li>เก็บบน S3</li><li>SNS ส่งลิงก์รายงานทางอีเมล</li></ol>',
       refs: ['g-m11-api-op', 'q-m11-design-report']
     }
   ],

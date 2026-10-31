@@ -8,8 +8,14 @@ GUIDE.register({
   notes: [
     {
       heading: 'Lambda คืออะไร',
-      body: '<p>Lambda คือ compute แบบ serverless เราส่งโค้ดขึ้นไป ไม่ต้องสร้างหรือดูแล server โค้ดจะรันเมื่อมี <strong>event</strong> เข้ามา ระบบ scale ให้เอง จ่ายเฉพาะช่วงที่รันจริง ไม่จ่ายตอนว่าง และมี log/metric ส่งเข้า CloudWatch ให้ในตัว</p>' +
-        '<p>สองรูปแบบที่สไลด์ยกเป็นตัวอย่าง: (1) เว็บบน S3 → API Gateway → Lambda → DynamoDB (2) stream แบบ real-time: Kinesis → Lambda → DynamoDB</p>',
+      body: '<p>Lambda คือ compute แบบ serverless ส่งโค้ดขึ้นไปได้เลย ไม่ต้องสร้างหรือดูแล server เอง</p>' +
+        '<ul><li>โค้ดรันเมื่อมี <strong>event</strong> เข้ามา</li>' +
+        '<li>ระบบ scale ให้เอง</li>' +
+        '<li>จ่ายเฉพาะช่วงที่รันจริง ไม่จ่ายตอนว่าง</li>' +
+        '<li>มี log/metric ส่งเข้า CloudWatch ให้ในตัว</li></ul>' +
+        '<p>สองรูปแบบที่สไลด์ยกเป็นตัวอย่าง:</p>' +
+        '<ul><li>เว็บบน S3 → API Gateway → Lambda → DynamoDB</li>' +
+        '<li>stream แบบ real-time: Kinesis → Lambda → DynamoDB</li></ul>',
       refs: ['q-m07-design', 'q-m07-design-stream', 'q-m07-written'],
       diagram: {
         title: 'เว็บ cafe แบบ dynamic',
@@ -35,10 +41,23 @@ GUIDE.register({
     {
       heading: 'Invocation 3 แบบ (ออกสอบบ่อย)',
       body: '<ul>' +
-        '<li><strong>Synchronous (push)</strong>: ผู้เรียกยืนรอคำตอบ เช่น API Gateway ไม่มี retry ในตัว ผู้เรียกต้องจัดการ error เอง</li>' +
-        '<li><strong>Asynchronous (push)</strong>: Lambda รับ event เข้าคิวแล้วตอบ ack 202 ทันที เช่น S3 retry 0–2 ครั้ง เก็บ event ที่ล้มเหลวด้วย DLQ หรือ destination ได้</li>' +
-        '<li><strong>Polling / event source mapping (pull)</strong>: Lambda เป็นฝ่ายไปดึงจาก SQS, Kinesis, DynamoDB Streams แล้วส่งเป็น batch ถ้า error ฝั่ง stream shard จะติดค้าง ฝั่ง SQS batch ถูกคืนเข้าคิว</li></ul>' +
-        '<p>คีย์เวิร์ด: "ต้องรอผล" = sync, "ไม่ต้องรอ / fire-and-forget" = async, "ดึงจากคิว/stream เป็นชุด" = polling</p>',
+        '<li><strong>Synchronous (push)</strong><ul>' +
+        '<li>ผู้เรียกยืนรอคำตอบ เช่น API Gateway</li>' +
+        '<li>ไม่มี retry ในตัว</li>' +
+        '<li>ผู้เรียกต้องจัดการ error เอง</li></ul></li>' +
+        '<li><strong>Asynchronous (push)</strong><ul>' +
+        '<li>Lambda รับ event เข้าคิว แล้วตอบ ack 202 ทันที เช่น S3</li>' +
+        '<li>retry 0–2 ครั้ง</li>' +
+        '<li>เก็บ event ที่ล้มเหลวด้วย DLQ หรือ destination ได้</li></ul></li>' +
+        '<li><strong>Polling / event source mapping (pull)</strong><ul>' +
+        '<li>Lambda เป็นฝ่ายไปดึงจาก SQS, Kinesis, DynamoDB Streams</li>' +
+        '<li>ส่งให้ function เป็น batch</li>' +
+        '<li>ถ้า error ฝั่ง stream: shard จะติดค้าง</li>' +
+        '<li>ถ้า error ฝั่ง SQS: batch ถูกคืนเข้าคิว</li></ul></li></ul>' +
+        '<p>คีย์เวิร์ดที่ใช้แยก:</p>' +
+        '<ul><li>"ต้องรอผล" = sync</li>' +
+        '<li>"ไม่ต้องรอ / fire-and-forget" = async</li>' +
+        '<li>"ดึงจากคิว/stream เป็นชุด" = polling</li></ul>',
       refs: ['g-m07-invocation', 'q-m07-async-fail', 'l-m07-async-retry', 'l-m07-async-wait'],
       diagram: {
         title: 'Async invocation: คิว, retry, DLQ',
@@ -61,26 +80,45 @@ GUIDE.register({
     },
     {
       heading: 'ลิมิตและ config ด้านประสิทธิภาพ',
-      body: '<ul><li>Memory 128–10,240 MB และ CPU เพิ่มตามสัดส่วน memory</li><li>Timeout ตั้งได้ 1 วินาที ถึง <strong>15 นาที</strong> งานที่นานกว่านี้ไม่เหมาะกับ Lambda</li>' +
-        '<li>Concurrency ค่าเริ่มต้น 1,000 ต่อ Region ต่อ account (soft limit) ตั้ง limit ราย function ได้เพื่อไม่ให้ระบบปลายทางล้น หรือจองส่วนแบ่งไว้</li>' +
-        '<li><strong>Provisioned concurrency</strong> = อุ่น environment ไว้ ลด cold start คิดเงินแยก</li>' +
-        '<li>Layer ใส่ได้ไม่เกิน 5 ต่อ function ตัวเลขขนาดที่สไลด์ให้คือ 250 MB</li></ul>',
+      body: '<ul><li><strong>Memory</strong><ul><li>128–10,240 MB</li><li>CPU เพิ่มตามสัดส่วน memory</li></ul></li>' +
+        '<li><strong>Timeout</strong><ul><li>ตั้งได้ 1 วินาที ถึง <strong>15 นาที</strong></li><li>งานที่นานกว่านี้ไม่เหมาะกับ Lambda</li></ul></li>' +
+        '<li><strong>Concurrency</strong><ul><li>ค่าเริ่มต้น 1,000 ต่อ Region ต่อ account (soft limit)</li>' +
+        '<li>ตั้ง limit ราย function ได้ เพื่อไม่ให้ระบบปลายทางล้น</li>' +
+        '<li>หรือใช้จองส่วนแบ่งไว้ให้ function นั้น</li></ul></li>' +
+        '<li><strong>Provisioned concurrency</strong><ul><li>อุ่น environment ไว้ ลด cold start</li><li>คิดเงินแยก</li></ul></li>' +
+        '<li><strong>Layer</strong><ul><li>ใส่ได้ไม่เกิน 5 ต่อ function</li><li>ตัวเลขขนาดที่สไลด์ให้คือ 250 MB</li></ul></li></ul>',
       refs: ['l-m07-timeout', 'l-m07-memory', 'l-m07-concurrency', 'l-m07-layers', 'l-m07-layer-size', 'q-m07-timeout', 'q-m07-concurrency', 'g-m07-config']
     },
     {
       heading: 'สิทธิ์ 2 ชั้น: ใครเรียกได้ vs function ทำอะไรได้',
-      body: '<ul><li><strong>Resource (function) policy</strong> = อนุญาตให้ event source (เช่น S3, SNS) เรียก function ด้วย action <code>lambda:InvokeFunction</code> เพิ่มได้ด้วย <code>aws lambda add-permission</code></li>' +
-        '<li><strong>Execution role</strong> = สิ่งที่ function ทำกับ service อื่นได้ (เขียน log, อ่าน DynamoDB) ประกอบด้วย IAM policy และ trust policy ที่ให้ lambda.amazonaws.com assume role</li></ul>' +
+      body: '<ul><li><strong>Resource (function) policy</strong><ul>' +
+        '<li>อนุญาตให้ event source (เช่น S3, SNS) เรียก function</li>' +
+        '<li>ใช้ action <code>lambda:InvokeFunction</code></li>' +
+        '<li>เพิ่มได้ด้วย <code>aws lambda add-permission</code></li></ul></li>' +
+        '<li><strong>Execution role</strong><ul>' +
+        '<li>กำหนดสิ่งที่ function ทำกับ service อื่นได้ (เช่น เขียน log, อ่าน DynamoDB)</li>' +
+        '<li>ประกอบด้วย IAM policy และ trust policy</li>' +
+        '<li>trust policy ให้ lambda.amazonaws.com assume role</li></ul></li></ul>' +
         '<p>จำง่าย ๆ: ขาเข้า = resource policy, ขาออก = execution role</p>',
       refs: ['g-m07-permission', 'c-m07-perm-s3', 'c-m07-perm-ddb']
     },
     {
       heading: 'ส่งโค้ดขึ้น Lambda (Deploy): .zip หรือ container image',
       body: '<p>เขียนโค้ดเสร็จแล้วยังรันไม่ได้ ต้อง "ส่งขึ้นระบบ" (deploy) ก่อน ซึ่งทำได้ 2 ท่า:</p>' +
-        '<ul><li><strong>.zip archive</strong>: ตอนสร้าง function เลือก <strong>runtime</strong> (เช่น Python) แล้วบีบอัดโค้ด + library ที่ใช้เป็น .zip ส่งเข้า Lambda ตรง ๆ (จาก console หรือ IDE) <em>หรือ</em> พักไฟล์ไว้ที่ <strong>Amazon S3</strong> แล้วบอก Lambda ให้ไปเอา</li>' +
-        '<li><strong>Container image</strong>: ตอน build image เลือก <strong>runtime + Linux distribution</strong> เอง build จาก Dockerfile แล้วเก็บ image ไว้ที่ <strong>Amazon ECR</strong> (registry ของ AWS) Lambda จะดึง image ไปรัน</li></ul>' +
-        '<p>ข้อสอบ Knowledge Check ข้อ 8 ถามว่า .zip ขนาด 75 MB ต้องทำอย่างไร เฉลยคือ <strong>อัปโหลดตรงได้ไม่เกิน 50 MB</strong> ถ้าใหญ่กว่านั้นให้พักที่ S3 ก่อน</p>' +
-        '<p>จำง่าย ๆ: แพ็กเล็ก ๆ ใช้ภาษาที่ AWS รองรับ → .zip · อยากใช้เครื่องมือ Docker เดิมหรือแพ็กใหญ่ → container image ส่วนภาษาที่ AWS ไม่รองรับใช้ <strong>custom runtime</strong> (มีไฟล์ <code>bootstrap</code> เป็นจุดเริ่ม) วางไว้กับโค้ดหรือใน layer ก็ได้</p>' +
+        '<ul><li><strong>.zip archive</strong><ul>' +
+        '<li>ตอนสร้าง function เลือก <strong>runtime</strong> (เช่น Python)</li>' +
+        '<li>บีบอัดโค้ด + library ที่ใช้เป็น .zip</li>' +
+        '<li>ส่งเข้า Lambda ตรง ๆ (จาก console หรือ IDE) <em>หรือ</em> พักไฟล์ไว้ที่ <strong>Amazon S3</strong> แล้วบอก Lambda ให้ไปเอา</li></ul></li>' +
+        '<li><strong>Container image</strong><ul>' +
+        '<li>ตอน build image เลือก <strong>runtime + Linux distribution</strong> เอง</li>' +
+        '<li>build จาก Dockerfile</li>' +
+        '<li>เก็บ image ไว้ที่ <strong>Amazon ECR</strong> (registry ของ AWS) แล้ว Lambda จะดึงไปรัน</li></ul></li></ul>' +
+        '<p>ข้อสอบ Knowledge Check ข้อ 8 ถามว่า .zip ขนาด 75 MB ต้องทำอย่างไร</p>' +
+        '<ul><li>เฉลยคือ <strong>อัปโหลดตรงได้ไม่เกิน 50 MB</strong></li><li>ถ้าใหญ่กว่านั้นให้พักที่ S3 ก่อน</li></ul>' +
+        '<p>จำง่าย ๆ:</p>' +
+        '<ul><li>แพ็กเล็ก ๆ ใช้ภาษาที่ AWS รองรับ → .zip</li>' +
+        '<li>อยากใช้เครื่องมือ Docker เดิมหรือแพ็กใหญ่ → container image</li>' +
+        '<li>ภาษาที่ AWS ไม่รองรับ → <strong>custom runtime</strong> (มีไฟล์ <code>bootstrap</code> เป็นจุดเริ่ม) วางไว้กับโค้ดหรือใน layer ก็ได้</li></ul>' +
         '<p class="small muted">ตัวเลขที่มี * ในแผนภาพ (.zip ไม่เกิน 250 MB หลังคลายไฟล์, container image ไม่เกิน 10 GB) ไม่ได้อยู่ในสไลด์ เป็นข้อมูลจากเอกสาร AWS (นอก notes)</p>',
       refs: ['k-m07-08'],
       diagrams: [
@@ -95,14 +133,28 @@ GUIDE.register({
     },
     {
       heading: 'Version และ Alias: สำเนาที่แก้ไม่ได้ + ป้ายที่ย้ายได้',
-      body: '<p><strong>ปัญหาที่มันแก้:</strong> โค้ดมีการแก้บ่อย แต่ลูกค้าจริงควรใช้เฉพาะตัวที่ทดสอบแล้ว และเราอยากสลับ/ย้อนกลับให้เร็ว</p>' +
-        '<ol><li><strong>$LATEST = ฉบับร่าง</strong> คือโค้ดที่กำลังเขียนอยู่ แก้ได้ตลอด (ARN ลงท้าย <code>:$LATEST</code>)</li>' +
-        '<li><strong>Publish = ถ่ายสำเนา</strong> เก็บสำเนา $LATEST ทั้งโค้ดและ config เป็น <strong>Version 1, 2, 3 …</strong> เลขเรียงต่อกัน <strong>แก้ไม่ได้อีก</strong> และมี ARN ของตัวเอง (ลงท้ายด้วยตัวเลข เช่น <code>:1</code>)</li>' +
-        '<li><strong>Alias = ป้ายชื่อที่ชี้ไปที่ version</strong> เช่น <code>PROD</code>, <code>TEST</code> ย้ายป้ายไปชี้ version อื่นได้ (ต่างจาก version ที่แก้ไม่ได้) และมี ARN ของตัวเอง ลงท้ายด้วยชื่อ เช่น <code>:PROD</code></li></ol>' +
-        '<p><strong>เปรียบเทียบกับ Git:</strong> $LATEST ≈ ไฟล์ที่กำลังแก้ ยังไม่ commit · Version ≈ commit (แก้ย้อนหลังไม่ได้ เรียงลำดับ) · Alias ≈ tag/branch ที่ย้ายไปชี้ commit อื่นได้</p>' +
-        '<p><strong>ทำไมต้องมี alias:</strong> ให้ trigger (เช่น API Gateway, S3) ชี้ที่ <code>:PROD</code> ครั้งเดียวพอ เมื่อออกเวอร์ชันใหม่ก็แค่ย้ายป้าย ไม่ต้องไปแก้ trigger และถ้าเวอร์ชันใหม่มีปัญหาก็ย้ายป้ายกลับเวอร์ชันเก่าได้ทันที</p>' +
-        '<p><strong>ดู ARN ในข้อสอบ:</strong> ลงท้ายด้วยตัวเลข = version · ลงท้ายด้วยชื่อ (เช่น PROD) = alias · ลงท้าย <code>$LATEST</code> = ฉบับร่าง (Knowledge Check ข้อ 9)</p>' +
-        '<p><strong>ตัวอย่าง:</strong> ลูกค้าจริงใช้ PROD (ชี้ Version 1) ทีมทดสอบใช้ TEST (ชี้ Version 2) พอ Version 2 ทดสอบผ่านก็ย้าย PROD ไปชี้ Version 2 (ดูภาพ 2 ขั้นด้านล่าง)</p>',
+      body: '<p><strong>ปัญหาที่มันแก้:</strong> โค้ดมีการแก้บ่อย แต่ลูกค้าจริงควรใช้เฉพาะตัวที่ทดสอบแล้ว และเราอยากสลับหรือย้อนกลับให้เร็ว</p>' +
+        '<ol><li><strong>$LATEST = ฉบับร่าง</strong><ul><li>คือโค้ดที่กำลังเขียนอยู่ แก้ได้ตลอด</li><li>ARN ลงท้าย <code>:$LATEST</code></li></ul></li>' +
+        '<li><strong>Publish = ถ่ายสำเนา</strong><ul><li>เก็บสำเนา $LATEST ทั้งโค้ดและ config เป็น <strong>Version 1, 2, 3 …</strong> เลขเรียงต่อกัน</li>' +
+        '<li><strong>แก้ไม่ได้อีก</strong></li>' +
+        '<li>มี ARN ของตัวเอง ลงท้ายด้วยตัวเลข เช่น <code>:1</code></li></ul></li>' +
+        '<li><strong>Alias = ป้ายชื่อที่ชี้ไปที่ version</strong> เช่น <code>PROD</code>, <code>TEST</code><ul><li>ย้ายป้ายไปชี้ version อื่นได้ (ต่างจาก version ที่แก้ไม่ได้)</li>' +
+        '<li>มี ARN ของตัวเอง ลงท้ายด้วยชื่อ เช่น <code>:PROD</code></li></ul></li></ol>' +
+        '<p><strong>เปรียบเทียบกับ Git:</strong></p>' +
+        '<ul><li>$LATEST ≈ ไฟล์ที่กำลังแก้ ยังไม่ commit</li>' +
+        '<li>Version ≈ commit (แก้ย้อนหลังไม่ได้ เรียงลำดับ)</li>' +
+        '<li>Alias ≈ tag/branch ที่ย้ายไปชี้ commit อื่นได้</li></ul>' +
+        '<p><strong>ทำไมต้องมี alias:</strong></p>' +
+        '<ul><li>ให้ trigger (เช่น API Gateway, S3) ชี้ที่ <code>:PROD</code> ครั้งเดียวพอ</li>' +
+        '<li>เมื่อออกเวอร์ชันใหม่ก็แค่ย้ายป้าย ไม่ต้องไปแก้ trigger</li>' +
+        '<li>ถ้าเวอร์ชันใหม่มีปัญหา ย้ายป้ายกลับเวอร์ชันเก่าได้ทันที</li></ul>' +
+        '<p><strong>ดู ARN ในข้อสอบ</strong> (Knowledge Check ข้อ 9):</p>' +
+        '<ul><li>ลงท้ายด้วยตัวเลข = version</li>' +
+        '<li>ลงท้ายด้วยชื่อ (เช่น PROD) = alias</li>' +
+        '<li>ลงท้าย <code>$LATEST</code> = ฉบับร่าง</li></ul>' +
+        '<p><strong>ตัวอย่าง</strong> (ดูภาพ 2 ขั้นด้านล่าง):</p>' +
+        '<ol><li>ลูกค้าจริงใช้ PROD (ชี้ Version 1) ทีมทดสอบใช้ TEST (ชี้ Version 2)</li>' +
+        '<li>พอ Version 2 ทดสอบผ่าน ก็ย้าย PROD ไปชี้ Version 2</li></ol>',
       refs: ['g-m07-version', 'q-m07-written-release', 'c-m07-ver-snapshot', 'c-m07-ver-alias', 'k-m07-09'],
       diagrams: [
         {
@@ -121,9 +173,12 @@ GUIDE.register({
     },
     {
       heading: 'Layer: กองไลบรารีไว้ตรงกลางให้ทุก function ใช้ร่วมกัน',
-      body: '<p>ถ้ามี function 8 ตัวใช้ไลบรารีชุดเดียวกัน (เช่น numpy, requests) แล้วยัดไลบรารีลงใน .zip ของทุกตัว ไฟล์จะใหญ่ ซ้ำซ้อน และอัปเดตทีต้อง deploy ทุกตัว</p>' +
-        '<p><strong>Layer</strong> คือการแพ็กโค้ด/ไลบรารี/ข้อมูลที่ใช้ร่วมกันไว้ที่เดียว แล้วให้ function "อ้างอิง" ไปใช้ ผลที่สไลด์ระบุ: <strong>ลดขนาด package</strong> และ <strong>deploy เร็วขึ้น</strong></p>' +
-        '<ul><li>ลิมิตตามสไลด์: ผูกได้ <strong>ไม่เกิน 5 layer</strong> ต่อ function และสไลด์เขียนตัวเลข <strong>250 MB</strong> (สไลด์ไม่ได้บอกชัดว่าเป็นต่อ layer หรือรวมทุก layer)</li>' +
+      body: '<p>ถ้ามี function 8 ตัวใช้ไลบรารีชุดเดียวกัน (เช่น numpy, requests) แล้วยัดไลบรารีลงใน .zip ของทุกตัว จะเกิดปัญหา:</p>' +
+        '<ul><li>ไฟล์ใหญ่</li><li>ซ้ำซ้อน</li><li>อัปเดตทีต้อง deploy ทุกตัว</li></ul>' +
+        '<p><strong>Layer</strong> คือการแพ็กโค้ด/ไลบรารี/ข้อมูลที่ใช้ร่วมกันไว้ที่เดียว แล้วให้ function "อ้างอิง" ไปใช้ ผลที่สไลด์ระบุ:</p>' +
+        '<ul><li><strong>ลดขนาด package</strong></li><li><strong>deploy เร็วขึ้น</strong></li></ul>' +
+        '<ul><li>ลิมิตตามสไลด์: ผูกได้ <strong>ไม่เกิน 5 layer</strong> ต่อ function</li>' +
+        '<li>สไลด์เขียนตัวเลข <strong>250 MB</strong> แต่ไม่ได้บอกชัดว่าเป็นต่อ layer หรือรวมทุก layer</li>' +
         '<li>custom runtime (ภาษาที่ไม่รองรับ) วางไว้ใน layer ได้</li></ul>' +
         '<p>จำง่าย ๆ: "ไลบรารีซ้ำกันหลาย function → ใช้ layer"</p>' +
         '<p class="small muted">ตัวเลข 1 MB / 49 MB ในแผนภาพเป็นตัวอย่างประกอบให้เห็นภาพ ไม่ใช่ค่าจากสไลด์</p>',
@@ -140,8 +195,9 @@ GUIDE.register({
     {
       heading: 'Monitoring: CloudWatch vs X-Ray',
       body: '<ul><li><strong>CloudWatch</strong>: log, metric, alarm ของ function</li>' +
-        '<li><strong>X-Ray</strong>: ตาม request ที่วิ่งผ่านหลาย service เห็น service map และจุดที่ช้า ประกอบด้วย segment และ subsegment</li>' +
-        '<li>Annotation = key-value ที่ถูก index ใช้ filter ได้ / Metadata = ข้อมูลชนิดใดก็ได้ ไม่ถูก index ใช้ค้นหาไม่ได้</li></ul>',
+        '<li><strong>X-Ray</strong><ul><li>ตาม request ที่วิ่งผ่านหลาย service</li><li>เห็น service map และจุดที่ช้า</li><li>ประกอบด้วย segment และ subsegment</li></ul></li>' +
+        '<li><strong>Annotation</strong> = key-value ที่ถูก index ใช้ filter ได้</li>' +
+        '<li><strong>Metadata</strong> = ข้อมูลชนิดใดก็ได้ ไม่ถูก index ใช้ค้นหาไม่ได้</li></ul>',
       refs: ['q-m07-xray', 'g-m07-monitor']
     }
   ],

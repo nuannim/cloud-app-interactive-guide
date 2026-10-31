@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-lazy-loading · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-lazy-loading-title m09-lazy-loading-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-lazy-loading-title">Lazy loading</title>
+      <desc id="m09-lazy-loading-desc">Application ขอข้อมูลจาก ElastiCache ถ้า hit ตอบเลย ถ้า miss อ่านจาก database แล้วเติมข้อมูลลง cache ข้อดีคือไม่มีข้อมูลที่ไม่ถูกใช้ค้างและ node ล่มไม่ร้ายแรง ข้อเสียคือ miss ช้าและข้อมูลอาจเก่า</desc>
+      <defs>
+        <marker id="m09-lazy-loading-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-lazy-loading-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-lazy-loading-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-lazy-loading-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-lazy-loading-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="120" width="112" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="120" width="112" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="72" y="143" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Application</text>
+<text x="72" y="161" fill="#5f5d57" font-size="12" text-anchor="middle">รับ request</text>
+<rect x="244" y="120" width="128" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="244" y="120" width="128" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="308" y="152" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ElastiCache</text>
+<rect x="244" y="260" width="128" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="244" y="260" width="128" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="308" y="292" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Database</text>
+<path d="M128,136 L244,136" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-lazy-loading-arrow-blue)"/>
+<rect x="140" y="112" width="92" height="16" fill="#f6f5f1"/>
+<text x="186" y="124" fill="#5f5d57" font-size="12" text-anchor="middle">1 · ขอข้อมูล</text>
+<path d="M244,164 L128,164" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-lazy-loading-arrow-green)"/>
+<rect x="144" y="170" width="84" height="16" fill="#f6f5f1"/>
+<text x="186" y="182" fill="#5f5d57" font-size="12" text-anchor="middle">hit: ตอบเลย</text>
+<path d="M284,176 L284,260" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-lazy-loading-arrow-red)"/>
+<text x="276" y="222" fill="#5f5d57" font-size="12" text-anchor="end">2 · miss → DB</text>
+<path d="M332,260 L332,176" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-lazy-loading-arrow-acc)"/>
+<text x="340" y="222" fill="#5f5d57" font-size="12">3 · เติม cache</text>
+<rect x="452" y="56" width="252" height="100" rx="6" fill="#f6f5f1"/>
+<rect x="452" y="56" width="252" height="100" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="466" y="78" fill="#1d1d1b" font-size="12" font-weight="600">ข้อดี</text>
+<text x="466" y="102" font-size="12"><tspan fill="#1d1d1b">ไม่มีข้อมูลไม่มีใครใช้ค้าง</tspan></text>
+<text x="466" y="120" font-size="12"><tspan fill="#1d1d1b">node ล่มไม่ร้ายแรง</tspan></text>
+<rect x="452" y="172" width="252" height="100" rx="6" fill="#f6f5f1"/>
+<rect x="452" y="172" width="252" height="100" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1"/>
+<text x="466" y="194" fill="#1d1d1b" font-size="12" font-weight="600">ข้อเสีย</text>
+<text x="466" y="218" font-size="12"><tspan fill="#1d1d1b">miss ช้า (cache miss penalty)</tspan></text>
+<text x="466" y="236" font-size="12"><tspan fill="#1d1d1b">ข้อมูลอาจเก่า (stale)</tspan></text>
+<line x1="16" y1="340" x2="704" y2="340" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="360" fill="#5f5d57" font-size="12">เขียว = hit/ข้อดี · แดง = miss/ข้อเสีย · ส้ม = เติม cache · เหมาะกับข้อมูลที่อ่านบ่อยแต่แก้นาน ๆ ที เช่น user profile</text>
+
+    </svg>
+  </div>
+</body>
+</html>

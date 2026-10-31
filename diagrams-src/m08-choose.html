@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-choose · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-choose-title m08-choose-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-choose-title">เลือก service สำหรับ container</title>
+      <desc id="m08-choose-desc">ถ้าทีมเพิ่งเริ่มและอยากเริ่มเร็วให้ใช้ Elastic Beanstalk ถ้าใช้ Kubernetes อยู่แล้วให้ใช้ Amazon EKS ถ้าต้องการดูแล EC2 เองให้ใช้ ECS แบบ EC2 ไม่เช่นนั้นใช้ ECS แบบ Fargate</desc>
+      <defs>
+        <marker id="m08-choose-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-choose-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="40" y="16" width="280" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="16" width="280" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="180" y="38" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">จะรัน container บน AWS ด้วยอะไรดี</text>
+<path d="M180,52 L180,72" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="40" y="72" width="280" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="72" width="280" height="56" rx="6" fill="#ffffff" stroke="#5f5d57" stroke-width="1"/>
+<text x="180" y="95" fill="#1d1d1b" font-size="12" text-anchor="middle">ทีมเพิ่งเริ่ม ไม่ค่อยมีประสบการณ์</text>
+<text x="180" y="113" fill="#5f5d57" font-size="12" text-anchor="middle">และอยากเริ่มเร็ว?</text>
+<rect x="440" y="76" width="200" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="440" y="76" width="200" height="48" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="540" y="104" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Elastic Beanstalk</text>
+<path d="M320,100 L440,100" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="364" y="76" width="32" height="16" fill="#f6f5f1"/>
+<text x="380" y="88" fill="#5f5d57" font-size="12" text-anchor="middle">ใช่</text>
+<path d="M180,128 L180,168" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="190" y="140" width="32" height="16" fill="#f6f5f1"/>
+<text x="206" y="152" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่</text>
+<rect x="40" y="168" width="280" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="168" width="280" height="56" rx="6" fill="#ffffff" stroke="#5f5d57" stroke-width="1"/>
+<text x="180" y="191" fill="#1d1d1b" font-size="12" text-anchor="middle">ใช้ Kubernetes อยู่แล้ว</text>
+<text x="180" y="209" fill="#5f5d57" font-size="12" text-anchor="middle">และอยากได้แบบ managed?</text>
+<rect x="440" y="172" width="200" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="440" y="172" width="200" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="540" y="200" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Amazon EKS</text>
+<path d="M320,196 L440,196" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="364" y="172" width="32" height="16" fill="#f6f5f1"/>
+<text x="380" y="184" fill="#5f5d57" font-size="12" text-anchor="middle">ใช่</text>
+<path d="M180,224 L180,264" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="190" y="236" width="32" height="16" fill="#f6f5f1"/>
+<text x="206" y="248" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่</text>
+<rect x="40" y="264" width="280" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="264" width="280" height="56" rx="6" fill="#ffffff" stroke="#5f5d57" stroke-width="1"/>
+<text x="180" y="287" fill="#1d1d1b" font-size="12" text-anchor="middle">ต้องการดูแล EC2 เอง?</text>
+<text x="180" y="305" fill="#5f5d57" font-size="12" text-anchor="middle">(โหลดคาดการณ์ได้ / ประหยัด / compliance)</text>
+<rect x="440" y="268" width="200" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="440" y="268" width="200" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="540" y="296" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ECS + EC2 launch type</text>
+<path d="M320,292 L440,292" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="364" y="268" width="32" height="16" fill="#f6f5f1"/>
+<text x="380" y="280" fill="#5f5d57" font-size="12" text-anchor="middle">ใช่</text>
+<path d="M180,320 L180,360" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-choose-arrow)"/>
+<rect x="190" y="332" width="32" height="16" fill="#f6f5f1"/>
+<text x="206" y="344" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่</text>
+<rect x="40" y="360" width="280" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="40" y="360" width="280" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="180" y="388" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ECS + Fargate launch type</text>
+<line x1="16" y1="428" x2="704" y2="428" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="448" fill="#5f5d57" font-size="12">ผังนี้เป็นข้อสรุปของผู้สรุปจากสไลด์ (ข้อสอบตัวอย่าง, Fargate/EC2, EKS) ไม่ใช่ผังในสไลด์</text>
+
+    </svg>
+  </div>
+</body>
+</html>

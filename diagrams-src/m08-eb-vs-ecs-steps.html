@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-eb-vs-ecs-steps · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 622" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-eb-vs-ecs-steps-title m08-eb-vs-ecs-steps-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-eb-vs-ecs-steps-title">เริ่มใช้ ECS เทียบกับ Elastic Beanstalk</title>
+      <desc id="m08-eb-vs-ecs-steps-desc">ECS ต้องสร้าง task definition, สร้างและตั้งค่า cluster ซึ่งมี EC2, VPC และ IAM role แล้วสร้าง service เองรวมห้าอย่าง ส่วน Elastic Beanstalk ต้องเขียน Dockerrun.aws.json กับ zip โค้ด เลือก platform แล้ว launch รวมสามอย่าง และ Beanstalk ตั้ง EC2, Auto Scaling, load balancer และ monitoring ให้</desc>
+      <defs>
+        <marker id="m08-eb-vs-ecs-steps-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-eb-vs-ecs-steps-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-eb-vs-ecs-steps-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-eb-vs-ecs-steps-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-eb-vs-ecs-steps-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="40" width="336" height="340" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="44" width="179" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="56" fill="#5f5d57" font-size="12" font-weight="600">เริ่มด้วย ECS (3 ขั้น)</text>
+<rect x="368" y="40" width="336" height="340" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="376" y="44" width="283" height="16" rx="2" fill="#f6f5f1"/>
+<text x="384" y="56" fill="#5f5d57" font-size="12" font-weight="600">เริ่มด้วย Elastic Beanstalk (3 ขั้น)</text>
+<rect x="28" y="68" width="312" height="64" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="36" y="72" width="201" height="16" rx="2" fill="#f6f5f1"/>
+<text x="44" y="84" fill="#5f5d57" font-size="12" font-weight="600">1 · สร้าง task definition</text>
+<rect x="44" y="96" width="128" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="44" y="96" width="128" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="108" y="114" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">Task definition</text>
+<path d="M184,132 L184,152" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-vs-ecs-steps-arrow)"/>
+<rect x="28" y="152" width="312" height="100" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="36" y="156" width="216" height="16" rx="2" fill="#f6f5f1"/>
+<text x="44" y="168" fill="#5f5d57" font-size="12" font-weight="600">2 · สร้างและตั้งค่า cluster</text>
+<rect x="44" y="180" width="88" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="44" y="180" width="88" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="88" y="198" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">EC2 instances</text>
+<rect x="140" y="180" width="88" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="140" y="180" width="88" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="184" y="198" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">VPC settings</text>
+<rect x="236" y="180" width="88" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="236" y="180" width="88" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="280" y="198" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">IAM role</text>
+<text x="184" y="236" fill="#5f5d57" font-size="12" text-anchor="middle">= cluster พร้อมรัน task</text>
+<path d="M184,252 L184,272" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-vs-ecs-steps-arrow)"/>
+<rect x="28" y="272" width="312" height="88" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="36" y="276" width="142" height="16" rx="2" fill="#f6f5f1"/>
+<text x="44" y="288" fill="#5f5d57" font-size="12" font-weight="600">3 · สร้าง service</text>
+<rect x="44" y="300" width="96" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="44" y="300" width="96" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="92" y="318" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">Service</text>
+<path d="M140,314 L176,314" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-vs-ecs-steps-arrow)"/>
+<rect x="176" y="300" width="96" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="176" y="300" width="96" height="28" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="224" y="318" fill="#1d1d1b" font-size="12" text-anchor="middle">Task × N</text>
+<text x="44" y="348" fill="#5f5d57" font-size="12">รันและดูแลจำนวน task ตามที่กำหนด</text>
+<rect x="28" y="392" width="312" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="28" y="392" width="312" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="184" y="409" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">ตั้งเอง 5 อย่าง</text>
+<text x="184" y="427" fill="#5f5d57" font-size="12" text-anchor="middle">task definition · EC2 · VPC · IAM role · service</text>
+<rect x="28" y="444" width="312" height="32" rx="6" fill="#f6f5f1"/>
+<rect x="28" y="444" width="312" height="32" rx="6" fill="rgba(29,29,27,0.03)" stroke="rgba(29,29,27,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="184" y="464" fill="#5f5d57" font-size="12" text-anchor="middle">ทุกชั้นเป็นหน้าที่ของคุณ</text>
+<rect x="380" y="68" width="312" height="64" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="388" y="72" width="238" height="16" rx="2" fill="#f6f5f1"/>
+<text x="396" y="84" fill="#5f5d57" font-size="12" font-weight="600">1 · เขียน Dockerrun + zip โค้ด</text>
+<rect x="396" y="96" width="140" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="396" y="96" width="140" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="466" y="114" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">Dockerrun.aws.json</text>
+<rect x="544" y="96" width="100" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="544" y="96" width="100" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="594" y="114" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">โค้ด .zip</text>
+<path d="M536,132 L536,152" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-vs-ecs-steps-arrow)"/>
+<rect x="380" y="152" width="312" height="64" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="388" y="156" width="209" height="16" rx="2" fill="#f6f5f1"/>
+<text x="396" y="168" fill="#5f5d57" font-size="12" font-weight="600">2 · เลือก platform ตามภาษา</text>
+<rect x="396" y="180" width="120" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="396" y="180" width="120" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="456" y="198" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">Platform</text>
+<path d="M536,216 L536,236" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-eb-vs-ecs-steps-arrow)"/>
+<rect x="380" y="236" width="312" height="124" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="388" y="240" width="120" height="16" rx="2" fill="#f6f5f1"/>
+<text x="396" y="252" fill="#5f5d57" font-size="12" font-weight="600">3 · launch แอป</text>
+<rect x="396" y="290" width="72" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="396" y="290" width="72" height="28" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="432" y="308" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">Launch</text>
+<path d="M468,304 L492,304" fill="none" stroke="#b45309" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m08-eb-vs-ecs-steps-arrow-acc)"/>
+<rect x="492" y="260" width="192" height="92" rx="8" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="0.8" stroke-dasharray="4,3"/>
+<rect x="500" y="264" width="142" height="16" rx="2" fill="#f6f5f1"/>
+<text x="508" y="276" fill="#5f5d57" font-size="12" font-weight="600">Beanstalk ตั้งให้</text>
+<rect x="500" y="286" width="88" height="24" rx="6" fill="#f6f5f1"/>
+<rect x="500" y="286" width="88" height="24" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="544" y="302" fill="#1d1d1b" font-size="12" text-anchor="middle">EC2</text>
+<rect x="592" y="286" width="88" height="24" rx="6" fill="#f6f5f1"/>
+<rect x="592" y="286" width="88" height="24" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="636" y="302" fill="#1d1d1b" font-size="12" text-anchor="middle">Auto Scaling</text>
+<rect x="500" y="316" width="88" height="24" rx="6" fill="#f6f5f1"/>
+<rect x="500" y="316" width="88" height="24" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="544" y="332" fill="#1d1d1b" font-size="12" text-anchor="middle">Load balancer</text>
+<rect x="592" y="316" width="88" height="24" rx="6" fill="#f6f5f1"/>
+<rect x="592" y="316" width="88" height="24" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="636" y="332" fill="#1d1d1b" font-size="12" text-anchor="middle">Monitoring</text>
+<rect x="380" y="392" width="312" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="380" y="392" width="312" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="536" y="409" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">ตั้งเอง 3 อย่าง</text>
+<text x="536" y="427" fill="#5f5d57" font-size="12" text-anchor="middle">Dockerrun + zip · platform · launch</text>
+<rect x="380" y="444" width="312" height="32" rx="6" fill="#f6f5f1"/>
+<rect x="380" y="444" width="312" height="32" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="536" y="464" fill="#b45309" font-size="12" text-anchor="middle">Beanstalk ตั้งให้: EC2 · Auto Scaling · LB · monitoring</text>
+<rect x="16" y="496" width="688" height="66" rx="6" fill="rgba(180,83,9,0.10)"/>
+<rect x="16" y="496" width="4" height="66" fill="#b45309"/>
+<text x="34" y="520" fill="#b45309" font-size="12" font-weight="600">ข้อแลกเปลี่ยน (ให้ผู้ใช้งานตัดสินเอง)</text>
+<text x="34" y="540" fill="#1d1d1b" font-size="12">Beanstalk เริ่มง่ายกว่า เพราะตั้งน้อยกว่า · ECS ปรับละเอียดกว่า แต่ต้องตั้งเองทุกชั้น</text>
+<line x1="16" y1="582" x2="704" y2="582" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="602" fill="#5f5d57" font-size="12">น้ำเงิน = คุณต้องตั้งเอง · ส้ม = Beanstalk ทำให้ · "ECS ปรับละเอียดกว่า" เป็นความรู้ทั่วไป ไม่อยู่ในสไลด์</text>
+
+    </svg>
+  </div>
+</body>
+</html>

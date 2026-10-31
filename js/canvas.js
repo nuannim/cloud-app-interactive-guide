@@ -2,7 +2,7 @@
   'use strict';
   var G = window.GUIDE;
   var NS = 'http://www.w3.org/2000/svg';
-  var NW = 116, NH = 84, TILE = 46; // กล่อง = ไอคอนสี (TILE) + ชื่อใต้ไอคอน แบบ architecture diagram ของ AWS
+  var NW = 116, NH = 84, TILE = 46, DEF = { NW: 116, NH: 84, TILE: 46 }; // กล่อง = ไอคอนสี (TILE) + ชื่อใต้ไอคอน แบบ architecture diagram ของ AWS
 
   /* สีตามหมวดบริการ (โทนใกล้ผังของ AWS) เลือกจากคำใน label รูปทรงในไอคอนวาดเองทั้งหมด ไม่ใช้โลโก้จริง
      ลำดับสำคัญ: ตัวที่ตรงก่อนชนะ แก้/เพิ่มหมวดได้ที่ตารางนี้ที่เดียว */
@@ -32,7 +32,7 @@
 
   var uid = 0;
   function arrowDefs(id) {
-    return s('defs', {}, s('marker', { id: id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 8, markerHeight: 8, orient: 'auto-start-reverse' },
+    return s('defs', {}, s('marker', { id: id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' },
       s('path', { d: 'M0 0L10 5L0 10z', class: 'cv-arrow' })));
   }
 
@@ -44,27 +44,28 @@
     return { x: n.x, y: tileTop - 3 };
   }
 
-  function nodeEl(n, cls) {
-    var st = G.awsStyle(n.label), tx = (NW - TILE) / 2;
+  function nodeEl(n, cls, dm) {
+    var NW = dm ? dm.NW : DEF.NW, NH = dm ? dm.NH : DEF.NH, TILE = dm ? dm.TILE : DEF.TILE, big = !!dm;
+    var st = G.awsStyle(n.label), tx = (NW - TILE) / 2, sc = TILE / 46;
     var label = n.label.length > 32 ? n.label.slice(0, 31) + '…' : n.label;
     // ชื่อยาวตัดเป็น 2 บรรทัดที่ช่องว่างใกล้กลาง และลดขนาดตัวอักษรถ้ายังยาว
-    var lines = [label], maxC = Math.floor(NW / 7.2);
+    var lines = [label], maxC = Math.floor(NW / (big ? 7.6 : 7.2));
     if (label.length > maxC) {
       var mid = label.length / 2, cut = -1;
       for (var i = 0; i < label.length; i++) if (label[i] === ' ' && (cut < 0 || Math.abs(i - mid) < Math.abs(cut - mid))) cut = i;
       if (cut > 0) lines = [label.slice(0, cut), label.slice(cut + 1)];
     }
     var longest = Math.max.apply(null, lines.map(function (l) { return l.length; }));
-    var text = s('text', { x: NW / 2, y: TILE + 18 });
-    if (longest > maxC) text.setAttribute('style', 'font-size:10.5px');
+    var text = s('text', { x: NW / 2, y: TILE + (big ? 22 : 18) });
+    if (longest > maxC) text.setAttribute('style', big ? 'font-size:12px' : 'font-size:10.5px');
     lines.forEach(function (ln, k) {
-      var span = s('tspan', { x: NW / 2, dy: k ? 13 : 0 });
+      var span = s('tspan', { x: NW / 2, dy: k ? (big ? 15 : 13) : 0 });
       span.textContent = ln;
       text.appendChild(span);
     });
-    var glyph = s('g', { transform: 'translate(' + (tx + (TILE - 24) / 2) + ',' + (4 + (TILE - 24) / 2) + ')', fill: 'none', stroke: '#fff', 'stroke-width': 1.9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    var glyph = s('g', { transform: 'translate(' + (tx + (TILE - 24 * sc) / 2) + ',' + (4 + (TILE - 24 * sc) / 2) + ') scale(' + sc + ')', fill: 'none', stroke: '#fff', 'stroke-width': 1.9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
     st.paths.forEach(function (d) { glyph.appendChild(s('path', { d: d })); });
-    return s('g', { class: 'cv-node' + (cls ? ' ' + cls : ''), 'data-id': n.id, transform: 'translate(' + (n.x - NW / 2) + ',' + (n.y - NH / 2) + ')' },
+    return s('g', { class: 'cv-node' + (big ? ' cv-big' : '') + (cls ? ' ' + cls : ''), 'data-id': n.id, transform: 'translate(' + (n.x - NW / 2) + ',' + (n.y - NH / 2) + ')' },
       s('rect', { class: 'cv-area', width: NW, height: NH, rx: 8 }),
       s('rect', { class: 'cv-tile', x: tx, y: 4, width: TILE, height: TILE, rx: 9, fill: st.color }),
       glyph, text);
@@ -92,6 +93,65 @@
     return { els: els, d: d };
   }
 
+  /* ---- แผนภาพ flow แบบวาดอัตโนมัติ (static): เส้นมุมฉากโค้งมน + ป้ายแคปซูล + ไอคอนใหญ่ ----
+     พื้นที่วาดโต้ตอบ (createCanvas) ใช้ขนาดและเส้นตรงแบบเดิม ไม่ผ่านโค้ดส่วนนี้ */
+  function estW(str) { // ความกว้างโดยประมาณของข้อความ 12px (ไทยแคบกว่า latin)
+    var w = 0;
+    for (var i = 0; i < str.length; i++) { var c = str.charCodeAt(i); w += c === 32 ? 3.6 : (c >= 0x0E00 && c <= 0x0E7F) ? 5.6 : 6.7; }
+    return w;
+  }
+  function roundedPath(pts, r) {
+    var d = 'M' + pts[0][0] + ',' + pts[0][1];
+    for (var i = 1; i < pts.length - 1; i++) {
+      var p = pts[i - 1], c = pts[i], n = pts[i + 1];
+      var l1 = Math.abs(c[0] - p[0]) + Math.abs(c[1] - p[1]), l2 = Math.abs(n[0] - c[0]) + Math.abs(n[1] - c[1]);
+      var rr = Math.min(r, l1 / 2, l2 / 2);
+      d += ' L' + (c[0] - Math.sign(c[0] - p[0]) * rr) + ',' + (c[1] - Math.sign(c[1] - p[1]) * rr) +
+        ' Q' + c[0] + ',' + c[1] + ' ' + (c[0] + Math.sign(n[0] - c[0]) * rr) + ',' + (c[1] + Math.sign(n[1] - c[1]) * rr);
+    }
+    var last = pts[pts.length - 1];
+    return d + ' L' + last[0] + ',' + last[1];
+  }
+  // เส้น + ป้ายแคปซูลกลางช่วงที่ยาวที่สุด (ป้ายขึ้นต้นด้วยเลขลำดับ → วงกลมเลขขั้น)
+  function flowEdge(pts, label, marker, vertical, box) {
+    var clean = [pts[0]];
+    pts.slice(1).forEach(function (p) { var q = clean[clean.length - 1]; if (p[0] !== q[0] || p[1] !== q[1]) clean.push(p); });
+    var g = s('g', {}, s('path', { d: roundedPath(clean, 8), class: 'cv-edge', 'marker-end': 'url(#' + marker + ')' }));
+    if (label) {
+      var m = /^(\d+)\s+(.+)$/.exec(label), num = m ? m[1] : null, txt = m ? m[2] : label;
+      var tw = estW(txt), bw = num ? 22 : 0, pw = tw + 18 + bw;
+      var inBox = function (i) { // แคปซูลที่กึ่งกลางช่วงเส้น i ไม่ล้นกรอบภาพ
+        var mx = (clean[i][0] + clean[i + 1][0]) / 2, my = (clean[i][1] + clean[i + 1][1]) / 2;
+        return mx - pw / 2 >= 2 && mx + pw / 2 <= box[0] - 2 && my - 11 >= 2 && my + 11 <= box[1] - 2;
+      };
+      var best = -1, bi = 0, bestAny = -1, ai = 0;
+      for (var i = 0; i < clean.length - 1; i++) {
+        var horiz = clean[i + 1][1] === clean[i][1];
+        var len = Math.abs(clean[i + 1][0] - clean[i][0]) + Math.abs(clean[i + 1][1] - clean[i][1]);
+        if (len >= bestAny) { bestAny = len; ai = i; }
+        if (inBox(i) && len >= (horiz ? pw + 20 : 30) && len >= best) { best = len; bi = i; }
+      }
+      if (vertical) { // แนวตั้ง: วางป้ายบนช่วงเส้นตั้งสุดท้าย (เหนือกล่องปลายทาง ตำแหน่งไม่ซ้อนกัน) ถ้ายาวพอ
+        for (var j = clean.length - 2; j >= 0; j--) {
+          if (clean[j + 1][0] === clean[j][0] && Math.abs(clean[j + 1][1] - clean[j][1]) >= 26 && inBox(j)) { best = 1; bi = j; break; }
+        }
+      }
+      if (best < 0) bi = ai;
+      var cx = (clean[bi][0] + clean[bi + 1][0]) / 2, cy = (clean[bi][1] + clean[bi + 1][1]) / 2, x0 = cx - pw / 2;
+      g.appendChild(s('rect', { class: 'cv-pill', x: x0, y: cy - 11, width: pw, height: 22, rx: 11 }));
+      if (num) {
+        g.appendChild(s('circle', { class: 'cv-badge', cx: x0 + 14, cy: cy, r: 8 }));
+        var nt = s('text', { class: 'cv-badge-n', x: x0 + 14, y: cy + 4 });
+        nt.textContent = num;
+        g.appendChild(nt);
+      }
+      var t = s('text', { class: 'cv-label cv-label-pill', x: x0 + bw + 9 + tw / 2, y: cy + 4 });
+      t.textContent = txt;
+      g.appendChild(t);
+    }
+    return g;
+  }
+
   /* Static, auto-laid-out rendering of a reference flow ({nodes, edges}). */
   G.renderFlow = function (flow, opts) {
     var nodes = flow.nodes, edges = flow.edges || [];
@@ -108,47 +168,101 @@
     nodes.forEach(function (n) { (cols[layer[n.id]] = cols[layer[n.id]] || []).push(n); });
     var colKeys = Object.keys(cols).map(Number).sort(function (a, b) { return a - b; });
     var maxRows = Math.max.apply(null, colKeys.map(function (k) { return cols[k].length; }));
-    // จอแคบ: วางแนวตั้ง (ขั้นตอนไหลจากบนลงล่าง) เพื่อให้ตัวอักษรอ่านออกโดยไม่ต้องเลื่อนข้าง
-    // และเมื่อแนวนอนใส่กรอบไม่พอดี (ย่อแล้วเล็กกว่า 80%) ก็วางแนวตั้งเช่นกัน
+    // จอแคบ: วางแนวตั้ง (ขั้นตอนไหลจากบนลงล่าง) และเมื่อแนวนอนใส่กรอบไม่พอดี (ย่อแล้วเล็กกว่า 90%) ก็วางแนวตั้งเช่นกัน
     var hostEl = document.querySelector('.rm-main') || document.getElementById('app') || document.body;
-    // พื้นที่ใช้ได้จริง = ความกว้างหน้า ลบ padding ของหน้า การ์ด กรอบแผนภาพ และกล่องเฉลย (~120px)
-    var avail = (hostEl.clientWidth || window.innerWidth) - 120;
-    var wideW = colKeys.length * (NW + 80) + 20;
-    var vertical = opts && opts.vertical != null ? opts.vertical : (window.innerWidth < 600 || wideW * 0.8 > avail);
-    var W, H, pos = {}, prevNW = NW;
-    if (vertical && maxRows >= 3) NW = 104; // ชั้นละ 3 กล่อง: ใช้กล่องแคบลงให้ย่อน้อยกว่า
+    var avail = (hostEl.clientWidth || window.innerWidth) - 120; // ความกว้างหน้า ลบ padding หน้า การ์ด กรอบแผนภาพ และกล่องเฉลย
+    var d = { NW: 112, NH: 102, TILE: 56 };
+    var wideW = colKeys.length * (d.NW + 76) + 20;
+    var vertical = opts && opts.vertical != null ? opts.vertical : (window.innerWidth < 600 || wideW * 0.85 > avail);
+    if (vertical) { d.NW = maxRows >= 3 ? 92 : 116; d.TILE = maxRows >= 3 ? 48 : 56; d.NH = d.TILE + 44; }
+    var hasSkip = edges.some(function (e) { return layer[e.to] - layer[e.from] > 1; });
+    var M = hasSkip ? (vertical ? 20 : 30) : 0; // เว้นขอบให้เส้นที่ข้ามชั้นอ้อมผ่านโดยไม่ทับกล่อง
+    var pos = {}, W, H;
     if (vertical) {
-      var gx = NW + (NW < 116 ? 12 : 22), gy = NH + 40;
-      W = Math.max(maxRows * gx + 20, 300); H = colKeys.length * gy + 20;
+      var gx = d.NW + (maxRows >= 3 ? 8 : 14), gy = d.NH + 82;
+      W = Math.max(maxRows * gx + 20, 280) + M * 2; H = colKeys.length * gy + 20;
       colKeys.forEach(function (k, li) {
         var list = cols[k];
         list.forEach(function (n, ri) {
-          pos[n.id] = { id: n.id, label: n.label, x: (W - list.length * gx) / 2 + gx / 2 + ri * gx, y: 10 + NH / 2 + li * gy };
+          pos[n.id] = { id: n.id, label: n.label, x: M + (W - 2 * M - list.length * gx) / 2 + gx / 2 + ri * gx, y: 10 + d.NH / 2 + li * gy };
         });
       });
     } else {
-      var gapX = NW + 80, gapY = NH + 24;
-      W = Math.max(600, colKeys.length * gapX + 20); H = maxRows * gapY + 20;
+      var gapX = d.NW + 76, gapY = d.NH + 26;
+      W = Math.max(600, colKeys.length * gapX + 20); H = maxRows * gapY + 20 + M * 2;
       colKeys.forEach(function (k, ci) {
         var list = cols[k];
         list.forEach(function (n, ri) {
-          pos[n.id] = { id: n.id, label: n.label, x: 10 + NW / 2 + ci * gapX, y: (H - list.length * gapY) / 2 + gapY / 2 + ri * gapY };
+          pos[n.id] = { id: n.id, label: n.label, x: 10 + d.NW / 2 + ci * gapX, y: M + (H - 2 * M - list.length * gapY) / 2 + gapY / 2 + ri * gapY };
         });
       });
     }
+    function tileTop(n) { return n.y - d.NH / 2 + 4; }
+    function tileCy(n) { return tileTop(n) + d.TILE / 2; }
+
+    // จุดออก/เข้าของเส้นที่ชนกล่องเดียวกันเหลื่อมกัน (เรียงตามตำแหน่งปลายทาง ไม่ให้ตัดกันเอง)
+    var valid = [], outE = {}, inE = {}, portOut = {}, portIn = {}, chan = {};
+    edges.forEach(function (e, i) {
+      if (!pos[e.from] || !pos[e.to]) return;
+      valid.push(i);
+      (outE[e.from] = outE[e.from] || []).push(i);
+      (inE[e.to] = inE[e.to] || []).push(i);
+    });
+    function cross(id) { return vertical ? pos[id].x : pos[id].y; }
+    function spread(map, other, store) {
+      Object.keys(map).forEach(function (id) {
+        var list = map[id].slice().sort(function (a, b) { return cross(edges[a][other]) - cross(edges[b][other]); });
+        var step = Math.min(12, (d.TILE - 16) / Math.max(list.length, 1));
+        list.forEach(function (ei, k) { store[ei] = (k - (list.length - 1) / 2) * step; });
+      });
+    }
+    spread(outE, 'to', portOut); spread(inE, 'from', portIn);
+    function ends(ei) {
+      var e = edges[ei], a = pos[e.from], b = pos[e.to];
+      if (vertical) return { sx: a.x + portOut[ei], sy: a.y + d.NH / 2 + 2, ex: b.x + portIn[ei], ey: tileTop(b) - 3 };
+      return { sx: a.x + d.TILE / 2 + 4, sy: tileCy(a) + portOut[ei], ex: b.x - d.TILE / 2 - 4, ey: tileCy(b) + portIn[ei] };
+    }
+    // ช่องวิ่งของเส้นที่ข้ามชั้นเดียว: เส้นแนวตั้ง/แนวนอนกลางทางไม่ซ้อนกัน
+    var groups = {};
+    valid.forEach(function (ei) { var e = edges[ei]; if (layer[e.to] - layer[e.from] === 1) (groups[layer[e.from]] = groups[layer[e.from]] || []).push(ei); });
+    Object.keys(groups).forEach(function (k) {
+      var list = groups[k], n = list.length;
+      var start = function (ei) { var p = ends(ei); return vertical ? p.sx : p.sy; };
+      var goesFwd = function (ei) { var p = ends(ei); return (vertical ? p.ex - p.sx : p.ey - p.sy) > 0; };
+      var dn = list.filter(goesFwd).sort(function (a, b) { return start(a) - start(b); });
+      var up = list.filter(function (ei) { return !goesFwd(ei); }).sort(function (a, b) { return start(b) - start(a); });
+      dn.concat(up).forEach(function (ei, j) { chan[ei] = 0.3 + 0.4 * (n - j - 0.5) / n; });
+    });
+    var skipCount = 0;
+    function route(ei) {
+      var e = edges[ei], p = ends(ei), diff = layer[e.to] - layer[e.from];
+      if (diff <= 1) {
+        if (vertical) {
+          if (Math.abs(p.sx - p.ex) < 1) return [[p.sx, p.sy], [p.ex, p.ey]];
+          var my = p.sy + (p.ey - p.sy) * chan[ei];
+          return [[p.sx, p.sy], [p.sx, my], [p.ex, my], [p.ex, p.ey]];
+        }
+        if (Math.abs(p.sy - p.ey) < 1) return [[p.sx, p.sy], [p.ex, p.ey]];
+        var mx = p.sx + (p.ex - p.sx) * chan[ei];
+        return [[p.sx, p.sy], [mx, p.sy], [mx, p.ey], [p.ex, p.ey]];
+      }
+      var k = skipCount++; // เส้นที่ข้ามหลายชั้น: อ้อมออกนอกกลุ่มกล่อง
+      if (vertical) {
+        var left = (p.sx + p.ex) / 2 < W / 2, cx = left ? 8 + k * 6 : W - 8 - k * 6;
+        return [[p.sx, p.sy], [p.sx, p.sy + 12], [cx, p.sy + 12], [cx, p.ey - 12], [p.ex, p.ey - 12], [p.ex, p.ey]];
+      }
+      var above = (p.sy + p.ey) / 2 < H / 2, cy = above ? 10 + k * 8 : H - 10 - k * 8;
+      return [[p.sx, p.sy], [p.sx + 16 + k * 6, p.sy], [p.sx + 16 + k * 6, cy], [p.ex - 16 - k * 6, cy], [p.ex - 16 - k * 6, p.ey], [p.ex, p.ey]];
+    }
+
     var marker = 'ar' + (++uid);
     var svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'แผนภาพเฉลย' }, arrowDefs(marker));
-    svg.style.minWidth = Math.round(Math.min(W, vertical ? 240 : W * 0.8)) + 'px'; // กันย่อจนอ่านไม่ออก
+    svg.style.minWidth = Math.round(W * 0.76) + 'px'; // กันย่อจนตัวอักษรเล็กเกิน (จอแคบเลื่อนข้างได้ในกรอบ)
     svg.style.maxWidth = Math.round(W * 1.3) + 'px'; // กันแผนภาพเล็กขยายใหญ่เกิน
     svg.style.marginInline = 'auto';
-    edges.forEach(function (e) {
-      if (!pos[e.from] || !pos[e.to]) return;
-      edgeEls(pos[e.from], pos[e.to], e.label, marker).els.forEach(function (el) { svg.appendChild(el); });
-    });
-    nodes.forEach(function (n) { svg.appendChild(nodeEl(pos[n.id])); });
-    var wrap = G.h('div', { class: 'canvas-wrap flow-wrap' }, svg);
-    NW = prevNW;
-    return wrap;
+    valid.forEach(function (ei) { svg.appendChild(flowEdge(route(ei), edges[ei].label, marker, vertical, [W, H])); });
+    nodes.forEach(function (n) { svg.appendChild(nodeEl(pos[n.id], null, d)); });
+    return G.h('div', { class: 'canvas-wrap flow-wrap' }, svg);
   };
 
   G.flowToText = function (flow) {

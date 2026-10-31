@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-deploy-timeline · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 690" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-deploy-timeline-title m08-deploy-timeline-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-deploy-timeline-title">Deployment policy ทั้ง 5 แบบเป็นเส้นเวลา</title>
+      <desc id="m08-deploy-timeline-desc">เทียบ All at once, Rolling, Rolling with batch, Immutable และ Traffic splitting ในสามช่วงคือก่อน ระหว่าง และหลัง deploy ด้วยตัวอย่างสี่ instance แสดง instance เวอร์ชันเก่า v1 และเวอร์ชันใหม่ v2</desc>
+      <defs>
+        <marker id="m08-deploy-timeline-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-deploy-timeline-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-deploy-timeline-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-deploy-timeline-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-deploy-timeline-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<text x="240" y="44" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ก่อน</text>
+<text x="432" y="44" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ระหว่าง</text>
+<text x="624" y="44" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">หลัง</text>
+<text x="16" y="106" fill="#1d1d1b" font-size="12" font-weight="600">All at once</text>
+<rect x="148" y="60" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="164" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="72" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="178" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="198" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="198" y="72" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="212" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="232" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="232" y="72" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="246" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="266" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="266" y="72" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="280" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="340" y="60" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="356" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="72" width="28" height="28" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="370" y="90" fill="#b91c1c" font-size="12" text-anchor="middle">…</text>
+<rect x="390" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="72" width="28" height="28" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="404" y="90" fill="#b91c1c" font-size="12" text-anchor="middle">…</text>
+<rect x="424" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="72" width="28" height="28" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="438" y="90" fill="#b91c1c" font-size="12" text-anchor="middle">…</text>
+<rect x="458" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="72" width="28" height="28" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="472" y="90" fill="#b91c1c" font-size="12" text-anchor="middle">…</text>
+<text x="350" y="160" fill="#b91c1c" font-size="12">ทุกเครื่องอัปเดต = downtime</text>
+<rect x="532" y="60" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="548" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="548" y="72" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="562" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="582" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="582" y="72" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="596" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="616" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="616" y="72" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="630" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="650" y="72" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="650" y="72" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="664" y="90" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="542" y="160" fill="#5f5d57" font-size="12">เป็น v2 ทั้งหมด</text>
+<text x="16" y="222" fill="#1d1d1b" font-size="12" font-weight="600">Rolling</text>
+<rect x="148" y="176" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="164" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="188" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="178" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="198" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="198" y="188" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="212" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="232" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="232" y="188" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="246" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="266" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="266" y="188" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="280" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="340" y="176" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="356" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="188" width="28" height="28" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="370" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">…</text>
+<rect x="390" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="188" width="28" height="28" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="404" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">…</text>
+<rect x="424" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="188" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="438" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="458" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="188" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="472" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<text x="350" y="276" fill="#5f5d57" font-size="12">อัปเดตทีละ batch (ตย. batch=2)</text>
+<rect x="532" y="176" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="548" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="548" y="188" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="562" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="582" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="582" y="188" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="596" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="616" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="616" y="188" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="630" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="650" y="188" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="650" y="188" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="664" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="542" y="276" fill="#5f5d57" font-size="12">เป็น v2 ทั้งหมด</text>
+<text x="16" y="330" fill="#1d1d1b" font-size="12" font-weight="600">Rolling with</text>
+<text x="16" y="348" fill="#1d1d1b" font-size="12" font-weight="600">batch</text>
+<rect x="148" y="292" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="164" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="178" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="198" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="198" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="212" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="232" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="232" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="246" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="266" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="266" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="280" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="340" y="292" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="356" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="370" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="390" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="404" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="424" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="438" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="458" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="304" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="472" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="356" y="340" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="340" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="370" y="358" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="390" y="340" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="340" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="404" y="358" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="350" y="392" fill="#5f5d57" font-size="12">เพิ่ม batch ใหม่ก่อน</text>
+<rect x="532" y="292" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="548" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="548" y="304" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="562" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="582" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="582" y="304" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="596" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="616" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="616" y="304" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="630" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="650" y="304" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="650" y="304" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="664" y="322" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="542" y="392" fill="#5f5d57" font-size="12">เป็น v2 ทั้งหมด</text>
+<text x="16" y="454" fill="#1d1d1b" font-size="12" font-weight="600">Immutable</text>
+<rect x="148" y="408" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="164" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="178" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="198" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="198" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="212" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="232" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="232" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="246" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="266" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="266" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="280" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="340" y="408" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="356" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="370" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="390" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="404" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="424" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="438" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="458" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="420" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="472" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="356" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="370" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="390" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="404" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="424" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="438" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="458" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="472" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="350" y="508" fill="#5f5d57" font-size="12">ชุดใหม่ทั้งชุดใน ASG ใหม่</text>
+<rect x="532" y="408" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="548" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="548" y="420" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="562" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="582" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="582" y="420" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="596" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="616" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="616" y="420" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="630" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="650" y="420" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="650" y="420" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="664" y="438" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="542" y="508" fill="#5f5d57" font-size="12">ผ่าน health แล้วทิ้งชุดเก่า</text>
+<rect x="350" y="453" width="144" height="34" rx="4" fill="rgba(21,128,61,0.10)" fill-opacity="0.6" stroke="#15803d" stroke-width="1" stroke-dasharray="4,3"/>
+<rect x="356" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="370" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="390" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="404" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="424" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="438" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="458" y="456" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="456" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="472" y="474" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="16" y="562" fill="#1d1d1b" font-size="12" font-weight="600">Traffic</text>
+<text x="16" y="580" fill="#1d1d1b" font-size="12" font-weight="600">splitting</text>
+<rect x="148" y="524" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="164" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="178" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="198" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="198" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="212" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="232" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="232" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="246" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="266" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="266" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="280" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="340" y="524" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="356" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="370" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="390" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="404" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="424" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="438" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="458" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="536" width="28" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="472" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v1</text>
+<rect x="356" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="370" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="390" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="404" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="424" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="438" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="458" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="472" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="350" y="624" fill="#5f5d57" font-size="12">traffic 15% ไป v2 รอ 10 นาที</text>
+<rect x="532" y="524" width="184" height="108" rx="6" fill="#ffffff" stroke="rgba(29,29,27,0.20)" stroke-width="0.8"/>
+<rect x="548" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="548" y="536" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="562" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="582" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="582" y="536" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="596" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="616" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="616" y="536" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="630" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="650" y="536" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="650" y="536" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="664" y="554" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<text x="542" y="624" fill="#5f5d57" font-size="12">health ผ่าน → v2 ทั้งหมด</text>
+<rect x="350" y="569" width="144" height="34" rx="4" fill="rgba(21,128,61,0.10)" fill-opacity="0.6" stroke="#15803d" stroke-width="1" stroke-dasharray="4,3"/>
+<rect x="356" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="356" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="370" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="390" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="390" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="404" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="424" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="424" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="438" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<rect x="458" y="572" width="28" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="458" y="572" width="28" height="28" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="472" y="590" fill="#1d1d1b" font-size="12" text-anchor="middle">v2</text>
+<line x1="16" y1="640" x2="704" y2="640" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="660" fill="#5f5d57" font-size="12">ขาว v1 = เวอร์ชันเก่า · ส้ม v2 = เวอร์ชันใหม่ · แดง = ไม่มีเครื่องรับงาน (downtime) · เทา = กำลังอัปเดตบางส่วน</text>
+<text x="16" y="678" fill="#5f5d57" font-size="12">กรอบเขียว = ชุดใหม่แยกต่างหาก ถ้าพังก็ทิ้งชุดนี้ได้ (ตัวอย่างสมมติ 4 instance)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

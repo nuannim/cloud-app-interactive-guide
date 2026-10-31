@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-bluegreen · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 524" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-bluegreen-title m08-bluegreen-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-bluegreen-title">Blue/green บน Elastic Beanstalk</title>
+      <desc id="m08-bluegreen-desc">ขั้น 1 clone environment blue เป็น green ขั้น 2 deploy และทดสอบเวอร์ชันใหม่ในสภาพแวดล้อมใหม่ ขั้น 3 สลับ CNAME ของสอง environment ทำให้ URL หลัก myapp ชี้ไป green และ myapp_new ชี้ไป blue</desc>
+      <defs>
+        <marker id="m08-bluegreen-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-bluegreen-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-bluegreen-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-bluegreen-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-bluegreen-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="56" width="240" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="56" width="240" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="136" y="79" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Elastic Beanstalk environment</text>
+<text x="136" y="97" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">(blue)</text>
+<rect x="464" y="56" width="240" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="464" y="56" width="240" height="56" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="584" y="79" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Elastic Beanstalk environment</text>
+<text x="584" y="97" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">(green)</text>
+<path d="M256,84 L464,84" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-bluegreen-arrow)"/>
+<rect x="290" y="60" width="140" height="16" fill="#f6f5f1"/>
+<text x="360" y="72" fill="#5f5d57" font-size="12" text-anchor="middle">1 · clone environment</text>
+<text x="704" y="140" fill="#1d1d1b" font-size="12" text-anchor="end">2 · deploy และทดสอบเวอร์ชันใหม่ใน environment นี้</text>
+<rect x="16" y="172" width="688" height="136" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="176" width="209" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="188" fill="#5f5d57" font-size="12" font-weight="600">ก่อนสลับ: URL หลักชี้ blue</text>
+<rect x="32" y="204" width="316" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="204" width="316" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="190" y="228" fill="#1d1d1b" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">myapp.useast-1.elasticbeanstalk.com</text>
+<path d="M348,224 L412,224" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m08-bluegreen-arrow-acc)"/>
+<rect x="412" y="204" width="276" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="412" y="204" width="276" height="40" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="550" y="228" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">environment (blue)</text>
+<rect x="32" y="252" width="316" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="252" width="316" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="190" y="276" fill="#1d1d1b" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">myapp_new.useast-1.elasticbeanstalk.com</text>
+<path d="M348,272 L412,272" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-bluegreen-arrow)"/>
+<rect x="412" y="252" width="276" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="412" y="252" width="276" height="40" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="550" y="276" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">environment (green)</text>
+<rect x="16" y="332" width="688" height="136" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="336" width="268" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="348" fill="#5f5d57" font-size="12" font-weight="600">3 · สลับ CNAMEs: URL หลักชี้ green</text>
+<rect x="32" y="364" width="316" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="364" width="316" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="190" y="388" fill="#1d1d1b" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">myapp.useast-1.elasticbeanstalk.com</text>
+<path d="M348,384 L412,384" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m08-bluegreen-arrow-acc)"/>
+<rect x="412" y="364" width="276" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="412" y="364" width="276" height="40" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="550" y="388" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">environment (green)</text>
+<rect x="32" y="412" width="316" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="412" width="316" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="190" y="436" fill="#1d1d1b" font-size="12" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" style="white-space:pre" xml:space="preserve">myapp_new.useast-1.elasticbeanstalk.com</text>
+<path d="M348,432 L412,432" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-bluegreen-arrow)"/>
+<rect x="412" y="412" width="276" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="412" y="412" width="276" height="40" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="550" y="436" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">environment (blue)</text>
+<line x1="16" y1="488" x2="704" y2="488" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="508" fill="#5f5d57" font-size="12">ลูกศรส้ม = URL หลัก (myapp...) ที่ผู้ใช้เข้า · น้ำเงิน / เขียว = environment ตามชื่อ · ตามสไลด์ Blue/green deployments</text>
+
+    </svg>
+  </div>
+</body>
+</html>

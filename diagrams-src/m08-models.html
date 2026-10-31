@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-models · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 412" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-models-title m08-models-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-models-title">Bare-metal, VM และ container ต่างกันที่ชั้นไหน</title>
+      <desc id="m08-models-desc">เทียบโครงสร้าง 3 แบบ: bare-metal แชร์ library บนเครื่องเดียว, VM มี Guest OS ของตัวเองต่อแอปบน virtualization platform, container ใช้ containerization platform และแชร์ OS kernel เดียวกัน</desc>
+      <defs>
+        <marker id="m08-models-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="56" width="224" height="296" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="60" width="96" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="72" fill="#5f5d57" font-size="12" font-weight="600">Bare-metal</text>
+<rect x="248" y="56" width="224" height="296" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="256" y="60" width="32" height="16" rx="2" fill="#f6f5f1"/>
+<text x="264" y="72" fill="#5f5d57" font-size="12" font-weight="600">VM</text>
+<rect x="480" y="56" width="224" height="296" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="488" y="60" width="88" height="16" rx="2" fill="#f6f5f1"/>
+<text x="496" y="72" fill="#5f5d57" font-size="12" font-weight="600">Container</text>
+<text x="32" y="100" fill="#5f5d57" font-size="12">แอปแย่งทรัพยากรกัน</text>
+<text x="32" y="118" fill="#5f5d57" font-size="12">ต้องแชร์ library เวอร์ชันเดียว</text>
+<text x="32" y="136" fill="#5f5d57" font-size="12">ค่าฮาร์ดแวร์ยืดหยุ่นไม่ได้</text>
+<text x="264" y="100" fill="#5f5d57" font-size="12">แยก app และ library ได้</text>
+<text x="264" y="118" fill="#5f5d57" font-size="12">ใช้ทรัพยากรดีขึ้น</text>
+<text x="264" y="136" fill="#5f5d57" font-size="12">แต่ OS ต้องดูแลเพิ่ม กินที่</text>
+<text x="496" y="100" fill="#5f5d57" font-size="12">เบา เร็ว รันเหมือนเดิมทุกที่</text>
+<text x="496" y="118" fill="#5f5d57" font-size="12">library แยกหรือร่วมก็ได้</text>
+<text x="496" y="136" fill="#5f5d57" font-size="12">แชร์ OS kernel ใช้ทรัพยากรดี</text>
+<rect x="32" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="60" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">App A</text>
+<rect x="100" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="100" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="128" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">App B</text>
+<rect x="168" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="168" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="196" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">App C</text>
+<rect x="32" y="244" width="192" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="244" width="192" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="128" y="266" fill="#1d1d1b" font-size="12" text-anchor="middle">Library ใช้ร่วมกัน</text>
+<rect x="32" y="288" width="192" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="288" width="192" height="36" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="128" y="310" fill="#1d1d1b" font-size="12" text-anchor="middle">Server (ฮาร์ดแวร์)</text>
+<rect x="264" y="156" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="264" y="156" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="292" y="178" fill="#1d1d1b" font-size="12" text-anchor="middle">App A</text>
+<rect x="332" y="156" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="332" y="156" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="178" fill="#1d1d1b" font-size="12" text-anchor="middle">App B</text>
+<rect x="400" y="156" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="400" y="156" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="428" y="178" fill="#1d1d1b" font-size="12" text-anchor="middle">App C</text>
+<rect x="264" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="264" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="292" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">Libs</text>
+<rect x="332" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="332" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">Libs</text>
+<rect x="400" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="400" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="428" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">Libs</text>
+<rect x="264" y="244" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="264" y="244" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="292" y="266" fill="#1d1d1b" font-size="12" text-anchor="middle">Guest OS</text>
+<rect x="332" y="244" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="332" y="244" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="266" fill="#1d1d1b" font-size="12" text-anchor="middle">Guest OS</text>
+<rect x="400" y="244" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="400" y="244" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="428" y="266" fill="#1d1d1b" font-size="12" text-anchor="middle">Guest OS</text>
+<rect x="264" y="288" width="192" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="264" y="288" width="192" height="36" rx="6" fill="rgba(29,29,27,0.03)" stroke="rgba(29,29,27,0.30)" stroke-width="1"/>
+<text x="360" y="310" fill="#1d1d1b" font-size="12" text-anchor="middle">Virtualization platform</text>
+<rect x="496" y="156" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="496" y="156" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="524" y="178" fill="#1d1d1b" font-size="12" text-anchor="middle">App A</text>
+<rect x="564" y="156" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="564" y="156" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="592" y="178" fill="#1d1d1b" font-size="12" text-anchor="middle">App B</text>
+<rect x="632" y="156" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="632" y="156" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="660" y="178" fill="#1d1d1b" font-size="12" text-anchor="middle">App C</text>
+<rect x="496" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="496" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="524" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">Bins/libs</text>
+<rect x="564" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="564" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="592" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">Bins/libs</text>
+<rect x="632" y="200" width="56" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="632" y="200" width="56" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="660" y="222" fill="#1d1d1b" font-size="12" text-anchor="middle">Bins/libs</text>
+<rect x="496" y="244" width="192" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="496" y="244" width="192" height="36" rx="6" fill="rgba(29,29,27,0.03)" stroke="rgba(29,29,27,0.30)" stroke-width="1"/>
+<text x="592" y="266" fill="#1d1d1b" font-size="12" text-anchor="middle">Containerization platform</text>
+<rect x="496" y="288" width="192" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="496" y="288" width="192" height="36" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="592" y="310" fill="#1d1d1b" font-size="12" text-anchor="middle">Shared OS kernel</text>
+<line x1="16" y1="372" x2="704" y2="372" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="392" fill="#5f5d57" font-size="12">ส้ม = ส่วนที่ container ใช้ร่วมกัน (OS kernel เดียว) ต่างจาก VM ที่ทุกตัวมี Guest OS ของตัวเอง</text>
+
+    </svg>
+  </div>
+</body>
+</html>

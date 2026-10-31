@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-compute · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-compute-title m08-compute-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-compute-title">ECS cluster แบบ Fargate เทียบกับ EC2: ใครดูแลอะไร</title>
+      <desc id="m08-compute-desc">container instance 1 ถึง 3 รัน App และ Bins/libs บน Docker engine (หนึ่งตัวต่อ OS) และ VM guest OS ใน ECS cluster เมื่อใช้ Fargate คุณดูแลเฉพาะ container ส่วน Docker engine และ OS เป็นหน้าที่ของ AWS เมื่อใช้ EC2 คุณดูแลทั้งหมด</desc>
+      <defs>
+        <marker id="m08-compute-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-compute-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-compute-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-compute-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-compute-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<text x="16" y="36" fill="#1d1d1b" font-size="12" font-weight="600">ECS cluster แบบ Fargate</text>
+<text x="704" y="36" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="end">ECS cluster แบบ EC2</text>
+<rect x="152" y="52" width="456" height="164" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="160" y="56" width="90" height="16" rx="2" fill="#f6f5f1"/>
+<text x="168" y="68" fill="#5f5d57" font-size="12" font-weight="600">Containers</text>
+<text x="232" y="92" fill="#5f5d57" font-size="12" text-anchor="middle">Container instance 1</text>
+<rect x="164" y="104" width="136" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="104" width="136" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="232" y="130" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">App 1</text>
+<rect x="164" y="156" width="136" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="156" width="136" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="232" y="182" fill="#5f5d57" font-size="12" text-anchor="middle">Bins/libs</text>
+<text x="380" y="92" fill="#5f5d57" font-size="12" text-anchor="middle">Container instance 2</text>
+<rect x="312" y="104" width="136" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="312" y="104" width="136" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="380" y="130" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">App 2</text>
+<rect x="312" y="156" width="136" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="312" y="156" width="136" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="380" y="182" fill="#5f5d57" font-size="12" text-anchor="middle">Bins/libs</text>
+<text x="528" y="92" fill="#5f5d57" font-size="12" text-anchor="middle">Container instance 3</text>
+<rect x="460" y="104" width="136" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="460" y="104" width="136" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="528" y="130" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">App 3</text>
+<rect x="460" y="156" width="136" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="460" y="156" width="136" height="44" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="528" y="182" fill="#5f5d57" font-size="12" text-anchor="middle">Bins/libs</text>
+<rect x="164" y="232" width="432" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="232" width="432" height="40" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="380" y="256" fill="#1d1d1b" font-size="12" text-anchor="middle">Docker engines (หนึ่งตัวต่อ OS ใน cluster)</text>
+<rect x="164" y="280" width="432" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="164" y="280" width="432" height="40" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="380" y="304" fill="#1d1d1b" font-size="12" text-anchor="middle">VM guest operating systems ใน ECS cluster</text>
+<path d="M146,104 H140 V200 H146" fill="none" stroke="#2e5aa8" stroke-width="1.5"/>
+<text x="130" y="156" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="end">คุณดูแล</text>
+<path d="M146,232 H140 V320 H146" fill="none" stroke="#b45309" stroke-width="1.5"/>
+<text x="130" y="280" fill="#b45309" font-size="12" font-weight="600" text-anchor="end">AWS ดูแล</text>
+<path d="M614,104 H620 V320 H614" fill="none" stroke="#2e5aa8" stroke-width="1.5"/>
+<text x="632" y="208" fill="#2e5aa8" font-size="12" font-weight="600">คุณดูแล</text>
+<text x="632" y="226" fill="#2e5aa8" font-size="12" font-weight="600">ทั้งหมด</text>
+<line x1="16" y1="340" x2="704" y2="340" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="360" fill="#5f5d57" font-size="12">น้ำเงิน = คุณดูแลเอง · ส้ม = AWS ดูแลให้เมื่อใช้ Fargate (ถ้าใช้ EC2 ส่วนสีส้มนี้คุณดูแลเอง)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

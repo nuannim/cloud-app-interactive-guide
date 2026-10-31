@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-should-cache · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 356" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-should-cache-title m09-should-cache-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-should-cache-title">4 คำถามก่อนตัดสินใจ cache</title>
+      <desc id="m09-should-cache-desc">คำถาม 4 ข้อ: query ที่ใช้สร้างข้อมูลช้าหรือแพงไหม ข้อมูลนิ่งและถูกเรียกบ่อยไหม ยอมให้ข้อมูลเก่าได้ไหม และคุ้มกับความซับซ้อนและค่าใช้จ่ายที่เพิ่มไหม</desc>
+      <defs>
+        <marker id="m09-should-cache-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-should-cache-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-should-cache-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-should-cache-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-should-cache-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="56" width="332" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="56" width="332" height="64" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="182" y="83" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">query ที่ช้า/แพง</text>
+<text x="182" y="101" fill="#5f5d57" font-size="12" text-anchor="middle">ต้องใช้สร้างข้อมูลนี้หรือเปล่า</text>
+<circle cx="40" cy="88" r="11" fill="#f6f5f1" stroke="#2e5aa8" stroke-width="1"/>
+<text x="40" y="92" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">1</text>
+<rect x="372" y="56" width="332" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="372" y="56" width="332" height="64" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="538" y="83" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ข้อมูลค่อนข้างนิ่ง</text>
+<text x="538" y="101" fill="#5f5d57" font-size="12" text-anchor="middle">และถูกเรียกใช้บ่อยหรือเปล่า</text>
+<circle cx="396" cy="88" r="11" fill="#f6f5f1" stroke="#2e5aa8" stroke-width="1"/>
+<text x="396" y="92" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">2</text>
+<rect x="16" y="136" width="332" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="136" width="332" height="64" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="182" y="163" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ยอมให้ข้อมูลเก่า (stale)</text>
+<text x="182" y="181" fill="#5f5d57" font-size="12" text-anchor="middle">ได้หรือเปล่า</text>
+<circle cx="40" cy="168" r="11" fill="#f6f5f1" stroke="#2e5aa8" stroke-width="1"/>
+<text x="40" y="172" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">3</text>
+<rect x="372" y="136" width="332" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="372" y="136" width="332" height="64" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="538" y="163" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">คุ้มกับความซับซ้อนและ</text>
+<text x="538" y="181" fill="#5f5d57" font-size="12" text-anchor="middle">ค่าใช้จ่ายที่เพิ่มขึ้นหรือเปล่า</text>
+<circle cx="396" cy="168" r="11" fill="#f6f5f1" stroke="#2e5aa8" stroke-width="1"/>
+<text x="396" y="172" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">4</text>
+<rect x="16" y="232" width="688" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="232" width="688" height="48" rx="6" fill="rgba(29,29,27,0.03)" stroke="rgba(29,29,27,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="360" y="260" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ยิ่งตอบ "ใช่" มากข้อ ยิ่งคุ้มที่จะ cache</text>
+<line x1="16" y1="304" x2="704" y2="304" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="324" fill="#5f5d57" font-size="12">ตามสไลด์ Factors for considering whether to cache: 4 คำถามก่อนตัดสินใจ</text>
+<text x="16" y="342" fill="#5f5d57" font-size="12">ประโยคในกล่องประ เป็นข้อสรุปของผู้สรุป (สไลด์ไม่ได้ให้เกณฑ์ว่าต้องตอบใช่กี่ข้อ)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

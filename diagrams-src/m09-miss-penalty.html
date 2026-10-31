@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-miss-penalty · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 334" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-miss-penalty-title m09-miss-penalty-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-miss-penalty-title">Cache miss penalty</title>
+      <desc id="m09-miss-penalty-desc">ถ้า cache hit ได้ข้อมูลทันที ถ้า miss หรือ TTL หมดอายุ application ต้องขอจาก database แล้วอัปเดต cache เวลาที่เสียเพิ่มคือ cache miss penalty</desc>
+      <defs>
+        <marker id="m09-miss-penalty-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-miss-penalty-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-miss-penalty-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-miss-penalty-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-miss-penalty-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<text x="16" y="92" fill="#15803d" font-size="12" font-weight="600">Cache hit</text>
+<rect x="128" y="64" width="92" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="128" y="64" width="92" height="44" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="174" y="90" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Application</text>
+<rect x="290" y="64" width="92" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="290" y="64" width="92" height="44" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="336" y="90" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ElastiCache</text>
+<path d="M220,86 L290,86" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-miss-penalty-arrow-green)"/>
+<rect x="452" y="64" width="252" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="452" y="64" width="252" height="44" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="578" y="90" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">ได้ข้อมูลทันที (เร็ว)</text>
+<path d="M382,86 L452,86" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-miss-penalty-arrow-green)"/>
+<text x="16" y="172" fill="#b91c1c" font-size="12" font-weight="600">Cache miss</text>
+<rect x="128" y="144" width="92" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="128" y="144" width="92" height="44" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="174" y="170" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Application</text>
+<rect x="290" y="144" width="92" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="290" y="144" width="92" height="44" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="336" y="170" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ElastiCache</text>
+<rect x="452" y="144" width="92" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="452" y="144" width="92" height="44" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="498" y="170" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Database</text>
+<rect x="614" y="144" width="90" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="614" y="144" width="90" height="44" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="659" y="170" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Update cache</text>
+<path d="M220,166 L290,166" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m09-miss-penalty-arrow)"/>
+<path d="M382,166 L452,166" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-miss-penalty-arrow-red)"/>
+<path d="M544,166 L614,166" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-miss-penalty-arrow-red)"/>
+<text x="336" y="214" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่มีข้อมูล หรือ TTL หมดอายุ</text>
+<rect x="290" y="228" width="414" height="8" rx="4" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="0.8"/>
+<text x="497" y="258" fill="#b91c1c" font-size="12" font-weight="600" text-anchor="middle">เวลาที่เสียเพิ่ม = cache miss penalty</text>
+<line x1="16" y1="282" x2="704" y2="282" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="302" fill="#5f5d57" font-size="12">เขียว = hit (เร็ว) · แดง = ขั้นที่ทำให้ช้า · ส้ม = ElastiCache และการอัปเดต cache</text>
+<text x="16" y="320" fill="#5f5d57" font-size="12">เทียบเส้นทาง hit กับ miss: miss ต้องไปถึง database แล้วเขียนกลับ cache (ตามสไลด์ Cache miss penalty and TTL)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-orchestration · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-orchestration-title m08-orchestration-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-orchestration-title">ทำไมต้องมี container orchestration</title>
+      <desc id="m08-orchestration-desc">container จำนวนมากถูก orchestration platform จัดตารางการเริ่มและหยุด เลือกว่าจะวางบน server ไหน และเชื่อมกับ service อื่นแทนผู้ใช้</desc>
+      <defs>
+        <marker id="m08-orchestration-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-orchestration-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="48" width="136" height="260" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="52" width="120" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="64" fill="#5f5d57" font-size="12" font-weight="600">container เยอะ</text>
+<rect x="32" y="88" width="104" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="88" width="104" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="84" y="110" fill="#1d1d1b" font-size="12" text-anchor="middle">container</text>
+<rect x="32" y="136" width="104" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="136" width="104" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="84" y="158" fill="#1d1d1b" font-size="12" text-anchor="middle">container</text>
+<rect x="32" y="184" width="104" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="184" width="104" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="84" y="206" fill="#1d1d1b" font-size="12" text-anchor="middle">container</text>
+<rect x="32" y="232" width="104" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="232" width="104" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="84" y="254" fill="#1d1d1b" font-size="12" text-anchor="middle">container</text>
+<rect x="232" y="96" width="200" height="160" rx="6" fill="#f6f5f1"/>
+<rect x="232" y="96" width="200" height="160" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="332" y="153" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Orchestration platform</text>
+<text x="332" y="171" fill="#5f5d57" font-size="12" text-anchor="middle">Scheduling: เริ่ม / หยุด</text>
+<text x="332" y="189" fill="#5f5d57" font-size="12" text-anchor="middle">Placement: วางที่ server ไหน</text>
+<text x="332" y="207" fill="#5f5d57" font-size="12" text-anchor="middle">Service integration</text>
+<rect x="512" y="52" width="192" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="512" y="52" width="192" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="608" y="79" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Server A</text>
+<text x="608" y="97" fill="#5f5d57" font-size="12" text-anchor="middle">มีทรัพยากรเหลือไม่เท่ากัน</text>
+<rect x="512" y="140" width="192" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="512" y="140" width="192" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="608" y="167" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Server B</text>
+<text x="608" y="185" fill="#5f5d57" font-size="12" text-anchor="middle">มีทรัพยากรเหลือไม่เท่ากัน</text>
+<rect x="512" y="228" width="192" height="64" rx="6" fill="#f6f5f1"/>
+<rect x="512" y="228" width="192" height="64" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="608" y="255" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Server C</text>
+<text x="608" y="273" fill="#5f5d57" font-size="12" text-anchor="middle">มีทรัพยากรเหลือไม่เท่ากัน</text>
+<path d="M152,176 L232,176" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-orchestration-arrow)"/>
+<path d="M432,128 L464,128 Q472,128 472,120 L472,92 Q472,84 480,84 L512,84" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-orchestration-arrow)"/>
+<path d="M432,172 L512,172" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-orchestration-arrow)"/>
+<path d="M432,216 L464,216 Q472,216 472,224 L472,252 Q472,260 480,260 L512,260" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-orchestration-arrow)"/>
+<line x1="16" y1="324" x2="704" y2="324" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="344" fill="#5f5d57" font-size="12">ปัญหาเมื่อ container เป็นร้อย: state ของแต่ละตัว · เริ่ม/หยุดเมื่อไร · server ไหนเหลือทรัพยากร</text>
+<text x="16" y="362" fill="#5f5d57" font-size="12">orchestration platform ตัดสินใจ 3 เรื่องแทนคุณ: scheduling, placement และ service integration</text>
+
+    </svg>
+  </div>
+</body>
+</html>

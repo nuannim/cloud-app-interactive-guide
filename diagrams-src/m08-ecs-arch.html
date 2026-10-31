@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-ecs-arch · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 272" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-ecs-arch-title m08-ecs-arch-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-ecs-arch-title">Amazon ECS: ภาพรวมการทำงาน</title>
+      <desc id="m08-ecs-arch-desc">Amazon ECR หรือ registry อื่นให้ container image แก่ Amazon ECS ผู้ใช้กำหนดแอปพลิเคชัน เลือก launch type เป็น AWS Fargate หรือ Amazon EC2 แล้วจัดการ container</desc>
+      <defs>
+        <marker id="m08-ecs-arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-ecs-arch-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<text x="72" y="56" fill="#5f5d57" font-size="12" text-anchor="middle">ดึง image จาก registry</text>
+<text x="544" y="56" fill="#5f5d57" font-size="12" text-anchor="middle">เลือก launch type</text>
+<rect x="16" y="68" width="112" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="68" width="112" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="72" y="96" fill="#1d1d1b" font-size="12" text-anchor="middle">Amazon ECR</text>
+<rect x="16" y="168" width="112" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="168" width="112" height="48" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="72" y="196" fill="#1d1d1b" font-size="12" text-anchor="middle">Registry อื่น</text>
+<rect x="184" y="118" width="104" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="184" y="118" width="104" height="48" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="236" y="146" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Amazon ECS</text>
+<rect x="312" y="118" width="96" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="312" y="118" width="96" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="137" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">กำหนด</text>
+<text x="360" y="155" fill="#5f5d57" font-size="12" text-anchor="middle">แอปพลิเคชัน</text>
+<rect x="500" y="68" width="88" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="500" y="68" width="88" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="544" y="96" fill="#1d1d1b" font-size="12" text-anchor="middle">AWS Fargate</text>
+<rect x="500" y="168" width="88" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="500" y="168" width="88" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="544" y="196" fill="#1d1d1b" font-size="12" text-anchor="middle">Amazon EC2</text>
+<rect x="612" y="118" width="92" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="612" y="118" width="92" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="658" y="137" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">จัดการ</text>
+<text x="658" y="155" fill="#5f5d57" font-size="12" text-anchor="middle">container</text>
+<path d="M128,92 L148,92 Q156,92 156,100 L156,122 Q156,130 164,130 L184,130" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<path d="M128,192 L148,192 Q156,192 156,184 L156,162 Q156,154 164,154 L184,154" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<path d="M288,142 L312,142" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<path d="M408,130 L432,130 Q440,130 440,122 L440,100 Q440,92 448,92 L500,92" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<path d="M408,154 L432,154 Q440,154 440,162 L440,184 Q440,192 448,192 L500,192" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<path d="M588,92 L592,92 Q600,92 600,100 L600,122 Q600,130 608,130 L612,130" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<path d="M588,192 L592,192 Q600,192 600,184 L600,162 Q600,154 608,154 L612,154" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-ecs-arch-arrow)"/>
+<line x1="16" y1="236" x2="704" y2="236" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="256" fill="#5f5d57" font-size="12">ตามสไลด์ ECS solution architecture: image จาก registry → กำหนดแอป → เลือก launch type → จัดการ container</text>
+
+    </svg>
+  </div>
+</body>
+</html>

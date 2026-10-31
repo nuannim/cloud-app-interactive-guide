@@ -5,7 +5,7 @@
   var NS = 'http://www.w3.org/2000/svg';
   // สีสาขา (เข้มพอให้ตัวอักษรขาวอ่านออก)
   var COLORS = ['#C25E00', '#5E7F0F', '#6B3FD6', '#A61DB0', '#C4106A', '#C42B3E', '#2F3BAE', '#0B6B73'];
-  var FONT = "'Noto Sans Thai','Sarabun','Segoe UI',system-ui,sans-serif";
+  var FONT = "'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif";
   var MAX_LEAVES = 7;
 
   function clip(s, n) { s = String(s).replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; }

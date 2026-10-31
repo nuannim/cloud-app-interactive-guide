@@ -8,24 +8,34 @@ GUIDE.register({
   notes: [
     {
       heading: 'ทำไมต้อง async และมี messaging 3 แบบ',
-      body: '<p><strong>Sync</strong> = ผู้เรียกส่ง request แล้วรอผลจากปลายทางโดยตรง (coupled แน่น) ส่วน <strong>async</strong> = ได้ acknowledgement กลับก่อน ผลอาจมาทางอื่นทีหลัง ทำให้พึ่งพากันน้อยลงและ client ตอบสนองไวขึ้น</p>' +
-        '<ul><li><strong>Queue (SQS)</strong>: ใส่ข้อความ → consumer ไป poll → ประมวลผล → ลบ</li>' +
-        '<li><strong>Pub/sub (SNS)</strong>: publish เข้า topic → push ไปให้ subscriber ทุกราย</li>' +
+      body: '<ul><li><strong>Sync</strong>: ผู้เรียกส่ง request แล้วรอผลจากปลายทางโดยตรง (coupled แน่น)</li>' +
+        '<li><strong>Async</strong><ul><li>ได้ acknowledgement กลับก่อน ผลอาจมาทางอื่นทีหลัง</li>' +
+        '<li>พึ่งพากันน้อยลง</li><li>client ตอบสนองไวขึ้น</li></ul></li></ul>' +
+        '<ul><li><strong>Queue (SQS)</strong><ol><li>ใส่ข้อความ</li><li>consumer ไป poll</li><li>ประมวลผล</li><li>ลบ</li></ol></li>' +
+        '<li><strong>Pub/sub (SNS)</strong>: publish เข้า topic แล้ว push ไปให้ subscriber ทุกราย</li>' +
         '<li><strong>Stream (Kinesis Data Streams)</strong>: ข้อมูลต่อเนื่องปริมาณมาก ไว้รวมและวิเคราะห์</li></ul>',
       refs: ['g-m10-style', 'q-m10-decouple', 'c-m10-style-queue', 'c-m10-style-pubsub']
     },
     {
       heading: 'SQS: Standard vs FIFO',
-      body: '<ul><li><strong>Standard</strong> (ค่าเริ่มต้น): ลำดับแบบ best effort, ส่งอย่างน้อย 1 ครั้ง (อาจซ้ำ), throughput แทบไม่จำกัด</li>' +
-        '<li><strong>FIFO</strong>: รักษาลำดับ, ส่งแบบ exactly-once, throughput จำกัดกว่า</li></ul>' +
-        '<p>วิธีเลือก: ถ้าลำดับหรือการซ้ำมีผลต่อความถูกต้อง (ฝากก่อนถอน, ตัดบัตรครั้งเดียว) = FIFO ถ้าเน้นปริมาณมากและลำดับไม่สำคัญ (resize รูป, ตรวจบัตรจำนวนมาก) = Standard</p>',
+      body: '<ul><li><strong>Standard</strong> (ค่าเริ่มต้น)<ul><li>ลำดับแบบ best effort</li><li>ส่งอย่างน้อย 1 ครั้ง (อาจซ้ำ)</li><li>throughput แทบไม่จำกัด</li></ul></li>' +
+        '<li><strong>FIFO</strong><ul><li>รักษาลำดับ</li><li>ส่งแบบ exactly-once</li><li>throughput จำกัดกว่า</li></ul></li></ul>' +
+        '<p><strong>วิธีเลือก</strong></p>' +
+        '<ul><li>ลำดับหรือการซ้ำมีผลต่อความถูกต้อง (เช่น ฝากก่อนถอน, ตัดบัตรครั้งเดียว) = FIFO</li>' +
+        '<li>เน้นปริมาณมากและลำดับไม่สำคัญ (เช่น resize รูป, ตรวจบัตรจำนวนมาก) = Standard</li></ul>',
       refs: ['g-m10-sqs-type', 'q-m10-fifo', 'q-m10-standard', 'c-m10-type-order', 'c-m10-type-volume']
     },
     {
       heading: 'วงจรข้อความ, visibility timeout, DLQ, polling',
-      body: '<p>Producer เรียก <strong>SendMessage</strong> → SQS เก็บสำเนาหลาย server → consumer เรียก <strong>ReceiveMessage</strong> → ข้อความถูกซ่อนไว้ช่วง <strong>visibility timeout</strong> (default 30 วินาที) → ประมวลผลเสร็จต้อง <strong>DeleteMessage</strong> ถ้าไม่ลบ ข้อความจะกลับมาให้คนอื่นเห็นอีก</p>' +
+      body: '<ol><li>Producer เรียก <strong>SendMessage</strong></li>' +
+        '<li>SQS เก็บสำเนาหลาย server</li>' +
+        '<li>Consumer เรียก <strong>ReceiveMessage</strong></li>' +
+        '<li>ข้อความถูกซ่อนไว้ช่วง <strong>visibility timeout</strong> (default 30 วินาที)</li>' +
+        '<li>ประมวลผลเสร็จต้องเรียก <strong>DeleteMessage</strong></li></ol>' +
+        '<p>ถ้าไม่ลบ ข้อความจะกลับมาให้ consumer อื่นเห็นอีก</p>' +
         '<p>ถ้า consumer ล้มเหลวซ้ำจนถึง <strong>maxReceiveCount</strong> ข้อความจะถูกย้ายไป <strong>dead-letter queue</strong> ไว้ตรวจแยกต่างหาก</p>' +
-        '<p><strong>Short polling</strong> สุ่มถามบาง server (อาจพลาดข้อความ) ส่วน <strong>long polling</strong> ถามทุก server และรอได้ตาม <code>WaitTimeSeconds</code></p>',
+        '<ul><li><strong>Short polling</strong>: สุ่มถามบาง server (อาจพลาดข้อความ)</li>' +
+        '<li><strong>Long polling</strong>: ถามทุก server และรอได้ตาม <code>WaitTimeSeconds</code></li></ul>',
       refs: ['l-m10-visibility', 'g-m10-polling', 'q-m10-visibility', 'q-m10-dlq', 'q-m10-polling', 'q-m10-design-supplier'],
       diagram: {
         title: 'วงจรข้อความ SQS + DLQ',
@@ -51,9 +61,11 @@ GUIDE.register({
     {
       heading: 'SNS: topic, fanout, filter policy',
       body: '<ul><li>Publisher ส่งเข้า <strong>topic</strong> แล้ว SNS push สำเนาไปทุก subscriber (many-to-many)</li>' +
-        '<li>Endpoint แบบ A2A: Lambda, SQS, Kinesis Data Firehose, HTTP(S) / แบบ A2P (แจ้งคน): Email, SMS, mobile push</li>' +
+        '<li>Endpoint<ul><li>แบบ A2A: Lambda, SQS, Kinesis Data Firehose, HTTP(S)</li>' +
+        '<li>แบบ A2P (แจ้งคน): Email, SMS, mobile push</li></ul></li>' +
         '<li><strong>Fanout</strong>: topic เดียวส่งต่อเข้าหลาย SQS queue ให้แต่ละระบบประมวลผลคนละงาน</li>' +
-        '<li><strong>Filter policy</strong> ที่ subscription + message attributes จากฝั่ง publisher ทำให้ subscriber ได้เฉพาะข้อความที่เกี่ยวข้อง</li>' +
+        '<li><strong>Filter policy</strong><ul><li>ตั้งที่ subscription และใช้ message attributes จากฝั่ง publisher</li>' +
+        '<li>subscriber ได้เฉพาะข้อความที่เกี่ยวข้อง</li></ul></li>' +
         '<li>ส่งไม่สำเร็จจะ retry ตาม delivery policy แล้วทิ้งหรือส่งเข้า DLQ</li>' +
         '<li>FIFO topic ใช้คู่กับ FIFO SQS เพื่อรักษาลำดับ</li></ul>',
       refs: ['q-m10-fanout', 'q-m10-filter', 'q-m10-notify', 'q-m10-design-fanout', 'c-m10-sns-a2p'],
@@ -80,10 +92,11 @@ GUIDE.register({
     },
     {
       heading: 'Kinesis และ queue vs stream',
-      body: '<ul><li><strong>Data Streams</strong>: รับ/พัก/ประมวลผลข้อมูลสตรีมแบบ real-time เก็บใน shard, หลาย consumer อ่านได้พร้อมกัน</li>' +
+      body: '<ul><li><strong>Data Streams</strong><ul><li>รับ พัก และประมวลผลข้อมูลสตรีมแบบ real-time</li><li>เก็บใน shard</li><li>หลาย consumer อ่านได้พร้อมกัน</li></ul></li>' +
         '<li><strong>Data Firehose</strong>: ส่งข้อมูลสตรีมไป data store โดยไม่ต้องเขียน consumer เอง</li>' +
         '<li><strong>Data Analytics</strong>: วิเคราะห์ข้อมูลในสตรีมด้วย SQL (หรือ Flink/Java/Scala/Python)</li></ul>' +
-        '<p>Queue: ค่าอยู่ที่ข้อความแต่ละชิ้น อัตราไม่คงที่ ประมวลผลแล้วถูกลบ (เช่น order, ธุรกรรมการเงิน) / Stream: ค่าอยู่ที่การรวมข้อมูล อัตราต่อเนื่องสูง หลาย consumer แต่ละคนมี pointer ของตัวเอง ไม่ลบ record (เช่น clickstream, log)</p>',
+        '<ul><li><strong>Queue</strong><ul><li>ค่าอยู่ที่ข้อความแต่ละชิ้น</li><li>อัตราไม่คงที่</li><li>ประมวลผลแล้วถูกลบ</li><li>เช่น order, ธุรกรรมการเงิน</li></ul></li>' +
+        '<li><strong>Stream</strong><ul><li>ค่าอยู่ที่การรวมข้อมูล</li><li>อัตราต่อเนื่องสูง</li><li>หลาย consumer แต่ละคนมี pointer ของตัวเอง</li><li>ไม่ลบ record</li><li>เช่น clickstream, log</li></ul></li></ul>',
       refs: ['g-m10-kinesis', 'q-m10-clickstream', 'q-m10-queue-vs-stream', 'c-m10-kin-firehose'],
       diagram: {
         title: 'Kinesis Data Streams',
@@ -110,7 +123,13 @@ GUIDE.register({
     },
     {
       heading: 'โจทย์คาเฟ่: อัปเดตสต็อกจาก supplier',
-      body: '<p>แทนที่จะอัปเดตสต็อกบนเว็บด้วยมือ ให้ supplier ส่งข้อมูลเข้า <strong>SNS topic</strong> → <strong>SQS queue</strong> (มี DLQ รองรับข้อความที่ประมวลผลไม่สำเร็จ) → แอปบน Elastic Beanstalk poll คิว → เขียนลง Aurora Serverless ผลคือ decouple supplier ออกจากแอป และข้อความไม่หายแม้แอปช้า</p>',
+      body: '<p>แทนที่จะอัปเดตสต็อกบนเว็บด้วยมือ ให้ supplier ส่งข้อมูลผ่านลำดับนี้</p>' +
+        '<ol><li>Supplier ส่งข้อมูลเข้า <strong>SNS topic</strong></li>' +
+        '<li>ต่อเข้า <strong>SQS queue</strong> (มี DLQ รองรับข้อความที่ประมวลผลไม่สำเร็จ)</li>' +
+        '<li>แอปบน Elastic Beanstalk poll คิว</li>' +
+        '<li>เขียนลง Aurora Serverless</li></ol>' +
+        '<p>ผลที่ได้</p>' +
+        '<ul><li>decouple supplier ออกจากแอป</li><li>ข้อความไม่หายแม้แอปช้า</li></ul>',
       refs: ['q-m10-design-supplier', 'q-m10-written-cafe']
     }
   ],

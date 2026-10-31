@@ -8,28 +8,53 @@ GUIDE.register({
   notes: [
     {
       heading: 'ความปลอดภัยของแอปมี 2 ด้าน',
-      body: '<ul><li><strong>เส้นทางเครือข่าย</strong>: เข้ารหัสการสื่อสารระหว่าง client กับ server ด้วย TLS/SSL โดยใช้ certificate ยืนยันตัวตนเว็บไซต์ และ <strong>ACM</strong> ช่วยออก/ติดตั้ง/ต่ออายุ certificate ให้ (ใช้ cert ของตัวเองได้ผ่าน ACM Private CA)</li>' +
-        '<li><strong>การควบคุมสิทธิ์</strong>: ให้ผู้ใช้/แอปเข้าถึง resource ด้วย credential ชั่วคราว ไม่ฝัง access key ในโค้ด</li></ul>' +
-        '<p>TLS handshake ในสไลด์มี 7 ขั้น สรุปคือ CA ออก cert ให้ server, client ตรวจว่า CA น่าเชื่อถือ แล้วส่ง session key ที่เข้ารหัส หลังจากนั้นข้อมูลทั้งหมดเข้ารหัสด้วย session key</p>',
+      body: '<ul><li><strong>เส้นทางเครือข่าย</strong><ul>' +
+        '<li>เข้ารหัสการสื่อสารระหว่าง client กับ server ด้วย TLS/SSL</li>' +
+        '<li>ใช้ certificate ยืนยันตัวตนเว็บไซต์</li>' +
+        '<li><strong>ACM</strong> ช่วยออก ติดตั้ง และต่ออายุ certificate ให้</li>' +
+        '<li>ถ้าจะใช้ cert ของตัวเอง ทำได้ผ่าน ACM Private CA</li></ul></li>' +
+        '<li><strong>การควบคุมสิทธิ์</strong><ul>' +
+        '<li>ให้ผู้ใช้/แอปเข้าถึง resource ด้วย credential ชั่วคราว</li>' +
+        '<li>ไม่ฝัง access key ในโค้ด</li></ul></li></ul>' +
+        '<p>TLS handshake ในสไลด์มี 7 ขั้น สรุปได้ดังนี้</p>' +
+        '<ol><li>CA ออก cert ให้ server</li><li>client ตรวจว่า CA น่าเชื่อถือ</li><li>client ส่ง session key ที่เข้ารหัสให้ server</li><li>หลังจากนั้นข้อมูลทั้งหมดเข้ารหัสด้วย session key</li></ol>',
       refs: ['q-m12-employee-login']
     },
     {
       heading: 'Authentication vs Authorization และคำศัพท์',
-      body: '<ul><li><strong>Authentication</strong> = พิสูจน์ว่าคุณคือใคร, <strong>Authorization</strong> = ตรวจว่าทำอะไรได้บ้าง</li>' +
-        '<li><strong>IdP</strong> = ที่เก็บ/ยืนยันตัวตน, <strong>identity broker</strong> = ตัวกลางที่ยืนยันกับ IdP แล้วไปขอ credential ชั่วคราวจาก STS</li>' +
-        '<li>SAML = มาตรฐานแลกเปลี่ยนข้อมูล authn/authz, OIDC = ให้ IdP ภายนอก (Google ฯลฯ) ยืนยันผู้ใช้แทนเว็บอื่น, JWT = รูปแบบส่งข้อมูลระหว่างสองฝ่ายอย่างปลอดภัย</li></ul>',
+      body: '<ul><li><strong>Authentication</strong> = พิสูจน์ว่าคุณคือใคร</li>' +
+        '<li><strong>Authorization</strong> = ตรวจว่าทำอะไรได้บ้าง</li>' +
+        '<li><strong>IdP</strong> = ที่เก็บและยืนยันตัวตน</li>' +
+        '<li><strong>identity broker</strong> = ตัวกลางที่ยืนยันกับ IdP แล้วไปขอ credential ชั่วคราวจาก STS</li>' +
+        '<li><strong>SAML</strong> = มาตรฐานแลกเปลี่ยนข้อมูล authn/authz</li>' +
+        '<li><strong>OIDC</strong> = ให้ IdP ภายนอก (เช่น Google) ยืนยันผู้ใช้แทนเว็บอื่น</li>' +
+        '<li><strong>JWT</strong> = รูปแบบส่งข้อมูลระหว่างสองฝ่ายอย่างปลอดภัย</li></ul>',
       refs: ['q-m12-written-flow']
     },
     {
       heading: 'Temporary credentials และ AWS STS',
-      body: '<p>แนวปฏิบัติที่ดี: ใช้ <strong>IAM role</strong> ดึง credential ชั่วคราวก่อน ถ้าทำไม่ได้ค่อยใช้ <strong>STS</strong> ส่วนการฝัง key ในโค้ดหรือแชร์ key ในทีมคือแนวปฏิบัติที่ห้ามทำ</p>' +
-        '<p>credential จาก STS ประกอบด้วย access key ID, secret access key และ session token อายุสั้น กำหนดอายุได้ และใช้ซ้ำไม่ได้หลังหมดอายุ</p>' +
-        '<ul><li><strong>AssumeRole</strong>: IAM user ที่มีอยู่ / cross-account (default 1 ชม.)</li><li><strong>GetFederationToken</strong>: federated user อายุ default นานกว่า คือ 12 ชม.</li><li><strong>GetSessionToken</strong>: IAM user ที่ต้องการความปลอดภัยเพิ่ม เช่น บังคับ MFA</li></ul>',
+      body: '<ul><li><strong>แนวปฏิบัติที่ดี</strong><ul>' +
+        '<li>ใช้ <strong>IAM role</strong> ดึง credential ชั่วคราวก่อน</li>' +
+        '<li>ถ้าทำไม่ได้ ค่อยใช้ <strong>STS</strong></li></ul></li>' +
+        '<li><strong>ห้ามทำ</strong><ul>' +
+        '<li>ฝัง key ในโค้ด</li>' +
+        '<li>แชร์ key ในทีม</li></ul></li></ul>' +
+        '<p>credential จาก STS ประกอบด้วย access key ID, secret access key และ session token</p>' +
+        '<ul><li>อายุสั้น</li><li>กำหนดอายุได้</li><li>ใช้ซ้ำไม่ได้หลังหมดอายุ</li></ul>' +
+        '<ul><li><strong>AssumeRole</strong><ul><li>ใช้กับ IAM user ที่มีอยู่ / cross-account</li><li>อายุ default 1 ชม.</li></ul></li>' +
+        '<li><strong>GetFederationToken</strong><ul><li>ใช้กับ federated user</li><li>อายุ default นานกว่า คือ 12 ชม.</li></ul></li>' +
+        '<li><strong>GetSessionToken</strong><ul><li>ใช้กับ IAM user ที่ต้องการความปลอดภัยเพิ่ม เช่น บังคับ MFA</li></ul></li></ul>',
       refs: ['l-m12-assumerole', 'l-m12-getfedtoken', 'g-m12-sts', 'g-m12-cred']
     },
     {
       heading: 'CloudTrail ไล่รอยผู้ใช้ federated',
-      body: '<p>CloudTrail บันทึก action ของผู้ใช้ที่ authenticate แล้วลง S3 และตั้งให้ตอบสนอง/แจ้งเตือนได้ วิธีไล่ว่าใครสั่ง terminate instance: ค้น <code>TerminateInstances</code> → ดู ARN ของ role ที่ผู้ใช้ assume → ค้น event <code>AssumeRoleWithSAML</code> ที่มี ARN นั้น → อ่านตัวตนผู้ใช้จาก attribute <code>userName</code> (รวม 4 ขั้น)</p>',
+      body: '<ul><li>CloudTrail บันทึก action ของผู้ใช้ที่ authenticate แล้วลง S3</li>' +
+        '<li>ตั้งให้ตอบสนองหรือแจ้งเตือนได้</li></ul>' +
+        '<p>วิธีไล่ว่าใครสั่ง terminate instance (4 ขั้น)</p>' +
+        '<ol><li>ค้น <code>TerminateInstances</code></li>' +
+        '<li>ดู ARN ของ role ที่ผู้ใช้ assume</li>' +
+        '<li>ค้น event <code>AssumeRoleWithSAML</code> ที่มี ARN นั้น</li>' +
+        '<li>อ่านตัวตนผู้ใช้จาก attribute <code>userName</code></li></ol>',
       refs: ['q-m12-cloudtrail'],
       diagram: { title: 'CloudTrail ไล่ผู้ใช้ federated', caption: 'ไล่จาก event TerminateInstances ย้อนไปหา AssumeRoleWithSAML จนเจอ userName', source: 'L471-488', flow: {
         nodes: [{ id: 's1', label: 'ค้น TerminateInstances' }, { id: 's2', label: 'หา ARN ของ IAM role' }, { id: 's3', label: 'ค้น AssumeRoleWithSAML' }, { id: 's4', label: 'อ่าน userName' }],
@@ -37,9 +62,21 @@ GUIDE.register({
     },
     {
       heading: 'Cognito: user pool vs identity pool',
-      body: '<ul><li><strong>User pool</strong> = ไดเรกทอรีผู้ใช้ มี sign-up/sign-in, หน้า login สำเร็จรูปปรับแต่งได้, ควบคุมการเข้าถึง API, ตรวจ credential ที่รั่ว, ยืนยันเบอร์/อีเมล, adaptive authentication และออก token</li>' +
-        '<li><strong>Identity pool</strong> (federated identities) = รับ identity จาก Amazon/Google/Facebook/SAML/OIDC แล้วแลกเป็น <strong>credential ชั่วคราวของ AWS</strong> ผ่าน STS role</li></ul>' +
-        '<p>จำง่าย ๆ: ต้องการ "ล็อกอิน" = user pool, ต้องการ "สิทธิ์ AWS ตรง ๆ" = identity pool สองตัวใช้ร่วมกันได้</p>',
+      body: '<ul><li><strong>User pool</strong> = ไดเรกทอรีผู้ใช้<ul>' +
+        '<li>มี sign-up/sign-in</li>' +
+        '<li>มีหน้า login สำเร็จรูป ปรับแต่งได้</li>' +
+        '<li>ควบคุมการเข้าถึง API</li>' +
+        '<li>ตรวจ credential ที่รั่ว</li>' +
+        '<li>ยืนยันเบอร์/อีเมล</li>' +
+        '<li>มี adaptive authentication</li>' +
+        '<li>ออก token</li></ul></li>' +
+        '<li><strong>Identity pool</strong> (federated identities)<ul>' +
+        '<li>รับ identity จาก Amazon/Google/Facebook/SAML/OIDC</li>' +
+        '<li>แลกเป็น <strong>credential ชั่วคราวของ AWS</strong> ผ่าน STS role</li></ul></li></ul>' +
+        '<p>จำง่าย ๆ</p>' +
+        '<ul><li>ต้องการ "ล็อกอิน" = user pool</li>' +
+        '<li>ต้องการ "สิทธิ์ AWS ตรง ๆ" = identity pool</li>' +
+        '<li>สองตัวนี้ใช้ร่วมกันได้</li></ul>',
       refs: ['g-m12-pools', 'q-m12-employee-login', 'q-m12-identity-pool'],
       diagram: { title: 'Identity pool: ขอ credential ชั่วคราว', caption: 'แอปตัวเดิมวาดซ้ำเป็นขั้น ๆ: login ได้ JWT, เอา JWT ไปขอ credential แล้วใช้ credential เรียก DynamoDB (ขั้น 4 ในสไลด์อ่านไม่ออก จึงไม่วาด และขั้น 8 คือ DynamoDB คืนข้อมูลให้แอป)', source: 'L676, L690', flow: {
         nodes: [{ id: 'app1', label: 'Mobile app' }, { id: 'up', label: 'Cognito user pool' }, { id: 'app2', label: 'Mobile app + JWT' }, { id: 'ip', label: 'Cognito identity pool' }, { id: 'app3', label: 'Mobile app + credential' }, { id: 'ddb', label: 'DynamoDB + IAM policy' }],
@@ -48,8 +85,13 @@ GUIDE.register({
     {
       heading: 'Token 3 ชนิด และ flow กับ API Gateway',
       body: '<ul><li><strong>ID token</strong>: claim เกี่ยวกับตัวผู้ใช้ (ชื่อ, อีเมล)</li><li><strong>Access token</strong>: อนุญาตการเรียก API ตาม custom scope ของ resource ที่ป้องกันไว้</li><li><strong>Refresh token</strong>: ใช้ขอ ID/access token ใหม่</li></ul>' +
-        '<p>flow ตัวอย่าง (6 ขั้น): แอปมือถือ login กับ user pool → ได้ JWT → เรียก API Gateway → API Gateway ตรวจ ID token → เรียก Lambda → Lambda เข้าถึง DynamoDB ส่วน flow identity pool (8 ขั้น) เพิ่มการขอ credential ชั่วคราวแล้ว sign request ให้ IAM policy ตรวจ</p>' +
-        '<p>ข้อสอบตัวอย่าง: sign-up/sign-in = Cognito (ไม่ใช่ IAM) และ log sign-in event = Lambda ที่ถูกเรียกหลัง post-authentication</p>',
+        '<p>flow ตัวอย่างกับ user pool (6 ขั้น)</p>' +
+        '<ol><li>แอปมือถือ login กับ user pool</li><li>ได้ JWT</li><li>เรียก API Gateway</li><li>API Gateway ตรวจ ID token</li><li>เรียก Lambda</li><li>Lambda เข้าถึง DynamoDB</li></ol>' +
+        '<p>flow ของ identity pool (8 ขั้น) เพิ่มสองอย่างเข้ามา</p>' +
+        '<ul><li>ขอ credential ชั่วคราว</li><li>sign request ให้ IAM policy ตรวจ</li></ul>' +
+        '<p>ข้อสอบตัวอย่าง</p>' +
+        '<ul><li>sign-up/sign-in = Cognito (ไม่ใช่ IAM)</li>' +
+        '<li>log sign-in event = Lambda ที่ถูกเรียกหลัง post-authentication</li></ul>',
       refs: ['g-m12-token', 'q-m12-sample-exam', 'q-m12-design-api', 'q-m12-design-identity'],
       diagram: { title: 'User pool + API Gateway', caption: 'แอปได้ JWT จาก user pool แล้วเรียก API ที่ API Gateway ตรวจ ID token ก่อนส่งต่อ', source: 'L660', flow: {
         nodes: [{ id: 'app', label: 'Mobile app' }, { id: 'up', label: 'Cognito user pool' }, { id: 'apigw', label: 'API Gateway' }, { id: 'lambda', label: 'Lambda' }, { id: 'ddb', label: 'DynamoDB' }],

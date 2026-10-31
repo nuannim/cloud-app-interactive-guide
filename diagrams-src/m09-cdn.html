@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-cdn · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 398" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-cdn-title m09-cdn-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-cdn-title">CDN ลดระยะทางและจำนวน hop</title>
+      <desc id="m09-cdn-desc">ไม่มี CDN ผู้ใช้เข้า origin ที่อยู่ไกลผ่าน router หลายตัว latency สูง มี CDN ผู้ใช้ได้ข้อมูลจาก POP ที่อยู่ใกล้ซึ่งเก็บสำเนา static และเนื้อหา dynamic ที่เหมาะกับพื้นที่ POP ดึงจาก origin เมื่อไม่มีสำเนา</desc>
+      <defs>
+        <marker id="m09-cdn-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m09-cdn-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-cdn-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-cdn-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-cdn-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="48" width="688" height="118" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="52" width="231" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="64" fill="#5f5d57" font-size="12" font-weight="600">ไม่มี CDN: ไกลและผ่านหลาย hop</text>
+<rect x="32" y="82" width="88" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="82" width="88" height="48" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="76" y="110" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ผู้ใช้</text>
+<rect x="170" y="92" width="64" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="170" y="92" width="64" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="202" y="110" fill="#5f5d57" font-size="12" text-anchor="middle">Router</text>
+<rect x="270" y="92" width="64" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="270" y="92" width="64" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="302" y="110" fill="#5f5d57" font-size="12" text-anchor="middle">Router</text>
+<rect x="370" y="92" width="64" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="370" y="92" width="64" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="402" y="110" fill="#5f5d57" font-size="12" text-anchor="middle">Router</text>
+<rect x="470" y="92" width="64" height="28" rx="6" fill="#f6f5f1"/>
+<rect x="470" y="92" width="64" height="28" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="502" y="110" fill="#5f5d57" font-size="12" text-anchor="middle">Router</text>
+<rect x="590" y="82" width="100" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="590" y="82" width="100" height="48" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="640" y="110" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Origin</text>
+<path d="M120,106 L170,106" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-cdn-arrow-red)"/>
+<path d="M234,106 L270,106" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-cdn-arrow-red)"/>
+<path d="M334,106 L370,106" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-cdn-arrow-red)"/>
+<path d="M434,106 L470,106" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-cdn-arrow-red)"/>
+<path d="M534,106 L590,106" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-cdn-arrow-red)"/>
+<text x="360" y="152" fill="#b91c1c" font-size="12" font-weight="600" text-anchor="middle">ระยะทางไกล + hop เยอะ → latency สูง</text>
+<rect x="16" y="184" width="688" height="158" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="188" width="238" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="200" fill="#5f5d57" font-size="12" font-weight="600">มี CDN: เสิร์ฟจากจุดใกล้ผู้ใช้</text>
+<rect x="32" y="220" width="88" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="32" y="220" width="88" height="48" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="76" y="248" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ผู้ใช้</text>
+<rect x="250" y="220" width="150" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="250" y="220" width="150" height="48" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="325" y="239" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">CDN POP</text>
+<text x="325" y="257" fill="#5f5d57" font-size="12" text-anchor="middle">สำเนา static ใกล้ผู้ใช้</text>
+<rect x="590" y="220" width="100" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="590" y="220" width="100" height="48" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="640" y="248" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Origin</text>
+<path d="M120,244 L250,244" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-cdn-arrow-green)"/>
+<rect x="155" y="220" width="60" height="16" fill="#f6f5f1"/>
+<text x="185" y="232" fill="#5f5d57" font-size="12" text-anchor="middle">สั้น ใกล้</text>
+<path d="M400,244 L590,244" fill="none" stroke="#5f5d57" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m09-cdn-arrow)"/>
+<rect x="429" y="220" width="132" height="16" fill="#f6f5f1"/>
+<text x="495" y="232" fill="#5f5d57" font-size="12" text-anchor="middle">ดึงมาเมื่อไม่มีใน POP</text>
+<text x="32" y="300" fill="#1d1d1b" font-size="12">static: เสิร์ฟจากสำเนาใน POP ได้เลย</text>
+<text x="32" y="320" fill="#1d1d1b" font-size="12">dynamic: เนื้อหาที่เหมาะกับพื้นที่ของผู้ใช้</text>
+<line x1="16" y1="362" x2="704" y2="362" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="382" fill="#5f5d57" font-size="12">ตามสไลด์ What is a CDN? · แดง = ช้า (ไกล/หลาย hop) · เขียว = เร็ว · ส้ม = CDN POP (point of presence)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

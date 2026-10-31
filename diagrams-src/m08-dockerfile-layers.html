@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-dockerfile-layers · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 412" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-dockerfile-layers-title m08-dockerfile-layers-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-dockerfile-layers-title">Dockerfile แต่ละคำสั่งคือ 1 layer</title>
+      <desc id="m08-dockerfile-layers-desc">ตัวอย่าง Dockerfile ของ Apache บน CentOS 7 แสดงว่าแต่ละคำสั่งเพิ่ม layer แบบ read-only ซ้อนกันเป็น image ได้ 4 ชั้น และเมื่อรัน container จะมีชั้น read/write เพิ่มอยู่บนสุด</desc>
+      <defs>
+        <marker id="m08-dockerfile-layers-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="56" width="380" height="240" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="24" y="60" width="184" height="16" rx="2" fill="#f6f5f1"/>
+<text x="32" y="72" fill="#5f5d57" font-size="12" font-weight="600">Dockerfile (บนลงล่าง)</text>
+<rect x="412" y="56" width="292" height="312" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<rect x="420" y="60" width="144" height="16" rx="2" fill="#f6f5f1"/>
+<text x="428" y="72" fill="#5f5d57" font-size="12" font-weight="600">ตอนรัน container</text>
+<circle cx="40" cy="100" r="10" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="40" y="104" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">1</text>
+<text x="64" y="104" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace">FROM centos:7</text>
+<circle cx="40" cy="130" r="10" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="40" y="134" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">2</text>
+<text x="64" y="134" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace">RUN yum –y update &amp;&amp; yum –y install httpd</text>
+<circle cx="40" cy="160" r="10" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="40" y="164" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">3</text>
+<text x="64" y="164" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace">EXPOSE 80</text>
+<circle cx="40" cy="190" r="10" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="40" y="194" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">4</text>
+<text x="64" y="194" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace">ADD run-httpd.sh /run-httpd.sh</text>
+<circle cx="40" cy="220" r="10" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="40" y="224" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">4</text>
+<text x="64" y="224" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace">RUN chmod –v +x /run-httpd.sh</text>
+<text x="64" y="254" fill="#1d1d1b" font-size="12" font-family="ui-monospace,Consolas,monospace">CMD ["/run-httpd.sh"]</text>
+<text x="24" y="322" fill="#5f5d57" font-size="12">ทุกคำสั่งของ Dockerfile เพิ่ม 1 layer แบบ read-only</text>
+<text x="24" y="340" fill="#5f5d57" font-size="12">ตอนรัน container จะมีชั้น read/write วางบนสุดอีก 1 ชั้น</text>
+<rect x="436" y="100" width="244" height="44" rx="6" fill="#f6f5f1"/>
+<rect x="436" y="100" width="244" height="44" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="558" y="126" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Container layer · read/write</text>
+<rect x="436" y="160" width="244" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="436" y="160" width="244" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="558" y="184" fill="#1d1d1b" font-size="12" text-anchor="middle">4 · ADD + RUN chmod</text>
+<rect x="436" y="208" width="244" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="436" y="208" width="244" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="558" y="232" fill="#1d1d1b" font-size="12" text-anchor="middle">3 · EXPOSE 80</text>
+<rect x="436" y="256" width="244" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="436" y="256" width="244" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="558" y="280" fill="#1d1d1b" font-size="12" text-anchor="middle">2 · RUN yum update/install</text>
+<rect x="436" y="304" width="244" height="40" rx="6" fill="#f6f5f1"/>
+<rect x="436" y="304" width="244" height="40" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="558" y="328" fill="#1d1d1b" font-size="12" text-anchor="middle">1 · Base: CentOS 7</text>
+<line x1="16" y1="380" x2="704" y2="380" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="400" fill="#5f5d57" font-size="12">เลขในวงกลม = ลำดับ layer ตามสไลด์ (บรรทัด CMD ไม่ถูกนับในภาพของสไลด์)</text>
+
+    </svg>
+  </div>
+</body>
+</html>

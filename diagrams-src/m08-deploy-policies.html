@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-deploy-policies · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-deploy-policies-title m08-deploy-policies-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-deploy-policies-title">Deployment policy ของ Elastic Beanstalk 5 แบบ</title>
+      <desc id="m08-deploy-policies-desc">เรียงจาก All at once ที่เร็วที่สุดแต่มี downtime ไปจนถึง Traffic splitting ที่ใช้ทำ canary testing: Rolling, Rolling with batch และ Immutable อยู่ตรงกลาง ยิ่งยอมให้มี downtime ยิ่ง deploy ได้เร็ว</desc>
+      <defs>
+        <marker id="m08-deploy-policies-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-deploy-policies-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-deploy-policies-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-deploy-policies-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-deploy-policies-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<line x1="16" y1="64" x2="700" y2="64" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-deploy-policies-arrow)"/>
+<text x="16" y="48" fill="#b91c1c" font-size="12" font-weight="600">เร็วกว่า · downtime มากกว่า</text>
+<text x="704" y="48" fill="#15803d" font-size="12" font-weight="600" text-anchor="end">ช้ากว่า · ปลอดภัยกว่า</text>
+<rect x="16" y="88" width="128" height="120" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="88" width="128" height="120" rx="6" fill="rgba(185,28,28,0.09)" stroke="#b91c1c" stroke-width="1"/>
+<text x="80" y="125" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">All at once</text>
+<text x="80" y="143" fill="#5f5d57" font-size="12" text-anchor="middle">ทุก instance พร้อมกัน</text>
+<text x="80" y="161" fill="#5f5d57" font-size="12" text-anchor="middle">เร็วที่สุด</text>
+<text x="80" y="179" fill="#b91c1c" font-size="12" font-weight="600" text-anchor="middle">มี downtime</text>
+<rect x="156" y="88" width="128" height="120" rx="6" fill="#f6f5f1"/>
+<rect x="156" y="88" width="128" height="120" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="220" y="125" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Rolling</text>
+<text x="220" y="143" fill="#5f5d57" font-size="12" text-anchor="middle">ทีละ batch</text>
+<text x="220" y="161" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่ downtime</text>
+<text x="220" y="179" fill="#5f5d57" font-size="12" text-anchor="middle">capacity ลดชั่วคราว</text>
+<rect x="296" y="88" width="128" height="120" rx="6" fill="#f6f5f1"/>
+<rect x="296" y="88" width="128" height="120" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="125" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Rolling with batch</text>
+<text x="360" y="143" fill="#5f5d57" font-size="12" text-anchor="middle">เพิ่ม batch ใหม่ก่อน</text>
+<text x="360" y="161" fill="#5f5d57" font-size="12" text-anchor="middle">ไม่เสีย capacity</text>
+<text x="360" y="179" fill="#5f5d57" font-size="12" text-anchor="middle">นานกว่า rolling</text>
+<rect x="436" y="88" width="128" height="120" rx="6" fill="#f6f5f1"/>
+<rect x="436" y="88" width="128" height="120" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="500" y="125" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Immutable</text>
+<text x="500" y="143" fill="#5f5d57" font-size="12" text-anchor="middle">instance ใหม่ทั้งชุด</text>
+<text x="500" y="161" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">rollback ปลอดภัย</text>
+<text x="500" y="179" fill="#5f5d57" font-size="12" text-anchor="middle">ใช้เวลานาน</text>
+<rect x="576" y="88" width="128" height="120" rx="6" fill="#f6f5f1"/>
+<rect x="576" y="88" width="128" height="120" rx="6" fill="rgba(21,128,61,0.10)" stroke="#15803d" stroke-width="1"/>
+<text x="640" y="125" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Traffic splitting</text>
+<text x="640" y="143" fill="#5f5d57" font-size="12" text-anchor="middle">เหมือน immutable</text>
+<text x="640" y="161" fill="#5f5d57" font-size="12" text-anchor="middle">ส่ง traffic บางส่วน</text>
+<text x="640" y="179" fill="#15803d" font-size="12" font-weight="600" text-anchor="middle">ใช้ทำ canary</text>
+<rect x="16" y="228" width="688" height="68" rx="6" fill="rgba(180,83,9,0.10)"/>
+<rect x="16" y="228" width="4" height="68" fill="#b45309"/>
+<text x="34" y="252" fill="#b45309" font-size="12" font-weight="600">ข้อแลกเปลี่ยนหลัก: ยิ่งยอมให้มี downtime ยิ่ง deploy ได้เร็ว</text>
+<text x="34" y="272" fill="#1d1d1b" font-size="12">ยอมหยุดได้ → All at once (เร็วที่สุด) · ไม่อยากหยุด → Rolling ไปจนถึง Immutable / Traffic splitting ซึ่งใช้เวลานานขึ้น</text>
+<text x="16" y="324" fill="#5f5d57" font-size="12">Blue/green ทำแยกต่างหาก (clone environment แล้วสลับ CNAME) ดูหัวข้อถัดไป</text>
+<line x1="16" y1="340" x2="704" y2="340" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="360" fill="#5f5d57" font-size="12">แดง = มี downtime · เทา = ไม่ downtime แต่ capacity ลดหรือใช้เวลานาน · เขียว = rollback ปลอดภัย ไม่สะดุด</text>
+
+    </svg>
+  </div>
+</body>
+</html>

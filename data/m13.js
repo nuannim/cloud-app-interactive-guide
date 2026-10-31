@@ -18,8 +18,9 @@ GUIDE.register({
     {
       heading: 'CI vs Continuous delivery vs Continuous deployment',
       body: '<ul><li><strong>CI</strong>: รวมโค้ดและ build บ่อย ๆ (คนมักคิดว่า CI จบแค่ขั้น build)</li>' +
-        '<li><strong>Continuous delivery</strong>: ต่อยอดจาก CI ให้มั่นใจมากขึ้นว่าซอฟต์แวร์ใช้ได้จริงบน production มีจุด <em>manual intervention</em> (คนอนุมัติ) ก่อน deploy</li>' +
-        '<li><strong>Continuous deployment</strong>: อัตโนมัติตลอดทางจนถึง deploy ไม่มีคนมาคั่น</li></ul>' +
+        '<li><strong>Continuous delivery</strong><ul><li>ต่อยอดจาก CI ให้มั่นใจมากขึ้นว่าซอฟต์แวร์ใช้ได้จริงบน production</li>' +
+        '<li>มีจุด <em>manual intervention</em> (คนอนุมัติ) ก่อน deploy</li></ul></li>' +
+        '<li><strong>Continuous deployment</strong><ul><li>อัตโนมัติตลอดทางจนถึง deploy</li><li>ไม่มีคนมาคั่น</li></ul></li></ul>' +
         '<p>จำง่าย ๆ: ถ้ามีคนกดอนุมัติก่อนขึ้น production = delivery, ถ้าไม่มี = deployment</p>',
       refs: ['g-m13-cicd', 'q-m13-approval', 'c-m13-cicd-approval']
     },
@@ -28,8 +29,11 @@ GUIDE.register({
       body: '<ul><li><strong>CodePipeline</strong>: ร้อยทุกขั้นเข้าเป็น pipeline ของการปล่อย</li>' +
         '<li><strong>CodeBuild</strong>: ขั้น build (และทดสอบ)</li>' +
         '<li><strong>CodeDeploy</strong>: ขั้น deploy</li>' +
-        '<li>CodeConnections อยู่ในกลุ่มเครื่องมือ CI/CD เหมือนกัน แต่สไลด์ไม่ได้อธิบายหน้าที่ จึงไม่ต้องกังวลว่าจะถูกถามรายละเอียด</li></ul>' +
-        '<p>ขั้น Test ในภาพสไลด์เขียนว่า "your favorite tools" คือจะใช้เครื่องมือที่ชอบก็ได้ ส่วนในแล็บ คาเฟ่เก็บโค้ดไว้ใน code repository แล้วให้ CodePipeline อัปเดตเว็บอัตโนมัติ</p>',
+        '<li>CodeConnections อยู่ในกลุ่มเครื่องมือ CI/CD เหมือนกัน</li>' +
+        '<li>สไลด์ไม่ได้อธิบายหน้าที่ของ CodeConnections จึงไม่ต้องกังวลว่าจะถูกถามรายละเอียด</li></ul>' +
+        '<ul><li>ขั้น Test ในภาพสไลด์เขียนว่า "your favorite tools" คือใช้เครื่องมือที่ชอบก็ได้</li>' +
+        '<li>ในแล็บ คาเฟ่เก็บโค้ดไว้ใน code repository</li>' +
+        '<li>แล้วให้ CodePipeline อัปเดตเว็บอัตโนมัติ</li></ul>',
       refs: ['g-m13-codesvc', 'q-m13-pipeline', 'q-m13-design', 'q-m13-written'],
       diagram: {
         title: 'ขั้นตอนของ CI/CD pipeline',
@@ -56,10 +60,14 @@ GUIDE.register({
     },
     {
       heading: 'CloudFormation: template และ stack',
-      body: '<p>Infrastructure as code = สร้าง/แก้/ลบ infrastructure ด้วยโค้ด จึงเปิด environment dev/test ที่เหมือนกันได้ทุกครั้ง และใช้โค้ดชุดเดียวกันสร้าง production</p>' +
+      body: '<p>Infrastructure as code = สร้าง/แก้/ลบ infrastructure ด้วยโค้ด</p>' +
+        '<ul><li>เปิด environment dev/test ที่เหมือนกันได้ทุกครั้ง</li>' +
+        '<li>ใช้โค้ดชุดเดียวกันสร้าง production ได้</li></ul>' +
         '<ul><li><strong>Template</strong> = ไฟล์ข้อความ JSON หรือ YAML ระบุ resource ที่จะสร้าง</li>' +
-        '<li><strong>Stack</strong> = หน่วยของการ deploy ที่เกิดจาก template สร้างและอัปเดตได้ <strong>ลบ stack = resource ใน stack ถูกลบทั้งหมด</strong></li>' +
-        '<li>จำนวน stack อาจติด quota ถ้าชน ให้ขอเพิ่มผ่าน <strong>Support Center</strong> (เฉลยข้อสอบตัวอย่างในสไลด์)</li></ul>',
+        '<li><strong>Stack</strong> = หน่วยของการ deploy ที่เกิดจาก template<ul><li>สร้างและอัปเดตได้</li>' +
+        '<li><strong>ลบ stack = resource ใน stack ถูกลบทั้งหมด</strong></li></ul></li>' +
+        '<li>จำนวน stack อาจติด quota<ul><li>ถ้าชน ให้ขอเพิ่มผ่าน <strong>Support Center</strong></li>' +
+        '<li>(เฉลยข้อสอบตัวอย่างในสไลด์)</li></ul></li></ul>',
       refs: ['q-m13-stack-quota', 'l-m13-stack-quota'],
       diagram: {
         title: 'Template, stack และ resource',
@@ -82,10 +90,12 @@ GUIDE.register({
     },
     {
       heading: 'โครงสร้าง template',
-      body: '<p>ส่วนที่มีได้: AWSTemplateFormatVersion, Description, Metadata, Parameters, Mappings, Conditions, Transform, Resources, Outputs</p>' +
+      body: '<p>ส่วนที่มีได้ใน template:</p>' +
+        '<ul><li>AWSTemplateFormatVersion</li><li>Description</li><li>Metadata</li><li>Parameters</li><li>Mappings</li>' +
+        '<li>Conditions</li><li>Transform</li><li>Resources</li><li>Outputs</li></ul>' +
         '<ul><li>มี <strong>Resources</strong> เป็นส่วนเดียวที่จำเป็น (required)</li>' +
         '<li>AWSTemplateFormatVersion เวอร์ชันล่าสุดคือ 2010-09-09</li>' +
-        '<li>ตัวอย่าง Parameters ในสไลด์: Type, Default, AllowedValues, NoEcho (ซ่อนค่าไม่ให้แสดง)</li></ul>',
+        '<li>ตัวอย่าง Parameters ในสไลด์<ul><li>Type</li><li>Default</li><li>AllowedValues</li><li>NoEcho (ซ่อนค่าไม่ให้แสดง)</li></ul></li></ul>',
       refs: ['g-m13-sections', 'l-m13-required', 'l-m13-version']
     },
     {
@@ -93,8 +103,10 @@ GUIDE.register({
       body: '<ul><li>framework โอเพนซอร์สสำหรับสร้าง template ของแอป serverless แล้ว deploy ผ่าน CloudFormation</li>' +
         '<li>เป็น <strong>ส่วนขยายของ CloudFormation</strong> จึงได้ความน่าเชื่อถือของการ deploy แบบเดียวกัน</li>' +
         '<li>ใส่บรรทัด <code>Transform: AWS::Serverless-2016-10-31</code> เพื่อบอก CloudFormation ว่าต้องแปลง SAM template</li>' +
-        '<li>ประเภท resource ในตัวอย่าง: <code>AWS::Serverless::Function</code> (Lambda + API event) และ <code>AWS::Serverless::SimpleTable</code> (DynamoDB)</li>' +
-        '<li>เชื่อมกับ CodeBuild/CodeDeploy/CodePipeline ได้ และจำลองการเรียกใช้แบบ local ได้</li></ul>',
+        '<li>ประเภท resource ในตัวอย่าง<ul><li><code>AWS::Serverless::Function</code> (Lambda + API event)</li>' +
+        '<li><code>AWS::Serverless::SimpleTable</code> (DynamoDB)</li></ul></li>' +
+        '<li>เชื่อมกับ CodeBuild/CodeDeploy/CodePipeline ได้</li>' +
+        '<li>จำลองการเรียกใช้แบบ local ได้</li></ul>',
       refs: ['g-m13-iac', 'q-m13-sam', 'l-m13-sam-transform'],
       diagram: {
         title: 'SAM template ผ่าน CloudFormation',

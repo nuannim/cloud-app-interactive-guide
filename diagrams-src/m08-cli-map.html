@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-cli-map · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 412" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-cli-map-title m08-cli-map-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-cli-map-title">แผนที่คำสั่ง Docker CLI</title>
+      <desc id="m08-cli-map-desc">build สร้าง image จาก Dockerfile, run สร้าง container จาก image, commit สร้าง image ใหม่จาก container, push ส่ง image ไป registry คำสั่ง images, tag, rmi ใช้กับ image และ ps, logs, port, inspect, exec, stop, start, rm, update ใช้กับ container</desc>
+      <defs>
+        <marker id="m08-cli-map-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-cli-map-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="96" width="120" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="96" width="120" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="76" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Dockerfile</text>
+<rect x="300" y="96" width="120" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="300" y="96" width="120" height="48" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="360" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Image</text>
+<rect x="584" y="96" width="120" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="584" y="96" width="120" height="48" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="644" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Container</text>
+<path d="M136,120 L300,120" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-cli-map-arrow)"/>
+<rect x="196" y="96" width="44" height="16" fill="#f6f5f1"/>
+<text x="218" y="108" fill="#5f5d57" font-size="12" text-anchor="middle">build</text>
+<path d="M420,120 L584,120" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-cli-map-arrow)"/>
+<rect x="485" y="96" width="34" height="16" fill="#f6f5f1"/>
+<text x="502" y="108" fill="#5f5d57" font-size="12" text-anchor="middle">run</text>
+<path d="M644,96 L644,72 Q644,64 636,64 L368,64 Q360,64 360,72 L360,96" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-cli-map-arrow)"/>
+<rect x="474" y="44" width="56" height="16" fill="#f6f5f1"/>
+<text x="502" y="56" fill="#5f5d57" font-size="12" text-anchor="middle">commit</text>
+<rect x="300" y="224" width="120" height="48" rx="6" fill="#f6f5f1"/>
+<rect x="300" y="224" width="120" height="48" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="360" y="252" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Registry</text>
+<path d="M380,144 L380,224" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m08-cli-map-arrow)"/>
+<text x="392" y="188" fill="#1d1d1b" font-size="12">push</text>
+<rect x="16" y="168" width="240" height="100" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="168" width="240" height="100" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="30" y="190" fill="#1d1d1b" font-size="12" font-weight="600">กับ image</text>
+<text x="30" y="214" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">images</tspan><tspan fill="#5f5d57"> · ดูรายการ</tspan></text>
+<text x="30" y="232" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">tag</tspan><tspan fill="#5f5d57"> · ติด tag</tspan></text>
+<text x="30" y="250" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">rmi</tspan><tspan fill="#5f5d57"> · ลบ image</tspan></text>
+<path d="M320,144 L320,148 Q320,156 312,156 L244,156 Q236,156 236,164 L236,168" fill="none" stroke="#5f5d57" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m08-cli-map-arrow)"/>
+<rect x="464" y="168" width="240" height="196" rx="6" fill="#f6f5f1"/>
+<rect x="464" y="168" width="240" height="196" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="478" y="190" fill="#1d1d1b" font-size="12" font-weight="600">กับ container</text>
+<text x="478" y="214" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">ps</tspan><tspan fill="#5f5d57"> · ดูตัวที่รันอยู่</tspan></text>
+<text x="478" y="232" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">logs</tspan><tspan fill="#5f5d57"> · ดู log</tspan></text>
+<text x="478" y="250" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">port</tspan><tspan fill="#5f5d57"> · ดู port mapping</tspan></text>
+<text x="478" y="268" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">inspect</tspan><tspan fill="#5f5d57"> · ดูรายละเอียด</tspan></text>
+<text x="478" y="286" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">exec</tspan><tspan fill="#5f5d57"> · รันคำสั่งใน container</tspan></text>
+<text x="478" y="304" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">stop / start</tspan><tspan fill="#5f5d57"> · หยุด / เริ่ม</tspan></text>
+<text x="478" y="322" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">rm</tspan><tspan fill="#5f5d57"> · ลบ container</tspan></text>
+<text x="478" y="340" font-size="12"><tspan font-family="ui-monospace,Consolas,monospace" fill="#1d1d1b">update</tspan><tspan fill="#5f5d57"> · แก้ config ขณะรัน</tspan></text>
+<path d="M644,144 L644,168" fill="none" stroke="#5f5d57" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#m08-cli-map-arrow)"/>
+<line x1="16" y1="380" x2="704" y2="380" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="400" fill="#5f5d57" font-size="12">คำสั่งครบ 16 ตัวจากสไลด์ build, run, push, commit อยู่บนลูกศร ส่วนที่เหลืออยู่ในกล่อง</text>
+
+    </svg>
+  </div>
+</body>
+</html>

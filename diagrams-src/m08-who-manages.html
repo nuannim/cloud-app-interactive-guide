@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m08-who-manages · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 396" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m08-who-manages-title m08-who-manages-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m08-who-manages-title">ใครดูแลอะไร: EC2, ECS, Fargate และ Beanstalk</title>
+      <desc id="m08-who-manages-desc">ตารางเทียบ 4 ตัวเลือกในแถวแอป container, Docker engine กับ OS ของ VM, และเครื่อง EC2 กับ load balancer และ auto scaling โดยระบุว่าคุณหรือ AWS เป็นผู้ดูแล</desc>
+      <defs>
+        <marker id="m08-who-manages-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+        <marker id="m08-who-manages-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m08-who-manages-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m08-who-manages-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m08-who-manages-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="184" y="52" width="124" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="184" y="52" width="124" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="246" y="74" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Amazon EC2</text>
+<rect x="316" y="52" width="124" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="316" y="52" width="124" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="378" y="74" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ECS บน EC2</text>
+<rect x="448" y="52" width="124" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="448" y="52" width="124" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="510" y="74" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ECS บน Fargate</text>
+<rect x="580" y="52" width="124" height="36" rx="6" fill="#f6f5f1"/>
+<rect x="580" y="52" width="124" height="36" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+<text x="642" y="74" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Beanstalk</text>
+<text x="16" y="134" fill="#1d1d1b" font-size="12" font-weight="600">แอป / container</text>
+<text x="16" y="152" fill="#5f5d57" font-size="12">(โค้ดของคุณ)</text>
+<rect x="184" y="100" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="184" y="100" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="246" y="138" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<rect x="316" y="100" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="316" y="100" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="378" y="138" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<rect x="448" y="100" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="448" y="100" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="510" y="138" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<rect x="580" y="100" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="580" y="100" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="642" y="138" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<text x="16" y="214" fill="#1d1d1b" font-size="12" font-weight="600">Docker engine</text>
+<text x="16" y="232" fill="#5f5d57" font-size="12">และ OS ของ VM</text>
+<rect x="184" y="180" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="184" y="180" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="246" y="218" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<rect x="316" y="180" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="316" y="180" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="378" y="218" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<rect x="448" y="180" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="448" y="180" width="124" height="68" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="510" y="218" fill="#b45309" font-size="12" font-weight="600" text-anchor="middle">AWS</text>
+<rect x="580" y="180" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="580" y="180" width="124" height="68" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="642" y="209" fill="#b45309" font-size="12" font-weight="600" text-anchor="middle">Beanstalk เลือก</text>
+<text x="642" y="227" fill="#5f5d57" font-size="12" text-anchor="middle">platform ให้</text>
+<text x="16" y="294" fill="#1d1d1b" font-size="12" font-weight="600">EC2 + load balancer</text>
+<text x="16" y="312" fill="#5f5d57" font-size="12">+ auto scaling</text>
+<rect x="184" y="260" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="184" y="260" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="246" y="298" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณ</text>
+<rect x="316" y="260" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="316" y="260" width="124" height="68" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="378" y="289" fill="#2e5aa8" font-size="12" font-weight="600" text-anchor="middle">คุณตั้ง cluster</text>
+<text x="378" y="307" fill="#5f5d57" font-size="12" text-anchor="middle">(EC2, VPC, IAM)</text>
+<rect x="448" y="260" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="448" y="260" width="124" height="68" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="510" y="289" fill="#b45309" font-size="12" font-weight="600" text-anchor="middle">ไม่มี EC2</text>
+<text x="510" y="307" fill="#5f5d57" font-size="12" text-anchor="middle">ให้ดูแล</text>
+<rect x="580" y="260" width="124" height="68" rx="6" fill="#f6f5f1"/>
+<rect x="580" y="260" width="124" height="68" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="642" y="289" fill="#b45309" font-size="12" font-weight="600" text-anchor="middle">Beanstalk</text>
+<text x="642" y="307" fill="#5f5d57" font-size="12" text-anchor="middle">จัดให้</text>
+<line x1="16" y1="348" x2="704" y2="348" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="368" fill="#5f5d57" font-size="12">น้ำเงิน = คุณดูแล · ส้ม = AWS หรือ Beanstalk ดูแล/ตั้งให้ · เส้นประ = ความรู้ทั่วไป ไม่อยู่ในสไลด์</text>
+<text x="16" y="386" fill="#5f5d57" font-size="12">สรุปจากสไลด์ ECS แบบ Fargate/EC2 และ Elastic Beanstalk (ไม่ใช่ตารางที่อยู่ในสไลด์)</text>
+
+    </svg>
+  </div>
+</body>
+</html>
