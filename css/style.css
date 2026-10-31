@@ -121,6 +121,56 @@ a.btn, a.chip { display: inline-flex; align-items: center; }
 #nav .count { display: inline-block; min-width: 1.4em; padding: 0 .4em; margin-left: 2px; border-radius: 999px; background: var(--accent); color: var(--accent-text); font-size: .78rem; font-weight: 700; text-align: center; }
 #nav .count[hidden] { display: none; }
 
+/* Mindmap: จอกว้างใช้แผนผัง SVG, จอแคบใช้โครงต้นไม้พับได้ */
+.mm-svg-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; padding: 6px; }
+.mm-svg-wrap svg { display: block; width: 100%; max-width: 760px; height: auto; margin-inline: auto; }
+.mm-outline { display: none; }
+.mm-branch { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 14px; margin-bottom: 10px; }
+.mm-branch summary { cursor: pointer; font-weight: 600; padding: 10px 0; display: flex; align-items: center; gap: 10px; }
+.mm-branch ul { margin: 0 0 10px; padding-left: 1.4em; }
+.mm-branch li { margin: 3px 0; }
+.mm-dot { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+@media (max-width: 700px) { .mm-svg-wrap { display: none; } .mm-outline { display: block; } }
+
+/* Roadmap session: sidebar ซ้ายพับได้ (จอแคบเป็น drawer) */
+main.has-rm { max-width: 1240px; }
+.rm-shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: start; }
+.rm-shell.collapsed { grid-template-columns: 52px minmax(0, 1fr); }
+.rm-main { min-width: 0; max-width: 860px; }
+.rm-side { position: sticky; top: 76px; max-height: calc(100vh - 92px); overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+.rm-side:focus { outline: none; }
+.rm-side-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.rm-collapse { font: inherit; cursor: pointer; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); flex: none; }
+.rm-collapse:hover { border-color: var(--accent); }
+.rm-shell.collapsed .rm-side { padding: 8px; }
+.rm-shell.collapsed .rm-side-title, .rm-shell.collapsed .rm-side-body { display: none; }
+.rm-shell.collapsed .rm-collapse svg { transform: rotate(180deg); }
+.rm-day-side { border-top: 1px solid var(--border); padding: 6px 0; }
+.rm-day-side summary { cursor: pointer; font-weight: 600; padding: 6px 0; display: flex; align-items: center; gap: 8px; }
+.rm-list { list-style: none; margin: 0; padding: 0; }
+.rm-link { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: .93rem; line-height: 1.35; }
+.rm-link:hover { background: var(--surface-2); }
+.rm-link .rm-ico { flex: none; color: var(--muted); display: grid; }
+.rm-link .rm-name { flex: 1; min-width: 0; }
+.rm-link.done .rm-ico { color: var(--ok-solid); }
+.rm-link.current { background: var(--accent-soft); font-weight: 600; }
+.rm-link.current .rm-ico { color: var(--accent); }
+.rm-fab, .rm-scrim { display: none; }
+@media (max-width: 899px) {
+  .rm-shell, .rm-shell.collapsed { display: block; }
+  .rm-side { position: fixed; z-index: 60; left: 0; top: 0; bottom: 0; width: min(88vw, 340px); max-height: none; border-radius: 0 12px 12px 0; transform: translateX(-104%); padding: 14px; }
+  .rm-shell.collapsed .rm-side { padding: 14px; }
+  .rm-shell.collapsed .rm-side-title, .rm-shell.collapsed .rm-side-body { display: block; }
+  .rm-shell.collapsed .rm-collapse svg { transform: none; }
+  .rm-shell.drawer-open .rm-side { transform: none; }
+  .rm-shell.drawer-open .rm-scrim { display: block; position: fixed; z-index: 55; inset: 0; background: rgba(0, 0, 0, .4); }
+  .rm-fab { display: inline-flex; align-items: center; gap: 6px; position: fixed; z-index: 50; right: 12px; bottom: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, .25); }
+  .rm-main { max-width: none; padding-bottom: 72px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @media (max-width: 899px) { .rm-side { transition: transform .2s ease-out; } }
+}
+
 /* Roadmap */
 .rm-stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 10px; }
 .rm-stat { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; font-weight: 600; }
@@ -227,6 +277,11 @@ th { color: var(--muted); font-weight: 600; }
 .canvas-wrap { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 10px; }
 .canvas-wrap svg { display: block; width: 100%; height: auto; background: var(--surface-2); border-radius: 8px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .flow-wrap { overflow-x: auto; }
+/* แผนภาพวาดมือ (skill diagram-design): พื้นกระดาษของตัวเอง อ่านได้ทั้งโหมดสว่าง/มืด, จอแคบเลื่อนข้างแทนการย่อจนอ่านไม่ออก */
+.svg-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: #f6f5f1; padding: 4px; }
+.svg-wrap svg { display: block; width: 100%; min-width: 600px; max-width: 720px; height: auto; margin-inline: auto; }
+.svg-hint { display: none; margin: 4px 0 0; }
+@media (max-width: 700px) { .svg-hint { display: block; } }
 .cv-node { cursor: grab; touch-action: none; }
 .cv-area { fill: transparent; stroke: none; }
 .cv-tile { stroke: none; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .25)); }

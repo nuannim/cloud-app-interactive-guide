@@ -110,7 +110,7 @@
     var maxRows = Math.max.apply(null, colKeys.map(function (k) { return cols[k].length; }));
     // จอแคบ: วางแนวตั้ง (ขั้นตอนไหลจากบนลงล่าง) เพื่อให้ตัวอักษรอ่านออกโดยไม่ต้องเลื่อนข้าง
     // และเมื่อแนวนอนใส่กรอบไม่พอดี (ย่อแล้วเล็กกว่า 80%) ก็วางแนวตั้งเช่นกัน
-    var hostEl = document.getElementById('app') || document.body;
+    var hostEl = document.querySelector('.rm-main') || document.getElementById('app') || document.body;
     // พื้นที่ใช้ได้จริง = ความกว้างหน้า ลบ padding ของหน้า การ์ด กรอบแผนภาพ และกล่องเฉลย (~120px)
     var avail = (hostEl.clientWidth || window.innerWidth) - 120;
     var wideW = colKeys.length * (NW + 80) + 20;

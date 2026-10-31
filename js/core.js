@@ -140,6 +140,10 @@
     return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
   }
   G.dayKey = dayKey;
+  // แจ้งส่วนอื่น (เช่น sidebar แผนสอบ) ว่าความคืบหน้าเปลี่ยน
+  function progressChanged() {
+    try { document.dispatchEvent(new CustomEvent('aws-progress')); } catch (e) { /* ignore */ }
+  }
 
   G.store = {
     results: function () { return load().results; },
@@ -152,11 +156,12 @@
       var k = dayKey();
       s.days[k] = (s.days[k] || 0) + 1;
       save();
+      progressChanged();
     },
     // แผนเตรียมสอบ {days, start}
     plan: function () { return load().plan; },
     setPlan: function (days) { var s = load(); s.plan = { days: days, start: dayKey() }; save(); },
-    markRead: function (mid, on) { var s = load(); if (on === false) delete s.read[mid]; else s.read[mid] = dayKey(); s.days[dayKey()] = (s.days[dayKey()] || 0) + 1; save(); },
+    markRead: function (mid, on) { var s = load(); if (on === false) delete s.read[mid]; else s.read[mid] = dayKey(); s.days[dayKey()] = (s.days[dayKey()] || 0) + 1; save(); progressChanged(); },
     isRead: function (mid) { return !!load().read[mid]; },
     // XP: ตอบถูก 10 ตอบผิด 4 (ผิดแล้วได้ทบทวน ก็ยังนับว่าได้ฝึก)
     xp: function () {
@@ -192,7 +197,9 @@
     scenario: ['M6 21V4', 'M6 5h11l-2 4 2 4H6'],
     design: ['M5 5h5v5H5z', 'M14 5h5v5h-5z', 'M9.5 16h5v5h-5z', 'M10 7.5h4', 'M7.5 10v3.5h9V10', 'M12 13.5V16'],
     checkpoint: ['M8 4h8v5a4 4 0 0 1-8 0V4z', 'M8 6H5a3 3 0 0 0 3 4', 'M16 6h3a3 3 0 0 1-3 4', 'M12 13v4', 'M9 20h6', 'M10 17h4'],
-    check: ['M5 12.5l4.5 4.5L19 7.5']
+    check: ['M5 12.5l4.5 4.5L19 7.5'],
+    chevron: ['M15 6l-6 6 6 6'],
+    menu: ['M4 7h16', 'M4 12h16', 'M4 17h16']
   };
   var FILLED = {
     star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
@@ -337,9 +344,19 @@
     root.innerHTML = '';
     var links = document.querySelectorAll('#nav a');
     for (var i = 0; i < links.length; i++) links[i].classList.toggle('active', links[i].getAttribute('data-route') === name);
-    try { view(root, r.parts, r.query); }
+    // โหมด roadmap: หน้าที่เปิดด้วย ?rm=<คีย์บทเรียน> ถูกห่อด้วย sidebar แผนสอบ (พับได้) เพื่อให้รู้ว่าอยู่ตรงไหนของแผน
+    var host = root, inSession = !!(r.query.rm && name !== 'roadmap' && G.roadmap && G.roadmap.hasKey(r.query.rm));
+    root.classList.toggle('has-rm', inSession);
+    if (inSession) {
+      var shell = G.h('div', { class: 'rm-shell' });
+      host = G.h('div', { class: 'rm-main' });
+      G.roadmap.mountSidebar(shell, r.query.rm);
+      shell.appendChild(host);
+      root.appendChild(shell);
+    }
+    try { view(host, r.parts, r.query); }
     catch (err) {
-      root.appendChild(G.h('div', { class: 'card' }, G.h('h2', {}, 'เกิดข้อผิดพลาด'), G.h('pre', {}, String(err && err.stack || err))));
+      host.appendChild(G.h('div', { class: 'card' }, G.h('h2', {}, 'เกิดข้อผิดพลาด'), G.h('pre', {}, String(err && err.stack || err))));
     }
     G.updateBadge();
     window.scrollTo(0, 0);

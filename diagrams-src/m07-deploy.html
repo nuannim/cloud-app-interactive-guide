@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m07-deploy · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Noto Sans Thai', 'Sarabun', 'Segoe UI', system-ui, sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 672 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m07-deploy-title m07-deploy-desc" font-family="'Noto Sans Thai','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m07-deploy-title">วิธี deploy Lambda: .zip หรือ container image</title>
+      <desc id="m07-deploy-desc">Developer ส่งโค้ดขึ้น Lambda ได้สองทาง: บีบอัดเป็น .zip แล้วอัปโหลดตรงหรือพักที่ S3 ก่อน หรือ build เป็น Docker image แล้ว push ไป ECR ให้ Lambda ดึงไปรัน</desc>
+      <defs>
+        <marker id="m07-deploy-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#5f5d57"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+
+      <!-- zones -->
+      <rect x="40" y="132" width="284" height="320" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+      <rect x="48" y="136" width="144" height="16" rx="2" fill="#f6f5f1"/>
+      <text x="56" y="148" fill="#5f5d57" font-size="12" font-weight="600">1 · .zip (≤ 250 MB*)</text>
+      <rect x="348" y="132" width="284" height="320" rx="8" fill="rgba(29,29,27,0.02)" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+      <rect x="356" y="136" width="208" height="16" rx="2" fill="#f6f5f1"/>
+      <text x="364" y="148" fill="#5f5d57" font-size="12" font-weight="600">2 · container image (≤ 10 GB*)</text>
+
+      <!-- connectors (before nodes) -->
+      <path d="M304,96 V112 Q304,120 296,120 H284 Q276,120 276,128 V164" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+      <path d="M368,96 V112 Q368,120 376,120 H580 Q588,120 588,128 V164" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+      <path d="M112,220 V268" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+      <path d="M248,220 V380" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+      <path d="M112,324 V380" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+      <path d="M488,220 V268" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+      <path d="M488,324 V380" fill="none" stroke="#5f5d57" stroke-width="1.2" marker-end="url(#m07-deploy-arrow)"/>
+
+      <!-- connector labels -->
+      <rect x="118" y="232" width="120" height="16" rx="2" fill="#f6f5f1"/>
+      <text x="178" y="244" fill="#5f5d57" font-size="12" font-weight="500" text-anchor="middle">ไฟล์ใหญ่: ผ่าน S3</text>
+      <rect x="130" y="336" width="104" height="16" rx="2" fill="#f6f5f1"/>
+      <text x="182" y="348" fill="#5f5d57" font-size="12" font-weight="500" text-anchor="middle">ไฟล์เล็ก: ตรงเลย</text>
+      <rect x="496" y="236" width="84" height="16" rx="2" fill="#f6f5f1"/>
+      <text x="538" y="248" fill="#5f5d57" font-size="12" font-weight="500" text-anchor="middle" font-family="ui-monospace,'Cascadia Code',Consolas,monospace">docker push</text>
+      <rect x="496" y="344" width="108" height="16" rx="2" fill="#f6f5f1"/>
+      <text x="550" y="356" fill="#5f5d57" font-size="12" font-weight="500" text-anchor="middle">ดึง image มารัน</text>
+
+      <!-- nodes -->
+      <rect x="256" y="40" width="160" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="256" y="40" width="160" height="56" rx="6" fill="rgba(95,93,87,0.10)" stroke="#8a877f" stroke-width="1"/>
+      <text x="336" y="72" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Developer</text>
+
+      <rect x="60" y="164" width="240" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="60" y="164" width="240" height="56" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+      <text x="180" y="196" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">บีบอัดโค้ด + library เป็น .zip</text>
+
+      <rect x="60" y="268" width="104" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="60" y="268" width="104" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+      <text x="112" y="292" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Amazon S3</text>
+      <text x="112" y="310" fill="#5f5d57" font-size="12" text-anchor="middle">พักไฟล์ใหญ่</text>
+
+      <rect x="72" y="380" width="200" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="72" y="380" width="200" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+      <text x="172" y="412" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">AWS Lambda</text>
+
+      <rect x="368" y="164" width="240" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="368" y="164" width="240" height="56" rx="6" fill="#ffffff" stroke="#1d1d1b" stroke-width="1"/>
+      <text x="488" y="188" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Build เป็น Docker image</text>
+      <text x="488" y="206" fill="#5f5d57" font-size="12" text-anchor="middle">จาก Dockerfile</text>
+
+      <rect x="408" y="268" width="160" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="408" y="268" width="160" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+      <text x="488" y="292" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Amazon ECR</text>
+      <text x="488" y="310" fill="#5f5d57" font-size="12" text-anchor="middle">เก็บ image</text>
+
+      <rect x="412" y="380" width="152" height="56" rx="6" fill="#f6f5f1"/>
+      <rect x="412" y="380" width="152" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+      <text x="488" y="412" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">AWS Lambda</text>
+    </svg>
+  </div>
+</body>
+</html>

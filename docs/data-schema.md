@@ -21,6 +21,9 @@ GUIDE.register({
 });
 ```
 
+## แผนภาพวาดมือ (`diagrams-src/` → `data/diagrams.js`)
+วาดด้วย skill `diagram-design:diagram-design` ได้ไฟล์ HTML ใน `diagrams-src/<id>.html` (id ของ `<title>`/`<desc>` ต้องขึ้นต้นด้วย `<id>-`) ตรวจด้วย `python scripts/self_check.py` ของ skill แล้วรัน `node tools/embed-svg.mjs` เพื่อฝัง `<svg>` ลง `data/diagrams.js` (ไม่ใช้ fetch/`<img>` เพราะเปิดจาก file:// ไม่ได้) ใน notes ใช้ `diagrams: [{ title, caption?, source, supplement?, svgId: '<id>' }]` (หรือ `flow` แบบวาดอัตโนมัติ) หนึ่งหัวข้อมีได้หลายรูป; แผนภาพวาดมือกว้างขั้นต่ำ 600px จอแคบเลื่อนข้างได้
+
 ## Knowledge Check (`data/kc.js`)
 สร้างจาก `node tools/import-kc.mjs` ห้ามแก้ไฟล์ด้วยมือ: `GUIDE.registerKC('M07', { summary, remember: [{type:'list'|'table', ...}], questions: [{ id:'k-m07-01', prompt, choices:[{text,correct}], explain, source, topic? }] })` โจทย์เหล่านี้เป็น type `kc` ในโมดูลนั้น (`topic` = ลำดับหัวข้อใน notes ใช้เมื่ออัตโนมัติโยงผิด)
 

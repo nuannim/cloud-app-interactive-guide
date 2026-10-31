@@ -75,30 +75,67 @@ GUIDE.register({
       refs: ['g-m07-permission', 'c-m07-perm-s3', 'c-m07-perm-ddb']
     },
     {
-      heading: 'Deploy: version, alias, layer',
-      body: '<ul><li>$LATEST แก้ไขได้ตลอด ส่วน version ที่ publish แล้วเป็น snapshot ของโค้ดและ config แก้ไม่ได้ มี ARN ของตัวเอง</li>' +
-        '<li>Alias (เช่น PROD) เป็นตัวชี้ไปยัง version ให้ event source ชี้ที่ alias จะไม่ต้องแก้ trigger ทุกครั้งที่ออก version ใหม่</li>' +
-        '<li>Layer ไว้แชร์ไลบรารี/โค้ดข้าม function ช่วยลดขนาด package และ deploy เร็วขึ้น</li>' +
-        '<li>แพ็กเกจได้สองแบบ: .zip หรือ container image (เก็บใน Amazon ECR) ภาษาที่ไม่รองรับใช้ custom runtime (มีไฟล์ bootstrap)</li></ul>',
-      refs: ['g-m07-version', 'q-m07-layer', 'q-m07-written-release', 'c-m07-cfg-layer'],
-      diagram: {
-        title: 'Version และ Alias',
-        caption: 'event source ชี้ที่ alias ย้าย alias ไป version ใหม่ได้โดยไม่ต้องแก้ trigger',
-        source: 'L1204-1245, L1279-1280',
-        flow: {
-          nodes: [
-            { id: 'latest', label: '$LATEST (แก้ได้)' },
-            { id: 'v1', label: 'Version 1 (snapshot)' },
-            { id: 'prod', label: 'Alias PROD' },
-            { id: 'src', label: 'Event source' }
-          ],
-          edges: [
-            { from: 'latest', to: 'v1', label: 'Publish' },
-            { from: 'prod', to: 'v1', label: 'points to' },
-            { from: 'src', to: 'prod', label: 'alias ARN' }
-          ]
+      heading: 'ส่งโค้ดขึ้น Lambda (Deploy): .zip หรือ container image',
+      body: '<p>เขียนโค้ดเสร็จแล้วยังรันไม่ได้ ต้อง "ส่งขึ้นระบบ" (deploy) ก่อน ซึ่งทำได้ 2 ท่า:</p>' +
+        '<ul><li><strong>.zip archive</strong>: ตอนสร้าง function เลือก <strong>runtime</strong> (เช่น Python) แล้วบีบอัดโค้ด + library ที่ใช้เป็น .zip ส่งเข้า Lambda ตรง ๆ (จาก console หรือ IDE) <em>หรือ</em> พักไฟล์ไว้ที่ <strong>Amazon S3</strong> แล้วบอก Lambda ให้ไปเอา</li>' +
+        '<li><strong>Container image</strong>: ตอน build image เลือก <strong>runtime + Linux distribution</strong> เอง build จาก Dockerfile แล้วเก็บ image ไว้ที่ <strong>Amazon ECR</strong> (registry ของ AWS) Lambda จะดึง image ไปรัน</li></ul>' +
+        '<p>ข้อสอบ Knowledge Check ข้อ 8 ถามว่า .zip ขนาด 75 MB ต้องทำอย่างไร เฉลยคือ <strong>อัปโหลดตรงได้ไม่เกิน 50 MB</strong> ถ้าใหญ่กว่านั้นให้พักที่ S3 ก่อน</p>' +
+        '<p>จำง่าย ๆ: แพ็กเล็ก ๆ ใช้ภาษาที่ AWS รองรับ → .zip · อยากใช้เครื่องมือ Docker เดิมหรือแพ็กใหญ่ → container image ส่วนภาษาที่ AWS ไม่รองรับใช้ <strong>custom runtime</strong> (มีไฟล์ <code>bootstrap</code> เป็นจุดเริ่ม) วางไว้กับโค้ดหรือใน layer ก็ได้</p>' +
+        '<p class="small muted">ตัวเลขที่มี * ในแผนภาพ (.zip ไม่เกิน 250 MB หลังคลายไฟล์, container image ไม่เกิน 10 GB) ไม่ได้อยู่ในสไลด์ เป็นข้อมูลจากเอกสาร AWS (นอก notes)</p>',
+      refs: ['k-m07-08'],
+      diagrams: [
+        {
+          title: 'ส่งโค้ดขึ้น Lambda 2 ทาง',
+          caption: '.zip อัปโหลดตรงหรือพักที่ S3 · container image ต้องผ่าน ECR',
+          source: 'L1136-1190',
+          supplement: true,
+          svgId: 'm07-deploy'
         }
-      }
+      ]
+    },
+    {
+      heading: 'Version และ Alias: สำเนาที่แก้ไม่ได้ + ป้ายที่ย้ายได้',
+      body: '<p><strong>ปัญหาที่มันแก้:</strong> โค้ดมีการแก้บ่อย แต่ลูกค้าจริงควรใช้เฉพาะตัวที่ทดสอบแล้ว และเราอยากสลับ/ย้อนกลับให้เร็ว</p>' +
+        '<ol><li><strong>$LATEST = ฉบับร่าง</strong> คือโค้ดที่กำลังเขียนอยู่ แก้ได้ตลอด (ARN ลงท้าย <code>:$LATEST</code>)</li>' +
+        '<li><strong>Publish = ถ่ายสำเนา</strong> เก็บสำเนา $LATEST ทั้งโค้ดและ config เป็น <strong>Version 1, 2, 3 …</strong> เลขเรียงต่อกัน <strong>แก้ไม่ได้อีก</strong> และมี ARN ของตัวเอง (ลงท้ายด้วยตัวเลข เช่น <code>:1</code>)</li>' +
+        '<li><strong>Alias = ป้ายชื่อที่ชี้ไปที่ version</strong> เช่น <code>PROD</code>, <code>TEST</code> ย้ายป้ายไปชี้ version อื่นได้ (ต่างจาก version ที่แก้ไม่ได้) และมี ARN ของตัวเอง ลงท้ายด้วยชื่อ เช่น <code>:PROD</code></li></ol>' +
+        '<p><strong>เปรียบเทียบกับ Git:</strong> $LATEST ≈ ไฟล์ที่กำลังแก้ ยังไม่ commit · Version ≈ commit (แก้ย้อนหลังไม่ได้ เรียงลำดับ) · Alias ≈ tag/branch ที่ย้ายไปชี้ commit อื่นได้</p>' +
+        '<p><strong>ทำไมต้องมี alias:</strong> ให้ trigger (เช่น API Gateway, S3) ชี้ที่ <code>:PROD</code> ครั้งเดียวพอ เมื่อออกเวอร์ชันใหม่ก็แค่ย้ายป้าย ไม่ต้องไปแก้ trigger และถ้าเวอร์ชันใหม่มีปัญหาก็ย้ายป้ายกลับเวอร์ชันเก่าได้ทันที</p>' +
+        '<p><strong>ดู ARN ในข้อสอบ:</strong> ลงท้ายด้วยตัวเลข = version · ลงท้ายด้วยชื่อ (เช่น PROD) = alias · ลงท้าย <code>$LATEST</code> = ฉบับร่าง (Knowledge Check ข้อ 9)</p>' +
+        '<p><strong>ตัวอย่าง:</strong> ลูกค้าจริงใช้ PROD (ชี้ Version 1) ทีมทดสอบใช้ TEST (ชี้ Version 2) พอ Version 2 ทดสอบผ่านก็ย้าย PROD ไปชี้ Version 2 (ดูภาพ 2 ขั้นด้านล่าง)</p>',
+      refs: ['g-m07-version', 'q-m07-written-release', 'c-m07-ver-snapshot', 'c-m07-ver-alias', 'k-m07-09'],
+      diagrams: [
+        {
+          title: 'ขั้นที่ 1: PROD ชี้ Version 1, TEST ชี้ Version 2',
+          caption: 'version เรียงบนเส้นเวลาเดียวกัน (ซ้ายเก่า ขวาใหม่) alias เป็นป้ายที่ชี้ลงมา',
+          source: 'L1200-1285',
+          svgId: 'm07-version-before'
+        },
+        {
+          title: 'ขั้นที่ 2: ทดสอบผ่าน ย้าย PROD ไป Version 2',
+          caption: 'ย้ายแค่ป้าย trigger ไม่ต้องแก้ Version 1 ยังอยู่ ย้ายกลับได้ทันที',
+          source: 'L1200-1285',
+          svgId: 'm07-version-after'
+        }
+      ]
+    },
+    {
+      heading: 'Layer: กองไลบรารีไว้ตรงกลางให้ทุก function ใช้ร่วมกัน',
+      body: '<p>ถ้ามี function 8 ตัวใช้ไลบรารีชุดเดียวกัน (เช่น numpy, requests) แล้วยัดไลบรารีลงใน .zip ของทุกตัว ไฟล์จะใหญ่ ซ้ำซ้อน และอัปเดตทีต้อง deploy ทุกตัว</p>' +
+        '<p><strong>Layer</strong> คือการแพ็กโค้ด/ไลบรารี/ข้อมูลที่ใช้ร่วมกันไว้ที่เดียว แล้วให้ function "อ้างอิง" ไปใช้ ผลที่สไลด์ระบุ: <strong>ลดขนาด package</strong> และ <strong>deploy เร็วขึ้น</strong></p>' +
+        '<ul><li>ลิมิตตามสไลด์: ผูกได้ <strong>ไม่เกิน 5 layer</strong> ต่อ function และสไลด์เขียนตัวเลข <strong>250 MB</strong> (สไลด์ไม่ได้บอกชัดว่าเป็นต่อ layer หรือรวมทุก layer)</li>' +
+        '<li>custom runtime (ภาษาที่ไม่รองรับ) วางไว้ใน layer ได้</li></ul>' +
+        '<p>จำง่าย ๆ: "ไลบรารีซ้ำกันหลาย function → ใช้ layer"</p>' +
+        '<p class="small muted">ตัวเลข 1 MB / 49 MB ในแผนภาพเป็นตัวอย่างประกอบให้เห็นภาพ ไม่ใช่ค่าจากสไลด์</p>',
+      refs: ['q-m07-layer', 'c-m07-cfg-layer', 'l-m07-layers', 'l-m07-layer-size'],
+      diagrams: [
+        {
+          title: 'ก่อน/หลังใช้ Layer',
+          caption: 'function เหลือแค่โค้ด ไลบรารีกองไว้ที่ Layer ตรงกลาง (ตัวเลข MB เป็นตัวอย่าง)',
+          source: 'L1312-1329',
+          svgId: 'm07-layers'
+        }
+      ]
     },
     {
       heading: 'Monitoring: CloudWatch vs X-Ray',

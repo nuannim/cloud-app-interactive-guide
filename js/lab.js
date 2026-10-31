@@ -114,9 +114,11 @@
     function show() {
       box.innerHTML = '';
       if (i >= queue.length) {
+        var nx = query.rm && G.roadmap && G.roadmap.nextAfter(query.rm); // โหมด roadmap: ไปด่านถัดไป
         box.appendChild(h('div', { class: 'card' }, h('p', {}, 'จบชุดนี้แล้ว'),
           h('div', { class: 'row' },
-            h('button', { class: 'btn primary', type: 'button', onclick: function () { i = 0; queue = G.shuffle(queue); show(); } }, 'ทำซ้ำ'),
+            nx ? h('a', { class: 'btn primary', href: nx.href }, 'ด่านถัดไป: ' + nx.title) : null,
+            h('button', { class: 'btn' + (nx ? '' : ' primary'), type: 'button', onclick: function () { i = 0; queue = G.shuffle(queue); show(); } }, 'ทำซ้ำ'),
             h('a', { class: 'btn', href: query.g ? '#/lab/options' : '#/roadmap' }, query.g ? 'เลือกกลุ่มอื่น' : 'กลับไปแผนสอบ'))));
         return;
       }

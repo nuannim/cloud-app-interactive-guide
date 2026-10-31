@@ -82,11 +82,13 @@
 
     function summary() {
       box.innerHTML = '';
+      var nx = query.rm && G.roadmap && G.roadmap.nextAfter(query.rm); // โหมด roadmap: ไปด่านถัดไป
       box.appendChild(h('div', { class: 'card' },
         h('h2', {}, 'จบชุดนี้'),
         h('p', {}, 'ทำถูก ' + right + ' จาก ' + queue.length + ' ข้อ'),
         h('div', { class: 'row' },
-          h('a', { class: 'btn primary', href: '#/drill' }, 'เลือกชุดใหม่'),
+          nx ? h('a', { class: 'btn primary', href: nx.href }, 'ด่านถัดไป: ' + nx.title) : null,
+          h('a', { class: 'btn' + (nx ? '' : ' primary'), href: '#/drill' }, 'เลือกชุดใหม่'),
           h('a', { class: 'btn', href: '#/mistakes' }, 'ดูข้อที่ผิด'))));
     }
 

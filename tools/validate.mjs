@@ -16,6 +16,14 @@ const err = (file, where, msg) => errors.push(`${path.basename(file)} ${where}: 
 const str = (v) => typeof v === 'string' && v.trim().length > 0;
 const strs = (v) => Array.isArray(v) && v.length > 0 && v.every(str);
 
+// id ของแผนภาพวาดมือที่ฝังไว้ (data/diagrams.js)
+const svgIds = new Set();
+try {
+  const g = { svgDiagrams: {} };
+  vm.runInNewContext(fs.readFileSync(path.join(dataDir, 'diagrams.js'), 'utf8'), { GUIDE: g });
+  Object.keys(g.svgDiagrams).forEach((k) => svgIds.add(k));
+} catch { /* ยังไม่มี data/diagrams.js: ถือว่าไม่มีแผนภาพวาดมือ */ }
+
 const modules = [];
 for (const file of files) {
   let mod = null;
@@ -43,11 +51,16 @@ for (const { file, mod } of modules) {
   if (!Array.isArray(mod.notes) || !mod.notes.length) err(file, 'notes', 'ต้องมี notes อย่างน้อย 1 หัวข้อ');
   (mod.notes || []).forEach((n, i) => {
     if (!str(n.heading) || !str(n.body)) err(file, `notes[${i}]`, 'ต้องมี heading และ body');
-    const d = n.diagram;
-    if (d != null) {
-      const w = `notes[${i}].diagram`;
+    const ds = n.diagrams || (n.diagram ? [n.diagram] : []);
+    ds.forEach((d, di) => {
+      const w = `notes[${i}].diagram[${di}]`;
       if (!str(d.title)) err(file, w, 'ต้องมี title');
       if (!str(d.source)) err(file, w, 'ต้องมี source (เลขบรรทัดที่ยืนยันแล้ว)');
+      if (d.svgId != null) { // แผนภาพวาดมือ (skill diagram-design) ฝังใน data/diagrams.js
+        if (!svgIds.has(d.svgId)) err(file, w, `svgId "${d.svgId}" ไม่มีใน data/diagrams.js (รัน node tools/embed-svg.mjs)`);
+        if (d.flow) err(file, w, 'ใช้ svgId หรือ flow อย่างใดอย่างหนึ่ง');
+        return;
+      }
       const f = d.flow;
       if (!f || !Array.isArray(f.nodes) || f.nodes.length < 3 || f.nodes.length > 9) err(file, w, 'flow.nodes ต้อง 3–9 กล่อง');
       else {
@@ -57,9 +70,9 @@ for (const { file, mod } of modules) {
         if (!Array.isArray(f.edges) || !f.edges.length) err(file, w, 'flow.edges ว่าง');
         (f.edges || []).forEach((e) => { if (!nid.has(e.from) || !nid.has(e.to)) err(file, w, `edge ${e.from}->${e.to} อ้าง node ที่ไม่มี`); });
       }
-    }
+    });
   });
-  if (!(mod.notes || []).some((n) => n.diagram)) warnings.push(`${path.basename(file)}: ยังไม่มี diagram ใน notes`);
+  if (!(mod.notes || []).some((n) => n.diagram || (n.diagrams || []).length)) warnings.push(`${path.basename(file)}: ยังไม่มี diagram ใน notes`);
 
   (mod.limits || []).forEach((l) => {
     claim(file, l.id, `l-${mm}-`);

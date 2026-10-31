@@ -17,10 +17,17 @@
     return row;
   }
 
+  function diagramsOf(n) { return n.diagrams || (n.diagram ? [n.diagram] : []); }
+
   function diagramFigure(d) {
-    return h('figure', { class: 'diagram' },
-      h('figcaption', {}, h('strong', {}, d.title), d.caption ? h('span', { class: 'muted' }, ' — ' + d.caption) : null),
-      G.renderFlow(d.flow));
+    var cap = h('figcaption', {}, h('strong', {}, d.title), d.caption ? h('span', { class: 'muted' }, ' — ' + d.caption) : null,
+      d.supplement ? h('span', { class: 'badge warn', style: 'margin-left:8px' }, 'นอก notes') : null);
+    if (d.svgId) {
+      // แผนภาพวาดมือด้วย skill diagram-design ฝังเป็นสตริงใน data/diagrams.js (ข้อมูลของเราเอง ไม่ใช่ข้อมูลภายนอก)
+      var wrap = h('div', { class: 'svg-wrap', html: (G.svgDiagrams && G.svgDiagrams[d.svgId]) || '' });
+      return h('figure', { class: 'diagram svg-fig' }, cap, wrap, h('p', { class: 'svg-hint small muted' }, 'เลื่อนดูซ้าย–ขวาได้'));
+    }
+    return h('figure', { class: 'diagram' }, cap, G.renderFlow(d.flow));
   }
 
   G.views.notes = function (root, parts, query) {
@@ -28,9 +35,10 @@
     if (!mid || !G.modules[mid]) {
       root.appendChild(h('h1', {}, 'สรุปเนื้อหา'));
       root.appendChild(h('p', { class: 'muted' }, 'สรุปที่เขียนใหม่เป็นภาษาของเราเอง มี diagram ประกอบ และลิงก์ไปยังโจทย์ที่เกี่ยวข้อง'));
+      root.appendChild(h('p', { class: 'small' }, h('a', { href: '#/mindmap' }, 'ดู Mindmap ของทุกโมดูล')));
       var list = h('div', { class: 'modlist' });
       G.order.forEach(function (m) {
-        var nd = (G.modules[m].notes || []).filter(function (n) { return n.diagram; }).length;
+        var nd = (G.modules[m].notes || []).reduce(function (c, n) { return c + diagramsOf(n).length; }, 0);
         list.appendChild(h('a', { class: 'modrow', href: '#/notes/' + m },
           h('span', { class: 'modname' }, m + ' ' + G.modules[m].title),
           h('span', { class: 'small muted modsum' }, G.modules[m].summary),
@@ -44,6 +52,7 @@
     root.appendChild(h('p', { class: 'small' }, h('a', { href: '#/notes' }, '← ทุกโมดูล')));
     root.appendChild(h('h1', {}, mid + ' ' + m.title));
     root.appendChild(h('p', { class: 'muted' }, m.summary));
+    root.appendChild(h('p', { class: 'small' }, h('a', { href: '#/mindmap/' + mid }, 'ดู Mindmap ของโมดูลนี้')));
     root.appendChild(practiceLinks(mid));
 
     var sections = m.notes || [];
@@ -63,7 +72,7 @@
     sections.forEach(function (n, i) {
       var card = h('section', { class: 'card notes-body', id: 'sec-' + i },
         h('h2', {}, n.heading), h('div', { html: n.body }));
-      if (n.diagram) card.appendChild(diagramFigure(n.diagram));
+      diagramsOf(n).forEach(function (d) { card.appendChild(diagramFigure(d)); });
       if (n.refs && n.refs.length) {
         var chips = h('div', { class: 'row', style: 'margin-top:8px' });
         n.refs.forEach(function (id) {
@@ -102,7 +111,9 @@
     }
     readBtn.addEventListener('click', function () { G.store.markRead(mid, !G.store.isRead(mid)); paintRead(); });
     paintRead();
-    root.appendChild(h('p', { style: 'margin:18px 0' }, readBtn));
+    var nxLesson = query && query.rm && G.roadmap && G.roadmap.nextAfter(query.rm); // โหมด roadmap: ไปด่านถัดไป
+    root.appendChild(h('div', { class: 'row', style: 'margin:18px 0' }, readBtn,
+      nxLesson ? h('a', { class: 'btn', href: nxLesson.href }, 'ด่านถัดไป: ' + nxLesson.title) : null));
 
     // มาจากลิงก์ในเฉลย (?s=ลำดับหัวข้อ): เลื่อนไปที่หัวข้อนั้นและเน้นให้เห็น
     if (query && query.s != null) {
