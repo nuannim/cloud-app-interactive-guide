@@ -13,13 +13,13 @@ const FIRST = 7; // ขอบเขตปลายภาค M07-M13 (ไฟล�
 const topicOverrides = {
   'k-m07-01': 0, // characteristic of Lambda -> Lambda คืออะไร
   'k-m07-05': 0, // function handler -> Lambda คืออะไร (ไม่มีหัวข้อ handler โดยเฉพาะ)
-  'k-m09-01': 3, // factors for where to add caching -> ควร cache ไหม
-  'k-m09-02': 4, // in-memory key-value store (Redis) -> ElastiCache
-  'k-m09-03': 7, // code checks cache then DB -> กลยุทธ์ cache (lazy loading)
-  'k-m09-04': 5, // ElastiCache node address -> ศัพท์ node/cluster
-  'k-m09-05': 10, // serve static content from edge -> CloudFront
-  'k-m09-07': 12, // cached file expiration -> ไฟล์ใน cache หมดอายุ
-  'k-m09-10': 2, // caching at each application layer -> cache ได้ทุกชั้น
+  'k-m09-01': 2, // factors for where to add caching -> ควร cache ไหม
+  'k-m09-02': 3, // in-memory key-value store (Redis) -> ElastiCache
+  'k-m09-03': 6, // code checks cache then DB -> กลยุทธ์ cache (lazy loading)
+  'k-m09-04': 4, // ElastiCache node address -> ศัพท์ node/cluster
+  'k-m09-05': 9, // serve static content from edge -> CloudFront
+  'k-m09-07': 11, // cached file expiration -> ไฟล์ใน cache หมดอายุ
+  'k-m09-10': 1, // caching at each application layer -> cache ได้ทุกชั้น
   'k-m10-10': 4, // Kinesis Data Streams -> Kinesis และ queue vs stream
   'k-m11-03': 2, // role of Task state -> State 8 ชนิด
   'k-m11-06': 2, // Succeed/Fail states -> State 8 ชนิด

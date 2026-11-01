@@ -58,6 +58,18 @@ for (const { file, mod } of modules) {
       if (k >= ds.length) err(file, `notes[${i}]`, `fig-slot data-i="${k}" ไม่มีภาพ (มีภาพ ${ds.length} ภาพ)`);
       if (slots.indexOf(k) !== si) err(file, `notes[${i}]`, `fig-slot data-i="${k}" ซ้ำ`);
     });
+    // ฉบับย่อ (brief): ใช้ช่องวางภาพชุดเดียวกัน ต้องแสดงทุกภาพของหัวข้อครั้งเดียว และสั้นกว่า body
+    if (n.brief != null) {
+      if (!str(n.brief)) err(file, `notes[${i}].brief`, 'brief ว่าง');
+      const bs = [...String(n.brief).matchAll(/class="fig-slot" data-i="(\d+)"/g)].map((m) => Number(m[1]));
+      bs.forEach((k, si) => {
+        if (k >= ds.length) err(file, `notes[${i}].brief`, `fig-slot data-i="${k}" ไม่มีภาพ (มีภาพ ${ds.length} ภาพ)`);
+        if (bs.indexOf(k) !== si) err(file, `notes[${i}].brief`, `fig-slot data-i="${k}" ซ้ำ`);
+      });
+      for (let k = 0; k < ds.length; k++) if (!bs.includes(k)) err(file, `notes[${i}].brief`, `ภาพที่ ${k} ไม่มีช่องวางใน brief (โหมดย่อต้องแสดงทุกภาพ)`);
+      const plain = (s) => String(s).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').length;
+      if (plain(n.brief) >= plain(n.body)) err(file, `notes[${i}].brief`, 'brief ต้องสั้นกว่า body');
+    }
     ds.forEach((d, di) => {
       const w = `notes[${i}].diagram[${di}]`;
       if (!str(d.title)) err(file, w, 'ต้องมี title');

@@ -9,9 +9,9 @@
 
   function practiceLinks(mid) {
     var c = G.counts(mid), row = h('div', { class: 'row', style: 'margin:4px 0 20px' });
-    if (c.scenario) row.appendChild(h('a', { class: 'btn primary', href: '#/drill/run?t=scenario&m=' + mid + '&n=all' }, 'Scenario (' + c.scenario + ')'));
-    if (c.design) row.appendChild(h('a', { class: 'btn primary', href: '#/drill/run?t=design&m=' + mid + '&n=all' }, 'Design · วาด diagram (' + c.design + ')'));
-    if (c.kc) row.appendChild(h('a', { class: 'btn primary', href: '#/drill/run?t=kc&m=' + mid + '&n=all' }, 'Knowledge Check (' + c.kc + ')'));
+    if (c.scenario) row.appendChild(h('a', { class: 'btn', href: '#/drill/run?t=scenario&m=' + mid + '&n=all' }, 'Scenario (' + c.scenario + ')'));
+    if (c.design) row.appendChild(h('a', { class: 'btn', href: '#/drill/run?t=design&m=' + mid + '&n=all' }, 'Design · วาด diagram (' + c.design + ')'));
+    if (c.kc) row.appendChild(h('a', { class: 'btn', href: '#/drill/run?t=kc&m=' + mid + '&n=all' }, 'Knowledge Check (' + c.kc + ')'));
     row.appendChild(h('a', { class: 'btn', href: '#/lab/limits?m=' + mid }, 'ชนลิมิต'));
     row.appendChild(h('a', { class: 'btn', href: '#/lab/guess?m=' + mid }, 'เดาตัวเลข'));
     return row;
@@ -52,25 +52,95 @@
     root.appendChild(h('p', { class: 'small' }, h('a', { href: '#/notes' }, '← ทุกโมดูล')));
     root.appendChild(h('h1', {}, mid + ' ' + m.title));
     root.appendChild(h('p', { class: 'muted' }, m.summary));
-    root.appendChild(h('p', { class: 'small' }, h('a', { href: '#/mindmap/' + mid }, 'ดู Mindmap ของโมดูลนี้')));
+    var sections = m.notes || [];
+    // โมดูลที่มีฉบับย่อ (n.brief) มีปุ่ม เนื้อหาเต็ม | เนื้อหาย่อ ที่สลับทั้งหน้า จำค่าที่เลือกไว้ในเบราว์เซอร์
+    var hasBrief = sections.some(function (n) { return n.brief; }), mode = 'full', sectionsBox = null, modeToggle = null, modeLabel = null;
+    try { if (hasBrief && localStorage.getItem('aws-notes-mode') === 'brief') mode = 'brief'; } catch (e) { /* ignore */ }
+    if (hasBrief) {
+      // สวิตช์เปิด/ปิด: ป้ายบอกโหมดปัจจุบัน ปุ่มเลื่อนไปขวาเมื่อเป็นเนื้อหาย่อ
+      modeLabel = h('span', { class: 'mode-label' });
+      modeToggle = h('button', {
+        class: 'mode-toggle', type: 'button', role: 'switch', 'aria-label': 'สลับเนื้อหาเต็ม / เนื้อหาย่อ',
+        onclick: function () { setMode(mode === 'full' ? 'brief' : 'full'); }
+      }, modeLabel, h('span', { class: 'switch-track', 'aria-hidden': 'true' }, h('span', { class: 'switch-knob' })));
+    }
+    // แถวเดียวกัน: ลิงก์ Mindmap ชิดซ้าย สวิตช์ชิดขวา
+    root.appendChild(h('div', { class: 'row spread mode-row' },
+      h('a', { class: 'small', href: '#/mindmap/' + mid }, 'ดู Mindmap ของโมดูลนี้'), modeToggle || h('span')));
     root.appendChild(practiceLinks(mid));
 
-    var sections = m.notes || [];
-    if (sections.length > 2) {
-      var toc = h('nav', { class: 'row toc', 'aria-label': 'หัวข้อในหน้านี้' });
-      sections.forEach(function (n, i) {
-        toc.appendChild(h('button', {
-          class: 'chip', type: 'button', onclick: function () {
-            var el = document.getElementById('sec-' + i);
-            if (el) el.scrollIntoView({ block: 'start' });
-          }
-        }, n.heading));
-      });
-      root.appendChild(toc);
-    }
+    sectionsBox = h('div', { class: 'notes-sections' });
+    root.appendChild(sectionsBox);
 
-    sections.forEach(function (n, i) {
-      var bodyEl = h('div', { html: n.body });
+    // สารบัญลอยชิดขอบขวาของจอ (แบบ Notion): ปกติเป็นขีดสั้น ๆ ชี้เมาส์แล้วกางเป็นรายการ จอแคบใช้ปุ่มมุมขวาล่าง
+    var tocItems = sections.map(function (n, i) { return { id: 'sec-' + i, title: n.heading }; });
+    if (m.kc && (m.kc.remember || []).length) tocItems.push({ id: 'sec-kc', title: 'จำไว้จาก Knowledge Check' });
+    var tocRail = null, tocPanel = null, tocLinks = {}, tocForced = null, tocCur = null;
+    if (tocItems.length > 2) {
+      var tocList = h('ul', { class: 'toc-list' });
+      tocItems.forEach(function (t) {
+        var a = h('a', { href: '#', title: t.title, onclick: function (ev) {
+          ev.preventDefault();
+          var el = document.getElementById(t.id);
+          if (el) el.scrollIntoView({ block: 'start' });
+          tocForced = t.id; // หัวข้อท้ายหน้าที่สั้นจนเลื่อนไม่ถึงขอบบน ยังต้องเน้นตามที่กด จนกว่าผู้ใช้จะเลื่อนเอง
+          paintActive(t.id);
+          tocRail.classList.remove('open');
+        } }, h('span', { class: 'toc-tick', 'aria-hidden': 'true' }), h('span', { class: 'toc-title' }, t.title));
+        tocLinks[t.id] = a;
+        tocList.appendChild(h('li', {}, a));
+      });
+      var tocOpen = h('button', {
+        class: 'toc-open', type: 'button', 'aria-label': 'สารบัญ', 'aria-expanded': 'false',
+        onclick: function () {
+          var on = tocRail.classList.toggle('open');
+          tocOpen.setAttribute('aria-expanded', on ? 'true' : 'false');
+        }
+      }, 'สารบัญ');
+      tocPanel = h('div', { class: 'toc-panel' }, tocList);
+      tocRail = h('nav', { class: 'toc-rail', 'aria-label': 'หัวข้อในหน้านี้' }, tocOpen, tocPanel);
+      document.body.appendChild(tocRail);
+      var onDocClick = function (ev) { if (tocRail && !tocRail.contains(ev.target)) tocRail.classList.remove('open'); };
+      var onScroll = function () { computeActive(); }; // งานเบา (วัดตำแหน่งไม่กี่หัวข้อ) คำนวณตรงเลย ไม่ต้องรอ requestAnimationFrame
+      var onUserScroll = function () { if (tocForced) { tocForced = null; computeActive(); } };
+      document.addEventListener('click', onDocClick);
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) { window.addEventListener(ev, onUserScroll, { passive: true }); });
+      G.cleanups.push(function () {
+        document.removeEventListener('click', onDocClick);
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+        ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) { window.removeEventListener(ev, onUserScroll); });
+        if (tocRail) tocRail.remove();
+      });
+    }
+    // เน้นหัวข้อที่กำลังอ่าน = หัวข้อสุดท้ายที่ขอบบนผ่านเส้นอ้างอิงใต้ topbar แล้ว (เลื่อนสุดหน้า = หัวข้อสุดท้าย)
+    function paintActive(cur) {
+      if (!tocRail || cur === tocCur) return;
+      tocCur = cur;
+      Object.keys(tocLinks).forEach(function (k) { tocLinks[k].classList.toggle('active', k === cur); });
+      var a = tocLinks[cur]; // เลื่อนรายการในแผงให้หัวข้อที่เน้นอยู่ในมุมมอง (แผงเลื่อนได้เมื่อรายการยาว)
+      if (a && tocPanel.scrollHeight > tocPanel.clientHeight) {
+        if (a.offsetTop < tocPanel.scrollTop) tocPanel.scrollTop = a.offsetTop;
+        else if (a.offsetTop + a.offsetHeight > tocPanel.scrollTop + tocPanel.clientHeight) tocPanel.scrollTop = a.offsetTop + a.offsetHeight - tocPanel.clientHeight;
+      }
+    }
+    function computeActive() {
+      if (!tocRail) return;
+      var cur = tocItems[0].id;
+      tocItems.forEach(function (t) { var el = document.getElementById(t.id); if (el && el.getBoundingClientRect().top <= 120) cur = t.id; });
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) cur = tocItems[tocItems.length - 1].id;
+      paintActive(tocForced || cur);
+    }
+    function watchActive() { computeActive(); }
+
+    function paintSections() {
+      sectionsBox.textContent = '';
+      sections.forEach(paintSection);
+    }
+    function paintSection(n, i) {
+      var bodyEl = h('div', { html: mode === 'brief' && n.brief ? n.brief : n.body });
       var card = h('section', { class: 'card notes-body', id: 'sec-' + i }, h('h2', {}, n.heading), bodyEl);
       // ภาพที่มีช่องวางใน body (<div class="fig-slot" data-i="N">) ไปอยู่ตรงนั้น (ท้ายหัวข้อย่อยของมัน) ที่เหลือเรียงท้ายหัวข้อเหมือนเดิม
       var figs = diagramsOf(n), placed = {};
@@ -88,8 +158,30 @@
         card.appendChild(h('div', { class: 'small muted', style: 'margin-top:12px' }, 'ฝึกเรื่องนี้'));
         card.appendChild(chips);
       }
-      root.appendChild(card);
-    });
+      sectionsBox.appendChild(card);
+    }
+    function setMode(next) {
+      var anchor = 0, top = Infinity, anchorTop = 0;
+      sections.forEach(function (n, i) { // หัวข้อที่อยู่ใกล้ขอบบนจอที่สุด: หลังสลับให้มันอยู่ตำแหน่งเดิมบนจอ (ไม่เด้ง)
+        var el = document.getElementById('sec-' + i);
+        if (el) { var t = el.getBoundingClientRect().top, d = Math.abs(t); if (d < top) { top = d; anchor = i; anchorTop = t; } }
+      });
+      mode = next;
+      try { localStorage.setItem('aws-notes-mode', mode); } catch (e) { /* ignore */ }
+      paintSections();
+      paintMode();
+      var el = document.getElementById('sec-' + anchor);
+      if (el) { var delta = el.getBoundingClientRect().top - anchorTop; if (delta) window.scrollBy(0, delta); }
+      watchActive();
+    }
+    function paintMode() {
+      if (!modeToggle) return;
+      modeToggle.classList.toggle('on', mode === 'brief');
+      modeToggle.setAttribute('aria-checked', mode === 'brief' ? 'true' : 'false');
+      modeLabel.textContent = mode === 'brief' ? 'เนื้อหาย่อ' : 'เนื้อหาเต็ม';
+    }
+    paintSections();
+    paintMode();
 
     // สรุป "จำไว้" จาก Knowledge Check ของบทนี้
     if (m.kc && (m.kc.remember || []).length) {
@@ -106,6 +198,7 @@
       if (m.kc.summary && m.kc.summary.thinking) kcCard.appendChild(h('p', { class: 'muted' }, 'วิธีคิด: ' + m.kc.summary.thinking));
       root.appendChild(kcCard);
     }
+    watchActive();
 
     // ปุ่ม "อ่านจบแล้ว" (นับเป็นด่านอ่านสรุปใน Roadmap)
     var readBtn = h('button', { type: 'button', class: 'btn' });

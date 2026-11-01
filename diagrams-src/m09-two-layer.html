@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-two-layer · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-two-layer-title m09-two-layer-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-two-layer-title">Cache 2 ด่านของเว็บคาเฟ่</title>
+      <desc id="m09-two-layer-desc">ผู้ใช้ขอข้อมูลผ่าน CloudFront ถ้าเจอใน edge ตอบทันที ถ้าไม่เจอส่งต่อให้ application แอปถาม ElastiCache ถ้าเจอใน RAM ตอบทันที ถ้าไม่เจอไปอ่าน database แล้วเติมข้อมูลลง cache พร้อม TTL จากนั้นแอปตอบกลับและ CloudFront เก็บคำตอบไว้</desc>
+      <defs>
+        <marker id="m09-two-layer-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+        <marker id="m09-two-layer-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-two-layer-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#15803d"/></marker>
+        <marker id="m09-two-layer-arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b91c1c"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="100" width="80" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="100" width="80" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="56" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ผู้ใช้</text>
+<text x="56" y="142" fill="#5f5d57" font-size="12" text-anchor="middle">User</text>
+<rect x="130" y="100" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="130" y="100" width="120" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="190" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">CloudFront</text>
+<text x="190" y="142" fill="#5f5d57" font-size="12" text-anchor="middle">ด่านที่ 1 · edge</text>
+<rect x="290" y="100" width="80" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="290" y="100" width="80" height="56" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="330" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Application</text>
+<text x="330" y="142" fill="#5f5d57" font-size="12" text-anchor="middle">โค้ดคุณ</text>
+<rect x="410" y="100" width="120" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="410" y="100" width="120" height="56" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="470" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">ElastiCache</text>
+<text x="470" y="142" fill="#5f5d57" font-size="12" text-anchor="middle">ด่านที่ 2 · RAM</text>
+<rect x="590" y="100" width="114" height="56" rx="6" fill="#f6f5f1"/>
+<rect x="590" y="100" width="114" height="56" rx="6" fill="rgba(29,29,27,0.05)" stroke="#5f5d57" stroke-width="1"/>
+<text x="647" y="124" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">Database</text>
+<text x="647" y="142" fill="#5f5d57" font-size="12" text-anchor="middle">origin</text>
+<path d="M96,128 L130,128" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-blue)"/>
+<text x="113" y="120" fill="#5f5d57" font-size="12" text-anchor="middle">1</text>
+<path d="M250,128 L290,128" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-red)"/>
+<text x="270" y="120" fill="#5f5d57" font-size="12" text-anchor="middle">2</text>
+<path d="M370,128 L410,128" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-blue)"/>
+<text x="390" y="120" fill="#5f5d57" font-size="12" text-anchor="middle">3</text>
+<path d="M530,128 L590,128" fill="none" stroke="#b91c1c" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-red)"/>
+<text x="560" y="120" fill="#5f5d57" font-size="12" text-anchor="middle">4</text>
+<path d="M150,156 L150,196 L56,196 L56,156" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-green)"/>
+<rect x="64" y="204" width="132" height="16" fill="#f6f5f1"/>
+<text x="130" y="216" fill="#5f5d57" font-size="12" text-anchor="middle">hit: ตอบทันที</text>
+<path d="M450,156 L450,196 L330,196 L330,156" fill="none" stroke="#15803d" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-green)"/>
+<rect x="334" y="204" width="130" height="16" fill="#f6f5f1"/>
+<text x="399" y="216" fill="#5f5d57" font-size="12" text-anchor="middle">hit: ตอบจาก RAM</text>
+<path d="M647,156 L647,236 L490,236 L490,156" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-acc)"/>
+<rect x="500" y="244" width="190" height="16" fill="#f6f5f1"/>
+<text x="595" y="256" fill="#5f5d57" font-size="12" text-anchor="middle">5 · เติม cache พร้อม TTL</text>
+<path d="M350,100 L350,64 L210,64 L210,100" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-two-layer-arrow-acc)"/>
+<rect x="222" y="40" width="116" height="16" fill="#f6f5f1"/>
+<text x="280" y="52" fill="#5f5d57" font-size="12" text-anchor="middle">6 · ตอบ + CF เก็บไว้</text>
+<line x1="16" y1="290" x2="704" y2="290" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="312" fill="#5f5d57" font-size="12">ด่านที่ 1 (CloudFront) ลด request ที่ถึงแอป · ด่านที่ 2 (ElastiCache) ลด query ที่ถึง database</text>
+<text x="16" y="332" fill="#5f5d57" font-size="12">เขียว = hit · แดง = miss ส่งต่อ · ส้ม = เติม/เก็บ cache · น้ำเงิน = ผู้ใช้/โค้ดคุณ</text>
+
+    </svg>
+  </div>
+</body>
+</html>

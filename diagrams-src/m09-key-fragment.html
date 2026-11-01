@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>m09-key-fragment · Diagram Design</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f6f5f1; color: #1d1d1b; padding: 2rem; font-family: 'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif; }
+    .frame { max-width: 760px; margin: 0 auto; }
+    svg { width: 100%; min-width: 600px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 720 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="m09-key-fragment-title m09-key-fragment-desc" font-family="'Google Sans','Noto Sans Thai Looped','Sarabun','Segoe UI',system-ui,sans-serif">
+      <title id="m09-key-fragment-title">Cache key สั้น เทียบกับ cache key ที่มี User-Agent</title>
+      <desc id="m09-key-fragment-desc">ซ้าย: cache key มีแค่ path ผู้ใช้ 3 เบราว์เซอร์ใช้ key เดียวกัน origin ถูกเรียกครั้งเดียวที่เหลือ hit ขวา: cache key รวม User-Agent ผู้ใช้ 3 เบราว์เซอร์ได้ key คนละอัน cache แตกเป็น 3 ชุด origin ถูกเรียก 3 ครั้ง cache hit ตกเหลือราว 0 เปอร์เซ็นต์</desc>
+      <defs>
+        <marker id="m09-key-fragment-arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+        <marker id="m09-key-fragment-arrow-acc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f6f5f1"/>
+<rect x="16" y="16" width="340" height="274" rx="6" fill="#f6f5f1"/>
+<rect x="16" y="16" width="340" height="274" rx="6" fill="rgba(21,128,61,0.08)" stroke="#15803d" stroke-width="1"/>
+<text x="30" y="40" fill="#1d1d1b" font-size="12" font-weight="600">key สั้น: มีแค่ path</text>
+<rect x="28" y="64" width="70" height="34" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="63" y="85" fill="#1d1d1b" font-size="12" text-anchor="middle">Chrome</text>
+<rect x="28" y="112" width="70" height="34" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="63" y="133" fill="#1d1d1b" font-size="12" text-anchor="middle">Safari</text>
+<rect x="28" y="160" width="70" height="34" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="63" y="181" fill="#1d1d1b" font-size="12" text-anchor="middle">Firefox</text>
+<rect x="130" y="64" width="110" height="130" rx="6" fill="#f6f5f1"/>
+<rect x="130" y="64" width="110" height="130" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="185" y="120" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">key เดียวกัน</text>
+<text x="185" y="140" fill="#5f5d57" font-size="12" text-anchor="middle">/logo.png</text>
+<path d="M98,81 L130,81" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-blue)"/>
+<path d="M98,129 L130,129" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-blue)"/>
+<path d="M98,177 L130,177" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-blue)"/>
+<rect x="268" y="110" width="76" height="38" rx="6" fill="#f6f5f1"/>
+<rect x="268" y="110" width="76" height="38" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="306" y="133" fill="#1d1d1b" font-size="12" font-weight="600" text-anchor="middle">logo.png</text>
+<path d="M240,129 L268,129" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-acc)"/>
+<text x="30" y="232" fill="#1d1d1b" font-size="12">เก็บไฟล์ 1 ชุด ทุกคนใช้ร่วมกัน</text>
+<text x="30" y="252" fill="#1d1d1b" font-size="12">origin ถูกเรียกแค่ครั้งแรกครั้งเดียว</text>
+<text x="30" y="272" fill="#15803d" font-size="12" font-weight="600">cache hit ใกล้ 100%</text>
+<rect x="364" y="16" width="340" height="274" rx="6" fill="#f6f5f1"/>
+<rect x="364" y="16" width="340" height="274" rx="6" fill="rgba(185,28,28,0.08)" stroke="#b91c1c" stroke-width="1"/>
+<text x="378" y="40" fill="#1d1d1b" font-size="12" font-weight="600">key ยาวเกิน: path + User-Agent</text>
+<rect x="376" y="64" width="70" height="34" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="411" y="85" fill="#1d1d1b" font-size="12" text-anchor="middle">Chrome</text>
+<rect x="376" y="112" width="70" height="34" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="411" y="133" fill="#1d1d1b" font-size="12" text-anchor="middle">Safari</text>
+<rect x="376" y="160" width="70" height="34" rx="6" fill="rgba(46,90,168,0.10)" stroke="#2e5aa8" stroke-width="1"/>
+<text x="411" y="181" fill="#1d1d1b" font-size="12" text-anchor="middle">Firefox</text>
+<rect x="478" y="64" width="124" height="34" rx="6" fill="#f6f5f1"/>
+<rect x="478" y="64" width="124" height="34" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="540" y="85" fill="#1d1d1b" font-size="12" text-anchor="middle">/logo.png + Chrome</text>
+<rect x="478" y="112" width="124" height="34" rx="6" fill="#f6f5f1"/>
+<rect x="478" y="112" width="124" height="34" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="540" y="133" fill="#1d1d1b" font-size="12" text-anchor="middle">/logo.png + Safari</text>
+<rect x="478" y="160" width="124" height="34" rx="6" fill="#f6f5f1"/>
+<rect x="478" y="160" width="124" height="34" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="540" y="181" fill="#1d1d1b" font-size="12" text-anchor="middle">/logo.png + Firefox</text>
+<path d="M446,81 L478,81" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-blue)"/>
+<path d="M446,129 L478,129" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-blue)"/>
+<path d="M446,177 L478,177" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-blue)"/>
+<rect x="626" y="64" width="70" height="34" rx="6" fill="#f6f5f1"/>
+<rect x="626" y="64" width="70" height="34" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="661" y="85" fill="#1d1d1b" font-size="12" text-anchor="middle">logo.png</text>
+<rect x="626" y="112" width="70" height="34" rx="6" fill="#f6f5f1"/>
+<rect x="626" y="112" width="70" height="34" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="661" y="133" fill="#1d1d1b" font-size="12" text-anchor="middle">logo.png</text>
+<rect x="626" y="160" width="70" height="34" rx="6" fill="#f6f5f1"/>
+<rect x="626" y="160" width="70" height="34" rx="6" fill="rgba(180,83,9,0.10)" stroke="#b45309" stroke-width="1"/>
+<text x="661" y="181" fill="#1d1d1b" font-size="12" text-anchor="middle">logo.png</text>
+<path d="M602,81 L626,81" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-acc)"/>
+<path d="M602,129 L626,129" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-acc)"/>
+<path d="M602,177 L626,177" fill="none" stroke="#b45309" stroke-width="1.2" marker-end="url(#m09-key-fragment-arrow-acc)"/>
+<text x="378" y="232" fill="#1d1d1b" font-size="12">ไฟล์เดียวกันแตกเป็น 3 ชุด (cache fragmentation)</text>
+<text x="378" y="252" fill="#1d1d1b" font-size="12">miss 3 ครั้ง origin ถูกเรียก 3 รอบ</text>
+<text x="378" y="272" fill="#b91c1c" font-size="12" font-weight="600">cache hit ตกฮวบ</text>
+<line x1="16" y1="316" x2="704" y2="316" stroke="rgba(29,29,27,0.10)" stroke-width="0.8"/>
+<text x="16" y="338" fill="#5f5d57" font-size="12">ยิ่ง cache key มีเงื่อนไขน้อย ยิ่งแชร์ไฟล์ได้มาก (key ต้องตรงกันเป๊ะ ต่างกันตัวเดียวก็คนละ key)</text>
+<text x="16" y="358" fill="#5f5d57" font-size="12">น้ำเงิน = ผู้ใช้ · ส้ม = key/ไฟล์ใน cache · เขียว = ดี · แดง = มีปัญหา · ภาพนี้เรียบเรียงเอง</text>
+
+    </svg>
+  </div>
+</body>
+</html>
