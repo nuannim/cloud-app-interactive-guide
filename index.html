@@ -3,44 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AWS Exam Trainer</title>
-<meta name="description" content="ฝึกเตรียมสอบ AWS Cloud Developing แบบข้อเขียน">
+<title>เตรียมสอบ: เลือกวิชา</title>
+<meta name="description" content="หน้ารวมเว็บฝึกเตรียมสอบ Cloud Development Application และ Applied AI for IT">
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<style>
+:root {
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --text: #1d1d1b;
+  --muted: #5f5d57;
+  --border: #d9d6cc;
+  --accent: #b45309;
+  --accent-soft: #fdecd3;
+  --radius: 10px;
+  --font: "Google Sans", "Noto Sans Thai Looped", "Sarabun", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16150f;
+    --surface: #211f18;
+    --text: #efede4;
+    --muted: #a7a498;
+    --border: #3d3a2f;
+    --accent: #f59e0b;
+    --accent-soft: #3b2a0c;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.6;
+}
+main { max-width: 760px; margin: 0 auto; padding: 56px 16px 48px; }
+h1 { font-size: 1.6rem; margin: 0 0 6px; }
+.lead { color: var(--muted); margin: 0 0 28px; }
+.courses { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.course {
+  display: block;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: inherit;
+  text-decoration: none;
+}
+.course:hover, .course:focus-visible { border-color: var(--accent); outline: none; }
+.course:focus-visible { box-shadow: 0 0 0 3px var(--accent-soft); }
+.course h2 { font-size: 1.15rem; margin: 0 0 6px; }
+.course p { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
+.course .go { color: var(--accent); font-weight: 600; font-size: .95rem; }
+</style>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="#/">AWS Exam Trainer</a>
-  <nav id="nav" aria-label="เมนูหลัก">
-    <a href="#/" data-route="home">ฝึก</a>
-    <a href="#/roadmap" data-route="roadmap">แผนสอบ</a>
-    <a href="#/lab" data-route="lab">Detail</a>
-    <a href="#/notes" data-route="notes">สรุป</a>
-    <a href="#/mistakes" data-route="mistakes">ข้อผิด <span class="count" id="wrong-count" hidden></span></a>
-  </nav>
-</header>
-<main id="app" tabindex="-1"></main>
-
-<script src="js/core.js"></script>
-<!-- เนื้อหาแต่ละโมดูล: เพิ่มไฟล์ใหม่ได้โดยเพิ่มบรรทัด script ตรงนี้ -->
-<script src="data/m07.js"></script>
-<script src="data/m08.js"></script>
-<script src="data/m09.js"></script>
-<script src="data/m10.js"></script>
-<script src="data/m11.js"></script>
-<script src="data/m12.js"></script>
-<script src="data/m13.js"></script>
-<script src="data/kc.js"></script>
-<script src="data/kc-th.js"></script>
-<script src="data/diagrams.js"></script>
-<script src="js/canvas.js"></script>
-<script src="js/drill.js"></script>
-<script src="js/lab.js"></script>
-<script src="js/notes.js"></script>
-<script src="js/roadmap.js"></script>
-<script src="js/mindmap.js"></script>
-<script>GUIDE.start();</script>
+<main>
+  <h1>เตรียมสอบ</h1>
+  <p class="lead">เลือกวิชาที่ต้องการฝึก</p>
+  <div class="courses">
+    <a class="course" href="cloud-app/">
+      <h2>Cloud Development Application</h2>
+      <p>สรุปเนื้อหา M07–M13, โจทย์ Scenario / Detail / Design, Knowledge Check และแผนสอบรายวัน</p>
+      <span class="go">เข้าวิชานี้ →</span>
+    </a>
+    <a class="course" href="applied-ai/">
+      <h2>Applied AI for IT</h2>
+      <p>ข้อสอบเก็ง 107 ข้อ ปรนัย 5 ตัวเลือก พร้อมเฉลยและคำอธิบาย</p>
+      <span class="go">เข้าวิชานี้ →</span>
+    </a>
+  </div>
+</main>
+<script>
+// ลิงก์เก่าของวิชา Cloud (เช่น /#/notes/M07) เคยอยู่ที่ root: ส่งต่อไป cloud-app/ พร้อม hash เดิม
+if (location.hash.length > 2) location.replace('cloud-app/' + location.hash);
+</script>
 </body>
 </html>

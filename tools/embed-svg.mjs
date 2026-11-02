@@ -5,8 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const srcDir = path.join(root, 'diagrams-src');
-const outFile = path.join(root, 'data', 'diagrams.js');
+const srcDir = path.join(root, 'cloud-app', 'diagrams-src');
+const outFile = path.join(root, 'cloud-app', 'data', 'diagrams.js');
 
 const files = fs.readdirSync(srcDir).filter((f) => f.endsWith('.html')).sort();
 const problems = [];

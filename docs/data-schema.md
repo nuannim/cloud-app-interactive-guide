@@ -1,6 +1,6 @@
-# Data schema (`data/mXX.js`)
+# Data schema (`cloud-app/data/mXX.js`)
 
-หนึ่งไฟล์ต่อหนึ่งโมดูล เรียก `GUIDE.register({...})` ตัวอย่างที่ถูกต้องและเป็นแม่แบบคือ [../data/m07.js](../data/m07.js)
+หนึ่งไฟล์ต่อหนึ่งโมดูล เรียก `GUIDE.register({...})` ตัวอย่างที่ถูกต้องและเป็นแม่แบบคือ [../cloud-app/data/m07.js](../cloud-app/data/m07.js)
 ตรวจด้วย `node tools/validate.mjs` (ต้องผ่านก่อนส่งงาน)
 
 ## รูปแบบ

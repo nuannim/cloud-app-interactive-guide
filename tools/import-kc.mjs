@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const src = process.argv[2] || 'C:/Users/noey/Desktop/my personal researcher 2/knowledge/aws-academy/cloud-developing-kc.md';
-const outFile = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'data', 'kc.js');
+const outFile = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'cloud-app', 'data', 'kc.js');
 const FIRST = 7; // ขอบเขตปลายภาค M07-M13 (ไฟล์ต้นทางมี M6-M13)
 
 // id ของข้อ -> ลำดับหัวข้อใน notes ของโมดูล (0 เริ่มต้น) ใช้เมื่อการจับคู่อัตโนมัติโยงผิด

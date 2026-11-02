@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWS Exam Trainer</title>
+<meta name="description" content="ฝึกเตรียมสอบ AWS Cloud Developing แบบข้อเขียน">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#/">AWS Exam Trainer</a>
+  <nav id="nav" aria-label="เมนูหลัก">
+    <a href="#/" data-route="home">ฝึก</a>
+    <a href="#/roadmap" data-route="roadmap">แผนสอบ</a>
+    <a href="#/lab" data-route="lab">Detail</a>
+    <a href="#/notes" data-route="notes">สรุป</a>
+    <a href="#/mistakes" data-route="mistakes">ข้อผิด <span class="count" id="wrong-count" hidden></span></a>
+  </nav>
+</header>
+<main id="app" tabindex="-1"></main>
+
+<script src="js/core.js"></script>
+<!-- เนื้อหาแต่ละโมดูล: เพิ่มไฟล์ใหม่ได้โดยเพิ่มบรรทัด script ตรงนี้ -->
+<script src="data/m07.js"></script>
+<script src="data/m08.js"></script>
+<script src="data/m09.js"></script>
+<script src="data/m10.js"></script>
+<script src="data/m11.js"></script>
+<script src="data/m12.js"></script>
+<script src="data/m13.js"></script>
+<script src="data/kc.js"></script>
+<script src="data/kc-th.js"></script>
+<script src="data/diagrams.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/drill.js"></script>
+<script src="js/lab.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/roadmap.js"></script>
+<script src="js/mindmap.js"></script>
+<script>GUIDE.start();</script>
+</body>
+</html>

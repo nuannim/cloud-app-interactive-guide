@@ -7,7 +7,7 @@
         "rule": "side-tab",
         "value": "*",
         "files": [
-          "css/style.css"
+          "cloud-app/css/style.css"
         ],
         "createdAt": "2026-10-31T18:38:42.136Z",
         "reason": "user confirmed: keep callout left bar (grill round 2 answer: คงแบบเดิม)"

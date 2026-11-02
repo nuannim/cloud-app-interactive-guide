@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const dataDir = path.join(root, 'data');
+const dataDir = path.join(root, 'cloud-app', 'data');
 const files = process.argv.length > 2
   ? process.argv.slice(2).map((f) => path.resolve(f))
   : fs.readdirSync(dataDir).filter((f) => /^m\d+\.js$/.test(f)).sort().map((f) => path.join(dataDir, f));
