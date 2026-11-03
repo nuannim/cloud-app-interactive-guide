@@ -71,9 +71,15 @@
       if (UL.test(line) || OL.test(line)) {
         var ordered = OL.test(line) && !UL.test(line);
         var re = ordered ? OL : UL, items = [];
-        while (i < lines.length && re.test(lines[i])) { items.push(lines[i].match(re)[1]); i++; }
+        while (i < lines.length && re.test(lines[i])) {
+          var item = { text: lines[i].match(re)[1], extra: [] };
+          i++;
+          // บรรทัดต่อของรายการ: เยื้อง 2 ช่องว่างขึ้นไปใต้ข้อนั้น (ไม่ใช่รายการใหม่) ต่อท้ายข้อเดิมด้วยการขึ้นบรรทัด
+          while (i < lines.length && /^\s{2,}\S/.test(lines[i]) && !UL.test(lines[i]) && !OL.test(lines[i])) { item.extra.push(lines[i].trim()); i++; }
+          items.push(item);
+        }
         var tag = ordered ? 'ol' : 'ul';
-        html.push('<' + tag + '>' + items.map(function (x) { return '<li>' + inline(x) + '</li>'; }).join('') + '</' + tag + '>');
+        html.push('<' + tag + '>' + items.map(function (x) { return '<li>' + inline(x.text) + x.extra.map(function (e) { return '<br>' + inline(e); }).join('') + '</li>'; }).join('') + '</' + tag + '>');
         continue;
       }
 

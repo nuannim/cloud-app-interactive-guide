@@ -26,6 +26,9 @@ eq('โค้ดบล็อก', MiniMD.render('```python\nif a < b:\n    pass\
 eq('บรรทัดใหม่ในย่อหน้า', MiniMD.render('บรรทัด 1\nบรรทัด 2'), '<p>บรรทัด 1<br>บรรทัด 2</p>');
 eq('รายการ', MiniMD.render('- ก\n- ข'), '<ul><li>ก</li><li>ข</li></ul>');
 eq('1) ไม่ใช่ลิสต์', MiniMD.render('1) A เปิด\n2) A กด'), '<p>1) A เปิด<br>2) A กด</p>');
+eq('รายการมีบรรทัดต่อ', MiniMD.render('- ก ผิด\n  เพราะ x\n- ข'), '<ul><li>ก ผิด<br>เพราะ x</li><li>ข</li></ul>');
+eq('บรรทัดต่อไม่ทำให้ข้อความหลุด escape', MiniMD.render('- ก\n  <b>x</b>'), '<ul><li>ก<br>&lt;b&gt;x&lt;/b&gt;</li></ul>');
+eq('รายการซ้อนไม่ถูกกลืนเป็นบรรทัดต่อ', MiniMD.render('- ก\n  - ย่อย'), '<ul><li>ก</li><li>ย่อย</li></ul>');
 eq('ตาราง', MiniMD.render('| a | b |\n| --- | --- |\n| 1 | `x | y` |'),
   '<div class="tbl-wrap"><table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td><code>x | y</code></td></tr></tbody></table></div>');
 eq('โค้ดบล็อกไม่ปิด', MiniMD.render('```\nabc'), '<pre><code>abc</code></pre>');
@@ -57,7 +60,6 @@ Q.forEach((q) => {
   audit(`ข้อ ${q.n} โจทย์`, MiniMD.render(q.stem), q.stem);
   audit(`ข้อ ${q.n} เฉลย`, MiniMD.render(q.explanation), q.explanation);
   q.options.forEach((o, i) => {
-    if (/\n/.test(o)) bad(`ข้อ ${q.n} ตัวเลือก ${i}`, 'ตัวเลือกมีขึ้นบรรทัดใหม่');
     audit(`ข้อ ${q.n} ตัวเลือก ${'กขคงจ'[i]}`, MiniMD.inline(o), o);
   });
 });

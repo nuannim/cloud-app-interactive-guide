@@ -96,7 +96,9 @@ starts.forEach((s, k) => {
     } else if (options.length === 0) {
       stemLines.push(idx === 0 ? line.replace(/^\*\*\d+\.\*\*\s*/, '') : line);
     } else if (line.trim() !== '') {
-      fail(s.n, `มีข้อความหลังตัวเลือกที่ไม่ใช่ตัวเลือก: "${line.slice(0, 40)}" (ตัวเลือกต้องบรรทัดเดียว)`);
+      // ตัวเลือกยาวหลายบรรทัด: บรรทัดต่อต้องเยื้อง 2 ช่องว่างขึ้นไป (หรือ tab) ใต้ตัวเลือกนั้น แล้วต่อด้วย \n
+      if (/^(?: {2,}|\t)\S/.test(line)) options[options.length - 1] += '\n' + line.trim();
+      else fail(s.n, `มีข้อความหลังตัวเลือกที่ไม่ใช่ตัวเลือก: "${line.slice(0, 40)}" (ตัวเลือกยาวหลายบรรทัดให้เยื้องบรรทัดต่อ 3 ช่องว่าง)`);
     }
   });
   if (options.length !== 5) fail(s.n, `ตัวเลือกต้องมี 5 ตัว เจอ ${options.length}`);

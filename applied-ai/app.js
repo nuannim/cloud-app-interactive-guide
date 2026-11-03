@@ -211,7 +211,7 @@
       list.appendChild(el('button', {
         type: 'button', class: cls, 'data-i': i, 'aria-label': label, 'aria-pressed': String(isPicked), 'aria-disabled': String(!!o.locked),
         onclick: function () { if (!o.locked && o.onPick) o.onPick(LET[i]); }
-      }, [el('span', { class: 'letter', text: LET[i] }), el('span', { class: 'txt', html: MD.inline(text) })]));
+      }, [el('span', { class: 'letter', text: LET[i] }), el('span', { class: 'txt', html: MD.inline(text).replace(/\n/g, '<br>') })]));
     });
     card.appendChild(list);
 
