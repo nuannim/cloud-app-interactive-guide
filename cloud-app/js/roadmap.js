@@ -1,11 +1,9 @@
-/* Roadmap แผนเตรียมสอบ: เลือกจำนวนวัน -> เส้นทางบทเรียนต่อวัน (ไม่ล็อกด่าน) สร้างจากเนื้อหาที่มีอยู่ทั้งหมด */
+/* Roadmap แผนเตรียมสอบ: เส้นทางเดียว คั่นเป็นโมดูล M07 -> M13 (ไม่ล็อกด่าน) สร้างจากเนื้อหาที่มีอยู่ทั้งหมด */
 (function () {
   'use strict';
   var G = window.GUIDE, h = G.h;
 
-  var DAY_OPTIONS = [1, 2, 3, 5, 7];
   var MIN = { read: 8, kc: 10, detail: 8, scenario: 12, design: 15 };
-  var TIER = { kc: 'A', detail: 'A', read: 'B', scenario: 'C', design: 'D' }; // ลำดับความสำคัญ: A สำคัญสุด
   var KIND_INFO = {
     read: { icon: 'read', text: 'อ่านสรุปของโมดูล (มี diagram) แล้วกด "อ่านจบแล้ว" ท้ายหน้า' },
     kc: { icon: 'kc', text: 'ข้อสอบฝึก Knowledge Check ของ AWS Academy มีเฉลยและเหตุผล' },
@@ -14,8 +12,6 @@
     design: { icon: 'design', text: 'โจทย์ยาวหลาย service วาด diagram พร้อมอธิบาย' },
     checkpoint: { icon: 'checkpoint', text: 'ด่านรวม ทบทวนสิ่งที่เรียนมา' }
   };
-
-  function tiersFor(days) { return days <= 1 ? 'A' : days === 2 ? 'AB' : days === 3 ? 'ABC' : 'ABCD'; }
 
   function moduleLessons(mid) {
     var m = G.modules[mid], qs = m.questions || [], L = [];
@@ -47,36 +43,22 @@
     return out;
   }
 
-  function buildPlan(days) {
-    var tiers = tiersFor(days), total = 0;
-    var mods = G.order.map(function (mid) {
-      var ls = moduleLessons(mid).filter(function (l) { return tiers.indexOf(TIER[l.kind]) >= 0; });
-      var min = ls.reduce(function (n, l) { return n + l.min; }, 0);
-      total += min;
-      return { mid: mid, lessons: ls, min: min };
-    });
-    var out = [], d, cum = 0;
-    for (d = 0; d < days; d++) out.push({ n: d + 1, mods: [], lessons: [], min: 0 });
-    mods.forEach(function (m) {
-      var di = Math.min(days - 1, Math.floor((cum + m.min / 2) / total * days));
-      out[di].mods.push(m.mid);
-      out[di].lessons = out[di].lessons.concat(m.lessons);
-      out[di].min += m.min;
-      cum += m.min;
-    });
-    out = out.filter(function (x) { return x.lessons.length; });
-    out.forEach(function (day, idx) {
-      var last = idx === out.length - 1;
-      var ids = last ? checkpointIds(G.order, 1) : checkpointIds(day.mods, day.mods.length > 2 ? 1 : 2);
+  // หนึ่ง section ต่อหนึ่งโมดูล: ด่านครบทุกชนิด + ด่านรวมท้ายโมดูล (โมดูลสุดท้ายเป็น "ซ้อมใหญ่" ครอบทุกโมดูล)
+  function buildPlan() {
+    var last = G.order[G.order.length - 1];
+    return G.order.map(function (mid) {
+      var ls = moduleLessons(mid), isLast = mid === last;
+      var ids = isLast ? checkpointIds(G.order, 1) : checkpointIds([mid], 2);
       var uniq = ids.filter(function (id, k) { return ids.indexOf(id) === k; });
-      day.lessons.push({
-        kind: 'checkpoint', key: 'cp' + day.n, title: last ? 'ซ้อมใหญ่ ก่อนสอบ' : 'ด่านรวมวันที่ ' + day.n, ids: uniq,
+      ls.push({
+        kind: 'checkpoint', key: isLast ? 'cp-final' : 'cp-' + mid, title: isLast ? 'ซ้อมใหญ่ ก่อนสอบ' : 'ด่านรวม ' + mid, ids: uniq,
         href: '#/drill/run?ids=' + uniq.join(','), min: Math.max(5, Math.round(uniq.length * 1.2))
       });
-      day.min += day.lessons[day.lessons.length - 1].min;
+      return { mid: mid, title: G.modules[mid].title, lessons: ls, min: ls.reduce(function (n, l) { return n + l.min; }, 0) };
     });
-    return out;
   }
+
+  function doneIn(sec) { return sec.lessons.filter(function (l) { return lessonState(l).done; }).length; }
 
   function lessonState(l) {
     if (l.kind === 'read') { var rd = G.store.isRead(l.mid); return { done: rd, att: rd ? 1 : 0, total: 1, stars: 0 }; }
@@ -93,37 +75,29 @@
     return null;
   }
 
-  function todayIndex(plan, count) {
-    var diff = Math.floor((Date.parse(G.dayKey()) - Date.parse(plan.start)) / 86400000);
-    return Math.max(0, Math.min(count - 1, isNaN(diff) ? 0 : diff));
-  }
-
   // ลิงก์บทเรียนต่อท้าย ?rm=<คีย์> เพื่อให้หน้าปลายทางแสดง sidebar แผนสอบ
   function withRm(href, key) { return href + (href.indexOf('?') >= 0 ? '&' : '?') + 'rm=' + encodeURIComponent(key); }
-  function flat(days) {
+  function flat(secs) {
     var out = [];
-    days.forEach(function (d) { d.lessons.forEach(function (l) { out.push({ day: d, lesson: l }); }); });
+    secs.forEach(function (s) { s.lessons.forEach(function (l) { out.push({ sec: s, lesson: l }); }); });
     return out;
   }
-  function currentDays() { var plan = G.store.plan(); return plan ? buildPlan(plan.days) : null; }
 
   // ให้หน้าอื่นถามได้ว่าด่านถัดไปคืออะไร / มี sidebar ไหม
   G.roadmap = {
     next: function () {
-      var plan = G.store.plan();
-      if (!plan) return null;
-      var n = nextLesson(buildPlan(plan.days));
-      return n && { title: n.lesson.title, href: withRm(n.lesson.href, n.lesson.key), mid: n.lesson.mid };
+      var secs = buildPlan(), n = nextLesson(secs);
+      return n && {
+        title: n.lesson.title, href: withRm(n.lesson.href, n.lesson.key), mid: n.lesson.mid,
+        started: secs.some(function (s) { return doneIn(s) > 0; })
+      };
     },
     hasKey: function (key) {
-      var d = currentDays();
-      return !!d && flat(d).some(function (x) { return x.lesson.key === key; });
+      return flat(buildPlan()).some(function (x) { return x.lesson.key === key; });
     },
     // ด่านที่ยังไม่เสร็จถัดจากด่านนี้ (วนกลับไปหาจากต้นแผนถ้าไม่มีข้างหน้า)
     nextAfter: function (key) {
-      var d = currentDays();
-      if (!d) return null;
-      var all = flat(d), i = -1, pick = null, k;
+      var all = flat(buildPlan()), i = -1, pick = null, k;
       all.forEach(function (x, idx) { if (x.lesson.key === key) i = idx; });
       for (k = i + 1; k < all.length && !pick; k++) if (!lessonState(all[k].lesson).done) pick = all[k];
       for (k = 0; k < all.length && !pick; k++) if (all[k].lesson.key !== key && !lessonState(all[k].lesson).done) pick = all[k];
@@ -152,17 +126,18 @@
       document.addEventListener('keydown', onKey);
 
       function paint() {
-        var plan = G.store.plan();
-        if (!plan) return;
         body.innerHTML = '';
-        var days = buildPlan(plan.days), todayIdx = todayIndex(plan, days.length), total = 0, done = 0;
-        days.forEach(function (d) { d.lessons.forEach(function (l) { total++; if (lessonState(l).done) done++; }); });
-        body.appendChild(h('div', { class: 'small muted' }, 'แผน ' + plan.days + ' วัน · ทำแล้ว ' + done + '/' + total + ' ด่าน'));
+        var secs = buildPlan(), total = 0, done = 0, firstOpen = -1;
+        secs.forEach(function (s, si) {
+          total += s.lessons.length; done += doneIn(s);
+          if (firstOpen < 0 && doneIn(s) < s.lessons.length) firstOpen = si;
+        });
+        body.appendChild(h('div', { class: 'small muted' }, 'ทำแล้ว ' + done + '/' + total + ' ด่าน'));
         body.appendChild(h('div', { class: 'bar', style: 'margin:6px 0 10px' }, h('i', { style: 'width:' + Math.round(done / total * 100) + '%' })));
-        days.forEach(function (day, di) {
-          var hasCur = day.lessons.some(function (l) { return l.key === activeKey; });
+        secs.forEach(function (sec, di) {
+          var hasCur = sec.lessons.some(function (l) { return l.key === activeKey; });
           var list = h('ol', { class: 'rm-list' });
-          day.lessons.forEach(function (l) {
+          sec.lessons.forEach(function (l) {
             var st = lessonState(l), cur = l.key === activeKey;
             list.appendChild(h('li', {}, h('a', {
               class: 'rm-link' + (cur ? ' current' : '') + (st.done ? ' done' : ''), href: withRm(l.href, l.key), 'aria-current': cur ? 'step' : null
@@ -170,8 +145,8 @@
               h('span', { class: 'rm-name' }, (l.mid ? l.mid + ' ' : '') + l.title),
               !st.done && st.att && l.kind !== 'read' ? h('span', { class: 'small muted' }, st.att + '/' + st.total) : null)));
           });
-          var det = h('details', { class: 'rm-day-side', open: (dayOpen[di] !== undefined ? dayOpen[di] : (hasCur || di === todayIdx)) ? true : null },
-            h('summary', {}, 'วันที่ ' + day.n, di === todayIdx ? h('span', { class: 'badge warn' }, 'วันนี้') : null), list);
+          var det = h('details', { class: 'rm-day-side', open: (dayOpen[di] !== undefined ? dayOpen[di] : (hasCur || di === firstOpen)) ? true : null },
+            h('summary', {}, sec.mid + ' ' + sec.title, h('span', { class: 'rm-count' }, doneIn(sec) + '/' + sec.lessons.length)), list);
           det.addEventListener('toggle', function () { dayOpen[di] = det.open; });
           body.appendChild(det);
         });
@@ -189,45 +164,17 @@
     return h('div', { class: 'rm-stat' }, G.icon(icon, 20), h('span', {}, String(value)), h('span', { class: 'small' }, label));
   }
 
-  function chooser(root, rerender) {
-    root.appendChild(h('h1', {}, 'แผนเตรียมสอบ'));
-    root.appendChild(h('p', { class: 'muted' }, 'เหลือเวลาอีกกี่วัน? เลือกแล้วระบบจะจัดเส้นทางบทเรียนให้พอดี เปลี่ยนแผนได้ทุกเมื่อ ความคืบหน้าไม่หาย'));
-    var grid = h('div', { class: 'rm-pick' });
-    DAY_OPTIONS.forEach(function (d) {
-      var p = buildPlan(d), total = p.reduce(function (n, x) { return n + x.min; }, 0);
-      var focus = d === 1 ? 'เน้น Knowledge Check + Detail' : d === 2 ? 'เพิ่มอ่านสรุป' : d === 3 ? 'เพิ่ม Scenario' : 'ครบทุกแบบ รวม Design';
-      grid.appendChild(h('button', {
-        class: 'rm-pickbtn', type: 'button', onclick: function () { G.store.setPlan(d); rerender(); }
-      }, h('span', { class: 'rm-num' }, String(d)), h('span', { class: 'rm-unit' }, 'วัน'),
-        h('span', { class: 'small muted' }, '~' + Math.round(total / p.length) + ' นาที/วัน'),
-        h('span', { class: 'small' }, focus)));
-    });
-    root.appendChild(grid);
-  }
-
   G.views.roadmap = function (root) {
-    var plan = G.store.plan();
-    function rerender() { root.innerHTML = ''; G.views.roadmap(root); }
-    if (!plan) { chooser(root, rerender); return; }
-
-    var days = buildPlan(plan.days), todayIdx = todayIndex(plan, days.length);
-    var nxt = nextLesson(days);
-    var allLessons = days.reduce(function (n, d) { return n + d.lessons.length; }, 0);
-    var doneCount = days.reduce(function (n, d) { return n + d.lessons.filter(function (l) { return lessonState(l).done; }).length; }, 0);
+    var secs = buildPlan();
+    var nxt = nextLesson(secs);
+    var allLessons = secs.reduce(function (n, s) { return n + s.lessons.length; }, 0);
+    var doneCount = secs.reduce(function (n, s) { return n + doneIn(s); }, 0);
 
     root.appendChild(h('h1', {}, 'แผนเตรียมสอบ'));
-    var switcher = h('div', { class: 'row', role: 'group', 'aria-label': 'จำนวนวัน' }, h('span', { class: 'small muted' }, 'เหลือเวลา'));
-    DAY_OPTIONS.forEach(function (d) {
-      switcher.appendChild(h('button', {
-        class: 'chip' + (d === plan.days ? ' on' : ''), type: 'button', 'aria-pressed': d === plan.days ? 'true' : 'false',
-        onclick: function () { if (d !== plan.days) { G.store.setPlan(d); rerender(); } }
-      }, d + ' วัน'));
-    });
-    root.appendChild(switcher);
+    root.appendChild(h('p', { class: 'muted' }, 'ไล่ตามโมดูล M07 → M13 ครบทุกแบบ ไม่ล็อกด่าน กดข้ามไปทำด่านไหนก่อนก็ได้ ความคืบหน้าบันทึกในเครื่องนี้'));
 
     root.appendChild(h('div', { class: 'rm-stats' },
-      stat('flame', G.store.streak(), 'วันติดกัน'), stat('bolt', G.store.xp(), 'XP'),
-      h('div', { class: 'rm-stat' }, h('span', {}, 'วันนี้ วันที่ ' + (todayIdx + 1) + '/' + days.length))));
+      stat('flame', G.store.streak(), 'วันติดกัน'), stat('bolt', G.store.xp(), 'XP')));
     root.appendChild(h('div', { class: 'bar', style: 'margin:0 0 6px' }, h('i', { style: 'width:' + Math.round(doneCount / allLessons * 100) + '%' })));
     root.appendChild(h('p', { class: 'small muted' }, 'ทำแล้ว ' + doneCount + ' จาก ' + allLessons + ' ด่าน'));
 
@@ -238,13 +185,12 @@
     }
 
     var openPanel = null, nextNode = null;
-    days.forEach(function (day, di) {
+    secs.forEach(function (sec, di) {
       var banner = h('div', { class: 'rm-banner' },
-        h('h2', {}, 'วันที่ ' + day.n),
-        h('span', { class: 'small muted' }, day.mods.map(function (m) { return m; }).join(' · ') + ' · ประมาณ ' + day.min + ' นาที'),
-        di === todayIdx ? h('span', { class: 'badge warn' }, 'วันนี้') : null);
+        h('h2', {}, sec.mid + ' ' + sec.title),
+        h('span', { class: 'small muted' }, 'ประมาณ ' + sec.min + ' นาที · ทำแล้ว ' + doneIn(sec) + '/' + sec.lessons.length + ' ด่าน'));
       var ol = h('ol', { class: 'rm-path' });
-      day.lessons.forEach(function (l, li) {
+      sec.lessons.forEach(function (l, li) {
         var st = lessonState(l), isNext = nxt && nxt.lesson === l;
         var cls = 'rm-node' + (st.done ? ' done' : isNext ? ' next' : '') + (l.kind === 'checkpoint' ? ' checkpoint' : '');
         var panelId = 'rm-panel-' + di + '-' + li;
@@ -268,8 +214,11 @@
         ol.appendChild(h('li', { class: 'rm-item pos' + (li % 4) },
           node, h('div', { class: 'rm-label' }, h('strong', {}, (l.mid ? l.mid + ' ' : '') + l.title)), stars, panel));
       });
-      root.appendChild(h('section', { class: 'rm-day' + (di === todayIdx ? ' today' : ''), 'aria-label': 'วันที่ ' + day.n }, banner, ol));
+      root.appendChild(h('section', { class: 'rm-day', id: 'rm-' + sec.mid, 'aria-label': sec.mid + ' ' + sec.title }, banner, ol));
     });
+
+    // สารบัญลอยขวาแบบ Notion (js/toc.js): ข้ามไปที่โมดูลที่ต้องการ
+    G.mountToc(secs.map(function (s) { return { id: 'rm-' + s.mid, title: s.mid + ' ' + s.title }; }));
 
     // เลื่อนไปที่ด่านถัดไปให้เห็นทันที
     if (nextNode) setTimeout(function () { nextNode.scrollIntoView({ block: 'center' }); }, 0);

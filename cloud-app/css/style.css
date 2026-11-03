@@ -150,6 +150,7 @@ main.has-rm { max-width: 1240px; }
 .rm-shell.collapsed .rm-collapse svg { transform: rotate(180deg); }
 .rm-day-side { border-top: 1px solid var(--border); padding: 6px 0; }
 .rm-day-side summary { cursor: pointer; font-weight: 600; padding: 6px 0; display: flex; align-items: center; gap: 8px; }
+.rm-day-side summary .rm-count { margin-left: auto; font-weight: 400; font-size: .85rem; color: var(--muted); }
 .rm-list { list-style: none; margin: 0; padding: 0; }
 .rm-link { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: .93rem; line-height: 1.35; }
 .rm-link:hover { background: var(--surface-2); }
@@ -179,15 +180,9 @@ main.has-rm { max-width: 1240px; }
 .rm-stat { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; font-weight: 600; }
 .rm-stat svg { color: var(--accent); }
 .rm-stat .small { font-weight: 400; color: var(--muted); }
-.rm-pick { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 18px; }
-.rm-pickbtn { font: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-align: center; }
-.rm-pickbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
-.rm-num { font-size: 2.2rem; font-weight: 700; line-height: 1.1; color: var(--accent); }
-.rm-unit { font-weight: 600; margin-bottom: 6px; }
-.rm-day { margin-top: 30px; }
+.rm-day { margin-top: 30px; scroll-margin-top: 72px; }
 .rm-banner { display: flex; align-items: baseline; gap: 4px 12px; flex-wrap: wrap; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .rm-banner h2 { margin: 0; font-size: 1.05rem; }
-.rm-day.today .rm-banner { border-color: var(--accent); background: var(--accent-soft); }
 .rm-path { list-style: none; margin: 0; padding: 6px 0 0; position: relative; }
 .rm-path::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 18px; border-left: 3px dotted var(--border); transform: translateX(-1.5px); }
 .rm-item { position: relative; display: flex; flex-direction: column; align-items: center; margin: 22px 0; }
@@ -365,3 +360,12 @@ th { color: var(--muted); font-weight: 600; }
 .cv-label { fill: var(--text); font-family: var(--font); font-size: 12px; text-anchor: middle; paint-order: stroke; stroke: var(--surface-2); stroke-width: 4px; pointer-events: none; }
 .cv-hint { font-size: .88rem; color: var(--muted); margin: 8px 0 0; }
 .palette { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+
+/* เก็งข้อสอบ (js/predict.js) */
+.badge.like-high { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+.badge.like-mid { background: var(--surface-2); color: var(--muted); }
+.hint-list { margin-top: 10px; display: grid; gap: 8px; }
+.hint-step { background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px; padding: 8px 12px; }
+.hint-no { display: block; font-size: .82rem; font-weight: 600; color: var(--accent); margin-bottom: 2px; }
+.sticky-timer { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+.predict-q .modrow { padding: 8px 0; }

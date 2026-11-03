@@ -33,6 +33,17 @@ GUIDE.register({
 
 **คำแปลไทยของโจทย์ KC** อยู่ใน `data/kc-th.js` (เขียนมือ ไม่ถูกเขียนทับเมื่อ import KC ใหม่): `GUIDE.registerKCth({ 'k-m07-01': { prompt, choices: [ตามลำดับ A, B, C, …] } })` `core.js` เก็บต้นฉบับอังกฤษไว้ที่ `q.en` แล้วใช้ไทยเป็นค่าเริ่มต้น หน้าทำโจทย์มีปุ่ม ไทย | EN สลับได้ และโจทย์ KC ไม่สลับลำดับตัวเลือก (เหตุผลอ้างตัวอักษร A–D) `validate.mjs` ตรวจว่าทุกข้อมีคำแปลและจำนวนตัวเลือกเท่าต้นฉบับ
 
+## เก็งข้อสอบ (`data/predict.js`)
+เขียนด้วยมือ/สคริปต์ (ไม่ใช่โจทย์ฝึก ไม่เข้า `G.index`) เรียก `GUIDE.registerPredict({ questions: [...], sets: [...] })` ตรวจด้วย `node tools/validate.mjs`
+```js
+{ id: 'p-m07-1', modules: ['M07'], likelihood: 'สูง'|'กลาง', depth: 'พื้นฐาน'|'ลึก', why: 'ทำไมเก็ง 1 บรรทัด',
+  prompt: 'โจทย์ scenario', hints: ['คำสำคัญ', 'service ที่เกี่ยว', 'โครงคำตอบ'], // ต้อง 3 ขั้น
+  modelAnswer: '...', rubric: ['≥ 4 ข้อ'], topics: [{ module: 'M07', index: 1 }], // index = ลำดับ notes[] ต้องมีจริง
+  source: ['M07 L431-460'], supplement?: true }
+sets: [{ id: 'A', title: 'ชุดซ้อม A', questions: ['p-...' x5] }]  // 3 ชุด ชุดละ 5 ข้อ ไม่ซ้ำข้ามชุด
+```
+กติกา: id ขึ้นต้น `p-` ไม่ซ้ำ · ทุกโมดูล M07–M13 มีอย่างน้อย 2 ข้อ · ข้อเท็จจริงในเฉลยต้องอ้างบรรทัด notes ส่วนที่เกินสไลด์ใส่ `supplement: true` · ตัวเลขที่เป็นเงื่อนไขสมมติของโจทย์ต้องไม่ถูกเขียนเหมือนเป็น limit ของ AWS
+
 ## กติกา
 - **id** ไม่ซ้ำทั้งเว็บ ขึ้นต้นด้วย `q-mXX-` (question), `l-mXX-` (limit), `g-mXX-` (option group), `c-mXX-` (challenge)
 - **source** = เลขบรรทัดในไฟล์สไลด์ต้นฉบับ เช่น `'L975'` หรือ `'L431-460'` (ทุก limit/challenge/question ต้องมี)

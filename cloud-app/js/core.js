@@ -45,6 +45,9 @@
     });
   };
 
+  // ข้อเก็งข้อสอบข้อเขียน (data/predict.js): แยกจากโจทย์ฝึก ไม่เข้า G.index / ตัวนับ / roadmap
+  G.registerPredict = function (p) { G.predict = p; };
+
   G.all = function (kind) {
     var out = [];
     Object.keys(G.index).forEach(function (id) { if (G.index[id].kind === kind) out.push(G.index[id]); });
@@ -414,9 +417,8 @@
     root.appendChild(h('h1', {}, 'ฝึกตามแบบข้อสอบ'));
     var nxt = G.roadmap && G.roadmap.next();
     root.appendChild(h('div', { class: 'row', style: 'margin:4px 0 8px' },
-      G.roadmap && G.store.plan()
-        ? (nxt ? h('a', { class: 'btn primary', href: '#/roadmap' }, 'ต่อแผนสอบ: ' + (nxt.mid ? nxt.mid + ' ' : '') + nxt.title) : h('a', { class: 'btn', href: '#/roadmap' }, 'ดูแผนสอบ (ครบแล้ว)'))
-        : h('a', { class: 'btn primary', href: '#/roadmap' }, 'ตั้งแผนเตรียมสอบ'),
+      nxt ? h('a', { class: 'btn primary', href: '#/roadmap' }, (nxt.started ? 'ต่อแผนสอบ: ' : 'เริ่มแผนสอบ: ') + (nxt.mid ? nxt.mid + ' ' : '') + nxt.title)
+        : h('a', { class: 'btn', href: '#/roadmap' }, 'ดูแผนสอบ' + (G.roadmap ? ' (ครบแล้ว)' : '')),
       h('a', { class: 'btn', href: '#/drill/run?n=10' }, 'สุ่ม 10 ข้อ ทุกประเภท'),
       wrong ? h('a', { class: 'btn', href: '#/mistakes' }, 'ทบทวนข้อที่เคยผิด (' + wrong + ')') : null));
 

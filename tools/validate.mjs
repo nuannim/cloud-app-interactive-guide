@@ -216,6 +216,57 @@ for (const { file, mod } of modules) {
   (mod.notes || []).forEach((n, i) => (n.refs || []).forEach((r) => { if (!ids.has(r)) err(file, `notes[${i}].refs`, `ไม่พบ id ${r}`); }));
 }
 
+// ข้อเก็งข้อสอบ (data/predict.js) — ตรวจเฉพาะตอนรันทั้งหมด
+if (process.argv.length <= 2) {
+  const pFile = path.join(dataDir, 'predict.js');
+  if (!fs.existsSync(pFile)) err(pFile, 'file', 'ไม่พบไฟล์');
+  else {
+    let P = null;
+    try {
+      vm.runInNewContext(fs.readFileSync(pFile, 'utf8'), { GUIDE: { registerPredict: (p) => { P = p; } } }, { filename: pFile });
+    } catch (e) { err(pFile, 'load', e.message); }
+    if (!P) err(pFile, 'load', 'ไม่ได้เรียก GUIDE.registerPredict');
+    else {
+      const pids = new Set();
+      const byMod = {};
+      for (const q of P.questions || []) {
+        const w = q.id || '(ไม่มี id)';
+        if (!str(q.id) || !q.id.startsWith('p-')) err(pFile, w, 'id ต้องขึ้นต้นด้วย p-');
+        if (pids.has(q.id)) err(pFile, w, 'id ซ้ำ');
+        pids.add(q.id);
+        if (!Array.isArray(q.modules) || !q.modules.length) err(pFile, w, 'ต้องมี modules');
+        for (const m of q.modules || []) {
+          byMod[m] = (byMod[m] || 0) + 1;
+          if (!modules.some((x) => x.mod.module === m)) err(pFile, w, `ไม่พบโมดูล ${m}`);
+        }
+        if (!['สูง', 'กลาง'].includes(q.likelihood)) err(pFile, w, 'likelihood ต้องเป็น สูง/กลาง');
+        if (!['พื้นฐาน', 'ลึก'].includes(q.depth)) err(pFile, w, 'depth ต้องเป็น พื้นฐาน/ลึก');
+        for (const k of ['why', 'prompt', 'modelAnswer']) if (!str(q[k])) err(pFile, w, `ขาด ${k}`);
+        if (!Array.isArray(q.hints) || q.hints.length !== 3 || !q.hints.every(str)) err(pFile, w, 'hints ต้องมี 3 ขั้น');
+        if (!Array.isArray(q.rubric) || q.rubric.length < 4 || !q.rubric.every(str)) err(pFile, w, 'rubric ต้อง ≥ 4 ข้อ');
+        if (!strs(q.source)) err(pFile, w, 'ต้องมี source');
+        if (!Array.isArray(q.topics) || !q.topics.length) err(pFile, w, 'ต้องมี topics');
+        for (const t of q.topics || []) {
+          const m = modules.find((x) => x.mod.module === t.module);
+          if (!m || !(m.mod.notes || [])[t.index]) err(pFile, w, `topics ชี้หัวข้อที่ไม่มี: ${t.module}[${t.index}]`);
+        }
+      }
+      const used = new Set();
+      for (const s of P.sets || []) {
+        if ((s.questions || []).length !== 5) err(pFile, `set ${s.id}`, 'ต้องมี 5 ข้อ');
+        for (const id of s.questions || []) {
+          if (!pids.has(id)) err(pFile, `set ${s.id}`, `ไม่พบข้อ ${id}`);
+          if (used.has(id)) err(pFile, `set ${s.id}`, `ข้อ ${id} ซ้ำข้ามชุด`);
+          used.add(id);
+        }
+      }
+      if ((P.sets || []).length !== 3) err(pFile, 'sets', 'ต้องมี 3 ชุด');
+      for (const mid of ['M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'M13']) if ((byMod[mid] || 0) < 2) err(pFile, mid, 'ต้องมีข้อเก็ง ≥ 2');
+      counts.push(`ข้อเก็ง: ${(P.questions || []).length} ข้อ, ${(P.sets || []).length} ชุด`);
+    }
+  }
+}
+
 console.log(counts.join('\n'));
 if (warnings.length) console.log('\nคำเตือน:\n' + warnings.map((w) => '  - ' + w).join('\n'));
 if (errors.length) {
